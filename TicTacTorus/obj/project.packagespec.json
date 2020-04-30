@@ -1,11 +1,14 @@
 ﻿{
   "version": "1.0.0",
   "restore": {
-    "projectUniqueName": "D:\\Visual Studio Projekte\\TicTacTorus\\TicTacTorus\\TicTacTorus.csproj",
+    "projectUniqueName": "C:\\Users\\gudda\\OneDrive - stud.hs-offenburg.de\\Hochschule\\SS2020\\Projekt 1\\WebApp\\TicTacTorus\\TicTacTorus.csproj",
     "projectName": "TicTacTorus",
-    "projectPath": "D:\\Visual Studio Projekte\\TicTacTorus\\TicTacTorus\\TicTacTorus.csproj",
-    "outputPath": "D:\\Visual Studio Projekte\\TicTacTorus\\TicTacTorus\\obj\\",
+    "projectPath": "C:\\Users\\gudda\\OneDrive - stud.hs-offenburg.de\\Hochschule\\SS2020\\Projekt 1\\WebApp\\TicTacTorus\\TicTacTorus.csproj",
+    "outputPath": "C:\\Users\\gudda\\OneDrive - stud.hs-offenburg.de\\Hochschule\\SS2020\\Projekt 1\\WebApp\\TicTacTorus\\obj\\",
     "projectStyle": "PackageReference",
+    "fallbackFolders": [
+      "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+    ],
     "originalTargetFrameworks": [
       "netcoreapp3.1"
     ],

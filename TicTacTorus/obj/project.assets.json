@@ -8,19 +8,23 @@
     ".NETCoreApp,Version=v3.1": []
   },
   "packageFolders": {
-    "C:\\Users\\todus\\.nuget\\packages\\": {}
+    "C:\\Users\\gudda\\.nuget\\packages\\": {},
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Visual Studio Projekte\\TicTacTorus\\TicTacTorus\\TicTacTorus.csproj",
+      "projectUniqueName": "C:\\Users\\gudda\\OneDrive - stud.hs-offenburg.de\\Hochschule\\SS2020\\Projekt 1\\WebApp\\TicTacTorus\\TicTacTorus.csproj",
       "projectName": "TicTacTorus",
-      "projectPath": "D:\\Visual Studio Projekte\\TicTacTorus\\TicTacTorus\\TicTacTorus.csproj",
-      "packagesPath": "C:\\Users\\todus\\.nuget\\packages\\",
-      "outputPath": "D:\\Visual Studio Projekte\\TicTacTorus\\TicTacTorus\\obj\\",
+      "projectPath": "C:\\Users\\gudda\\OneDrive - stud.hs-offenburg.de\\Hochschule\\SS2020\\Projekt 1\\WebApp\\TicTacTorus\\TicTacTorus.csproj",
+      "packagesPath": "C:\\Users\\gudda\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\gudda\\OneDrive - stud.hs-offenburg.de\\Hochschule\\SS2020\\Projekt 1\\WebApp\\TicTacTorus\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+      ],
       "configFilePaths": [
-        "C:\\Users\\todus\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\gudda\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
