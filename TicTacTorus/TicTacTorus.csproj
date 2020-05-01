@@ -34,4 +34,8 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Include="wwwroot\Media\Images\logo.png" />
+    </ItemGroup>
+
 </Project>
