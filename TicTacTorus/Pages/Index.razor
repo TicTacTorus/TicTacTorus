@@ -1,16 +1,16 @@
 ﻿@page "/"
 
 <!-- Temporary Logo with png for layout purposes. Needs to be dynamic later on! -->
-<div class="d-flex justify-content-center">
-    <img src="/Media/Images/logo.png" alt="Logo" height="300" width="600"/>
+<div class="d-flex justify-content-center my-5">
+    <h1 class="headers">TicTacTorus</h1>
 </div>
 
 <div class="d-flex justify-content-center">
-    <div class="card w-25">
+    <div class="box w-25">
         <div class="card-header text-center"><b><h3>Play</h3></b></div>
         <div class="card-body">
             <div class="d-flex align-content-between flex-wrap my-2">
-                <button class="btn btn-primary p-2 w-100" onclick="location.href ='game';">
+                <button class="btn btn-primary-custom p-2 w-100" onclick="location.href ='game';">
                     <svg class="bi bi-play-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z"/>
                     </svg>
@@ -18,7 +18,7 @@
                 </button>
             </div>
             <div class="d-flex align-content-between flex-wrap my-2">
-                <button class="btn btn-primary p-2 w-100" onclick="location.href ='lobbies';">
+                <button class="btn btn-secondary-custom p-2 w-100" onclick="location.href ='lobbies';">
                     <svg class="bi bi-search" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" d="M10.442 10.442a1 1 0 011.415 0l3.85 3.85a1 1 0 01-1.414 1.415l-3.85-3.85a1 1 0 010-1.415z" clip-rule="evenodd"/>
                         <path fill-rule="evenodd" d="M6.5 12a5.5 5.5 0 100-11 5.5 5.5 0 000 11zM13 6.5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" clip-rule="evenodd"/>
@@ -31,11 +31,11 @@
 </div>
 
 <div class="d-flex justify-content-center my-5">
-    <div class="card w-25">
+    <div class="box w-25">
         <div class="card-header text-center"><b><h3>Others</h3></b></div>
         <div class="card-body">
             <div class="d-flex align-content-between flex-wrap my-2">
-                <button class="btn btn-primary p-2 w-100" onclick="location.href ='login';">
+                <button class="btn btn-primary-custom p-2 w-100" onclick="location.href ='login';">
                     <svg class="bi bi-pencil" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                       <path fill-rule="evenodd" d="M11.293 1.293a1 1 0 011.414 0l2 2a1 1 0 010 1.414l-9 9a1 1 0 01-.39.242l-3 1a1 1 0 01-1.266-1.265l1-3a1 1 0 01.242-.391l9-9zM12 2l2 2-9 9-3 1 1-3 9-9z" clip-rule="evenodd"/>
                       <path fill-rule="evenodd" d="M12.146 6.354l-2.5-2.5.708-.708 2.5 2.5-.707.708zM3 10v.5a.5.5 0 00.5.5H4v.5a.5.5 0 00.5.5H5v.5a.5.5 0 00.5.5H6v-1.5a.5.5 0 00-.5-.5H5v-.5a.5.5 0 00-.5-.5H3z" clip-rule="evenodd"/>
@@ -44,7 +44,7 @@
                 </button>
             </div>
             <div class="d-flex align-content-between flex-wrap my-2">
-                <button class="btn btn-secondary p-2 w-100" onclick="location.href ='info';">
+                <button class="btn btn-third-custom p-2 w-100" onclick="location.href ='info';">
                     <svg class="bi bi-info-circle" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                       <path fill-rule="evenodd" d="M8 15A7 7 0 108 1a7 7 0 000 14zm0 1A8 8 0 108 0a8 8 0 000 16z" clip-rule="evenodd"/>
                       <path d="M8.93 6.588l-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588z"/>
