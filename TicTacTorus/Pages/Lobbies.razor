@@ -16,7 +16,7 @@
     <tr><th>Lobby</th><th class="playerCount">Players</th><th class="status">Status</th><th>Description</th></tr>
     @foreach (var elem in InitLobbyList())
     {
-        <tr @onclick="" id="lobbyRow" data-href="/lobby">
+        <tr id="lobbyRow" data-href="/lobby">
             <td>@elem.Name</td>
             <td class="playerCount">@elem.PlayerCount/@elem.MaxPlayerCount</td>
             <td class="status">@elem.Status</td>
