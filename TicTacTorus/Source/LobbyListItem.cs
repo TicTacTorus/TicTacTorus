@@ -10,6 +10,8 @@ namespace TicTacTorus.Source
 		public int MaxPlayerCount { get; private set; }
 		public string Status { get; private set; }
 		public string Description { get; private set; }
+		
+		public string Id { get; }
 
 		public LobbyListItem(string name, int currentCount, int maxCount, string status, string desc)
 		{
@@ -18,6 +20,7 @@ namespace TicTacTorus.Source
 			MaxPlayerCount = maxCount;
 			Status = status;
 			Description = desc;
+			Id = "ioRuZr82";
 		}
 
 		public static IList<LobbyListItem> GetAllLobbies()

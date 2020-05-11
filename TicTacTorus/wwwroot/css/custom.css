@@ -1,9 +1,4 @@
-﻿body{
-    min-width: 1100px;
-    min-height: 500px;
-}
-
-.btn-primary-custom {
+﻿.btn-primary-custom {
     color: #262626;
     background-color: #00b16f;
     border-color: #00945d;
@@ -46,19 +41,13 @@
 }
 
 .btn-back {
-    float: left;
-    display: inline-block;
-    text-decoration: none;
+    margin: auto;
     background: #f5f5f5;
     color: #262626;
     border: 1px solid #ccc;
-    width: 65px;
-    height: 65px;
-    line-height: 120px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
-    text-align: center;
-    font-weight: bold;
-    vertical-align: middle;
     overflow: hidden;
     transition: .4s;
 }
@@ -78,6 +67,10 @@
 }
 
 .box {
+    min-width: 400px;
+    min-height: 215px;
+    max-width: 400px;
+    max-height: 215px;
     transition: box-shadow .3s;
     margin: 15px;
     border-radius:10px;
@@ -104,6 +97,10 @@ th, td {
     text-align: left;
 }
 
+tr + td {
+    padding-left: 25px;
+}
+
 .playerCount, .status {
     text-align: center;
 }
@@ -117,4 +114,9 @@ th, td {
 
 #lobbyRow:hover {
     color: #000;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 10% 80% 10%;
 }
