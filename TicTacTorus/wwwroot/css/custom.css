@@ -77,9 +77,26 @@
     border: 1px solid #ccc;
     background: #fff;
     float: left;
-
 }
 .box:hover {
+    box-shadow: 0 0 11px rgba(33,33,33,.2);
+}
+
+.lobby-box {
+    min-width: 400px;
+    min-height: 215px;
+    max-width: 400px;
+    max-height: 215px;
+    transition: box-shadow .3s;
+    margin-left: 10px;
+    margin-right: 10px;
+    border-radius:10px;
+    border: 1px solid #ccc;
+    background: #fff;
+    float: left;
+}
+
+.lobby-box:hover {
     box-shadow: 0 0 11px rgba(33,33,33,.2);
 }
 
@@ -116,7 +133,12 @@ tr + td {
     color: #000;
 }
 
-.grid {
+.lobbies-grid {
     display: grid;
     grid-template-columns: 10% 80% 10%;
+}
+
+.lobby-grid {
+    display: flex;
+    justify-content: space-between;
 }
