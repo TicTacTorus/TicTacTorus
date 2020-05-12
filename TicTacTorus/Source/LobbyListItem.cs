@@ -23,7 +23,7 @@ namespace TicTacTorus.Source
 			Id = "ioRuZr82";
 		}
 
-		public static IList<LobbyListItem> GetAllLobbies()
+		public static IEnumerable<LobbyListItem> GetAllLobbies()
 		{
 			IList<LobbyListItem> test = new List<LobbyListItem>();
 			test.Add(new LobbyListItem("Daniel's Cube World", 8, 10, "Waiting", "Cubes"));
