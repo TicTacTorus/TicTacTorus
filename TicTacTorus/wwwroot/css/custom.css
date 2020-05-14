@@ -124,3 +124,10 @@ tr + td {
     display: flex;
     justify-content: space-between;
 }
+
+body {
+    background-image: url("../Media/Images/In-Game Prototyp.png");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+}
