@@ -122,5 +122,5 @@ tr + td {
 
 .lobby-grid {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
 }
