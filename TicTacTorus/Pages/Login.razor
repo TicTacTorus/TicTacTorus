@@ -1,5 +1,71 @@
 ﻿@page "/login"
 
-<h1>Login / Register</h1>
-
-Here we collect all the data we need to build our evil company. Hahahaha...
+<div class="min-vw-100">
+    <div class="my-5 lobbies-grid">
+        <button class="btn-back" onclick="location.href ='/';">
+            <svg class="bi bi-arrow-left" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M5.854 4.646a.5.5 0 010 .708L3.207 8l2.647 2.646a.5.5 0 01-.708.708l-3-3a.5.5 0 010-.708l3-3a.5.5 0 01.708 0z" clip-rule="evenodd"/>
+                <path fill-rule="evenodd" d="M2.5 8a.5.5 0 01.5-.5h10.5a.5.5 0 010 1H3a.5.5 0 01-.5-.5z" clip-rule="evenodd"/>
+            </svg>
+        </button>
+        <h1 class="headers">TicTacTorus</h1>
+    </div>
+    
+    <div class="d-flex justify-content-center">
+        <div class="row">
+            <div class="col-sm-9 col-md-7 col-lg-6 mx-auto">
+                <div class="box-login">
+                    <div class="container">
+                        <h4 class="text-center">Login</h4>
+                        <hr>
+                        <form>
+                            <div class="form-group">
+                                <label for="loginLoginName">Login Name*</label>
+                                <input type="text" id="loginLoginName" class="form-control" placeholder="Enter Login Name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="loginPassword">Password*</label>
+                                <input type="password" class="form-control" id="loginPassword" placeholder="Password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%">Sign In</button>
+                        </form>
+                        <p class="text-center"><a href="#" class="btn">Forgot password?</a></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-sm-9 col-md-7 col-lg-6 mx-auto">
+                <div class="box-login">
+                    <div class="container">
+                        <h4 class="text-center">Sign Up</h4>
+                        <hr>
+                        <form>
+                            <div class="form-group">
+                                <label for="registerLoginName">Login name*</label>
+                                <input type="text" id="registerLoginName" class="form-control" placeholder="Enter new Login Name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="registerInGameName">In-Game name</label>
+                                <input type="text" id="registerInGameName" class="form-control" aria-describedby="inGameNameHelp" placeholder="Enter new In-Game Name">
+                            </div>
+                            <div class="form-group">
+                                <label for="registerEmail">Email address</label>
+                                <input type="email" class="form-control" id="registerEmail" aria-describedby="emailHelp" placeholder="Enter email">
+                                <small id="emailHelp" class="form-text text-muted">Info: You cannot reset you password without an E-Mail!</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="registerPassword">Password*</label>
+                                <input type="password" class="form-control" id="registerPassword" placeholder="Password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="registerConfirmPassword">Confirm Password*</label>
+                                <input type="password" class="form-control" id="registerConfirmPassword" placeholder="Password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%">Sign Up</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

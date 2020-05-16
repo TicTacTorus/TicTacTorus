@@ -1,4 +1,5 @@
 ﻿.btn-primary-custom {
+    min-width: 100%;
     color: #262626;
     background-color: #00b16f;
     border-color: #00945d;
@@ -67,19 +68,39 @@
 }
 
 .box {
-    min-width: 400px;
-    min-height: 215px;
-    max-width: 400px;
-    max-height: 215px;
+    display: inline-block;
     transition: box-shadow .3s;
-    margin: 15px;
-    border-radius:10px;
+    border-radius: 8px;
     border: 1px solid #ccc;
     background: #fff;
-    float: left;
 }
-.box:hover {
+
+.box:hover, .box-map:hover, .box-login:hover {
     box-shadow: 0 0 11px rgba(33,33,33,.2);
+}
+
+.box-map {
+    min-width: 250px;
+    margin: 5px;
+    display: inline-block;
+    transition: box-shadow .3s;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #fff;
+}
+
+.box-login {
+    padding: 15px;
+    flex-wrap: wrap;
+    transition: box-shadow .3s;
+    margin: 5px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #fff;
+}
+
+.box-content {
+    padding: 15px;
 }
 
 .headers {
@@ -120,9 +141,29 @@ tr + td {
     grid-template-columns: 10% 80% 10%;
 }
 
-.lobby-grid {
-    display: flex;
-    justify-content: center;
+.left-side {
+    margin: 5px;
+    display: inline-block;
+    width: 50%;
+    float: left;
+}
+
+.right-side {
+    margin: 10px;
+    display: inline-block;
+    width: 50%;
+    float: right;
+}
+
+.custom-container {
+    display: inline-block;
+    min-width: 380px;
+    margin: 5px;
+}
+
+.below-chat {
+    min-width: 100%;
+    display: inline-block;
 }
 
 body {
