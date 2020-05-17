@@ -1,18 +1,64 @@
 ﻿@page "/ingame"
 <!-- Dont know we nee to think about a link name for this site -->
 
-<div class="d-flex flex-column float-right" style="height: 100%">
-    <div class="box-map align-self-start">
-        <div class="p-5">
-            <!-- Minimap here -->
+<div>
+    <!-- Game goes here -->
+</div>
+
+<div class="h-100">
+    <div class="nav-container">
+        <div class="box-map">
+            <div class="p-5">
+                <!-- Minimap goes here -->
+                Minimap Content
+            </div>
         </div>
-    </div>
     
-    <div class="box-map align-self-end">
-        <div class="box-content">
-            <div class="text-center left-side"><b>Chat</b></div>
-            <!-- <div class="text-center right-side"><b>Players</b></div> -->
-            <hr>
+        <div class="box-map">
+            <div class="box-game">
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a class="@_navOne" @onclick="NavClick">Chat</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="@_navTwo" @onclick="NavClick">Players</a>
+                    </li>
+                </ul>
+                <div>
+                    <!-- Chat / Player Content goes here -->
+                    Content
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+
+@functions
+{
+    private string _navOne = "nav-link active";
+    private string _navTwo = "nav-link";
+    private string _navTemp = "";
+    private bool _navClicked;
+
+    private void NavClick()
+    {
+    //I know can be simplified, but I'm lazy (Sorry ^^)
+        _navClicked = !_navClicked;
+        if (_navClicked)
+        {
+    //Player Tab is now Active
+            _navTemp = _navOne;
+            _navOne = _navTwo;
+            _navTwo = _navTemp;
+        }
+        else
+        {
+    //Chat Tab is now Active
+            _navTemp = _navTwo;
+            _navTwo = _navOne;
+            _navOne = _navTemp;
+        }
+    }
+    
+}
