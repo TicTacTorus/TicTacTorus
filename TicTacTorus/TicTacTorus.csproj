@@ -29,7 +29,7 @@
       <Content Update="Pages\Ingame.razor">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       </Content>
-      <Content Update="Pages\PlayRecording.razor">
+      <Content Update="Pages\Replay.razor">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       </Content>
       <Content Update="wwwroot\css\custom.css">

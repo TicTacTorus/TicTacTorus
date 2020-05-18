@@ -53,9 +53,7 @@ namespace TicTacTorus.Source.Security
                     result[index++] = (byte)(chr >> 8 * i & 0xff);
                 }
             }
-
             return result;
-            
         }
         
         private byte[] Concat(params byte[][] arrays)
