@@ -28,9 +28,9 @@
 
 @functions{
     //Method that returns a iterator of all lobbies (yield return)    
-    static IEnumerable<LobbyListItem> InitLobbyList()
+    static IEnumerable<MockLobbyList> InitLobbyList()
     {
-        var lobbies = LobbyListItem.GetAllLobbies();
+        var lobbies = MockLobbyList.GetAllLobbies();
         foreach (var elem in lobbies)
         {
             yield return elem;
