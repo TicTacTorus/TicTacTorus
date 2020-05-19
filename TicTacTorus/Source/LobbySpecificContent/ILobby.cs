@@ -5,6 +5,7 @@ namespace TicTacTorus.Source
     public interface ILobby
     {
         public string Name { get; set; }
+        public int CurrentPlayerCount { get; set; }
         public int MaxPlayerCount { get; set; }
         public string Status { get; set; }
         public string Description { get; set; }

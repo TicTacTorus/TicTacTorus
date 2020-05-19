@@ -1,6 +1,5 @@
 ﻿@page "/lobbies" 
-@using TicTacTorus.Source
-@using System.Net
+@using TicTacTorus.Source.LobbySpecificContent
 <!-- Maybe another tag for the lobbies site?? Open for possible solutions -->
 
 <div class="lobbies-grid my-5">
@@ -15,25 +14,17 @@
 
 <table id="lobbies">
     <tr><th>Lobby</th><th class="playerCount">Players</th><th class="status">Status</th><th>Description</th></tr>
-    @foreach (var elem in InitLobbyList())
+    @foreach (var (Id, lobby) in _fetchedLobbies.Lobbies)
     {
-        <tr id="lobbyRow" onclick="location.href ='game/@elem.Id';">
-            <td>@elem.Name</td>
-            <td class="playerCount">@elem.PlayerCount/@elem.MaxPlayerCount</td>
-            <td class="status">@elem.Status</td>
-            <td>@elem.Description</td>
+        <tr id="lobbyRow" onclick="location.href ='game/@Id';">
+            <td>@lobby.Name</td>
+            <td class="playerCount">@lobby.CurrentPlayerCount/@lobby.MaxPlayerCount</td>
+            <td class="status">@lobby.Status</td>
+            <td>@lobby.Description</td>
         </tr>
     }
 </table>
 
-@functions{
-    //Method that returns a iterator of all lobbies (yield return)    
-    static IEnumerable<MockLobbyList> InitLobbyList()
-    {
-        var lobbies = MockLobbyList.GetAllLobbies();
-        foreach (var elem in lobbies)
-        {
-            yield return elem;
-        }
-    }
+@{
+    private readonly LobbyList _fetchedLobbies = new LobbyList();
 }

@@ -1,6 +1,6 @@
 ﻿﻿using System.Collections.Generic;
 
-namespace TicTacTorus.Source
+ namespace TicTacTorus.Source.LobbySpecificContent
 {
     public class MockLobbyList
     {
