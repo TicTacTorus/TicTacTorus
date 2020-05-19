@@ -1,8 +1,22 @@
-﻿@page "/game"
+﻿﻿@page "/game"
 @using Microsoft.AspNetCore.SignalR.Client
+@using TicTacTorus.Source
+@using System.Drawing
+@using TicTacTorus.Source.Generator
 @inject NavigationManager NavigationManager
 
+@{
+    // if angemeldet 
+    // else generiere Name/Player
+    IPlayer i_am;
 
+    var name = AnonymPlayerNameGenerator.GetString();
+    var color = ColorGenerator.GetColor();
+    var symbol = ByteGenerator.GetByte();
+    i_am = new HumanPlayer("xyz", name, color, symbol);
+    
+    
+}
 <div class="my-5 lobbies-grid">
     <button class="btn-back" onclick="location.href ='/';">
         <svg class="bi bi-arrow-left" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -13,7 +27,7 @@
     <h1 class="headers">Tim's Lobby</h1>
 </div>
 <div contenteditable="true" class="text-center my-3">
-    Tim's Lobby Description
+    <p>@LobbyDescription</p>
 </div>
 <div class="d-flex justify-content-center">
     
@@ -25,6 +39,17 @@
                     <b><h3 class="text-center">Players (0/0)</h3></b>
                     <hr>
                     <div>
+                        <table id="player_table_in_lobby">
+                            @foreach (var elem in PlayerList())
+                            {
+                                <tr id="player_table_row">
+                                    <td><button onclick='MessageChatBox("@elem.ID got kicked")'>Kick</button></td>
+                                    <td>@elem.IngameName</td>
+                                    <td>@elem.Symbol</td>
+                                </tr>
+                            }
+                        </table>
+                        
                         <!-- Content goes here -->
                     </div>
                 </div>
@@ -37,7 +62,7 @@
                 <div class="box-content">
                     <b><h3 class="text-center">Chat</h3></b>
                     <hr>
-                    <div>
+                    <div id="chatbox">
                         <!-- Content goes here -->
                     </div>
                     <input type="text" class="w-100 align-bottom"/>
@@ -45,9 +70,10 @@
             </div>
             <div class="below-chat col">
                 <h5 class="text-center">Share this link to invite others</h5>
-                <div style="border-style: solid; border-width: 1px; border-radius: 10px; background: #ffffff" class="text-center my-2">
+                <!--<div style="border-style: solid; border-width: 1px; border-radius: 10px; background: #ffffff" class="text-center my-2">
                     http://www.brammens.com
-                </div>
+                </div>-->
+                <button id="link-copy" class="btn btn-primary-custom p-2" onclick="CopyText"> @InviteLink </button>
                 <button class="btn btn-primary-custom p-2" onclick="location.href ='ingame';">
                     <svg class="bi bi-play-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z"/>
@@ -65,9 +91,52 @@
                     <hr>
                     <div>
                         <!-- Content goes here -->
+                        <table>
+                            <tr>
+                                <form name="description" action="" method="post">
+                                    <div>Description</div>
+                                    <input name="host_description" type="text" id="host_description" size="64" class="w-100 align-bottom"/>
+                                    <input name="submit_description" type="submit" id="submit_description" value="Change"/>
+                                </form>
+                            </tr>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@code{
+    private static ILobby _lobby = new Source.LobbySpecificContent.Lobby("Tim's Game", "Just opened", "Tim's Description", 4, false);
+    private string LobbyName { get; set; } = _lobby.Name;
+    private string LobbyDescription { get; set; } = "Blaabla";
+    // var text = Request["host_description"];
+    private string LobbyStatus { get; set; } = _lobby.Status;
+    
+    private string InviteLink { get; set; } = "TicTacTorus.de/lobby/2nd83jf81";
+}
+
+@functions{
+    static ILobby lobby = new Source.LobbySpecificContent.Lobby("Tim's Wunderland", 3, true);
+    //Method that returns a iterator of all lobbies (yield return)    
+    static void InitPlayerList()
+    {
+        lobby.addPlayer(new HumanPlayer("Tim", "NicerDicer", Color.Coral, 111));
+        lobby.addPlayer(new HumanPlayer("Daniela", "Daisy", Color.Aquamarine, 120));
+    }
+
+    static IEnumerable<IPlayer> PlayerList()
+    {
+        var lobbies = lobby.GetAllPlayers();
+        foreach (var elem in lobbies)
+        {
+            yield return elem;
+        }
+    }
+
+    static void MessageChatBox(string message)
+    {
+        
+    }
+}

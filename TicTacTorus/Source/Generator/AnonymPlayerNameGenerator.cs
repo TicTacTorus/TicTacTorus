@@ -4,7 +4,7 @@ namespace TicTacTorus.Source.Generator
 {
     public class AnonymPlayerNameGenerator
     {
-        // Database 
+        // TODO: take out of Database 
         private static readonly string[] _names = {"Exe", "Person", "Bill Clinton"};
         
         public static string GetString()
