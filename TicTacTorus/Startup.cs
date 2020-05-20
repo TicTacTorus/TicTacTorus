@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TicTacTorus.Source;
+using TicTacTorus.Source.Hubs;
 
 namespace TicTacTorus
 {
@@ -60,6 +61,7 @@ namespace TicTacTorus
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapBlazorHub();
+                endpoints.MapHub<ChatHub>("/chatHub");
                 endpoints.MapFallbackToPage("/_Host");
             });
         }

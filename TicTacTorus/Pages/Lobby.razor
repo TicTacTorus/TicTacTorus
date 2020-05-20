@@ -1,4 +1,4 @@
-﻿﻿@using Microsoft.AspNetCore.SignalR.Client
+﻿@using Microsoft.AspNetCore.SignalR.Client
 @using TicTacTorus.Source
 @using System.Drawing
 @using TicTacTorus.Source.Generator
@@ -13,9 +13,8 @@
     var color = ColorGenerator.GetColor();
     var symbol = ByteGenerator.GetByte();
     i_am = new HumanPlayer("xyz", name, color, symbol);
-    
-    
 }
+
 @page "/game"
 <div class="my-5 lobbies-grid">
     <button class="btn-back" onclick="location.href ='/';">
@@ -63,11 +62,15 @@
                     <b><h3 class="text-center">Chat</h3></b>
                     <hr>
                     <div id="chatbox">
-                        <textarea id="chat-area" rows="9">
-                            
-                        </textarea>
+                        <ul id="messagesList">
+                            @foreach (var message in messages)
+                            {
+                                <li>@message</li>
+                            }
+                        </ul>
                     </div>
-                    <input type="text" id="ChatInput" class="w-100 align-bottom"/>
+                    <input @bind="_messageInput" type="text" id="ChatInput" class="w-100 align-bottom"/>
+                    <button @onclick="Send" disabled="@(!IsConnected)">Send</button>
                 </div>
             </div>
             <div class="below-chat col">
@@ -141,4 +144,30 @@
     {
         
     }
+    
+    private HubConnection _hubConnection;
+    private List<string> messages = new List<string>();
+    private string _messageInput;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/chatHub"))
+            .Build();
+
+        _hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        {
+            var encodedMsg = $"{user}: {message}";
+            messages.Add(encodedMsg);
+            StateHasChanged();
+        });
+
+        await _hubConnection.StartAsync();
+    }
+
+    Task Send() =>
+        _hubConnection.SendAsync("SendMessage", "Tim", _messageInput);
+
+    public bool IsConnected =>
+        _hubConnection.State == HubConnectionState.Connected;
 }

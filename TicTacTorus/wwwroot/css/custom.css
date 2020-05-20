@@ -174,8 +174,7 @@ body {
     background-size: cover;
 }
 
-#chat-area {
-    resize : none;
-    border : none;
-    columns: auto;
+#messagesList {
+    width : 100%;
+    height: 100px;
 }
