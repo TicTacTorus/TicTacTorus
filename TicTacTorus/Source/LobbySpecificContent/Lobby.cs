@@ -1,6 +1,5 @@
-﻿﻿
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using TicTacTorus.Source.Utility;
 
 namespace TicTacTorus.Source.LobbySpecificContent
 {
@@ -10,7 +9,7 @@ namespace TicTacTorus.Source.LobbySpecificContent
         public int MaxPlayerCount { get; set; }
         public string Status { get; set; }
         public string Description { get; set; }
-        public string Id { get; set; }
+        public Base64 Id { get; set; }
         public bool IsPrivate { get; set; }
 
         private IList<IPlayer> _players;
@@ -50,7 +49,6 @@ namespace TicTacTorus.Source.LobbySpecificContent
         {
             return _players;
         }
-
     }
 
     
