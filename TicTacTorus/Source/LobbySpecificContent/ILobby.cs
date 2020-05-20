@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Base64 = TicTacTorus.Source.Utility.Base64;
 
-namespace TicTacTorus.Source
+namespace TicTacTorus.Source.LobbySpecificContent
 {
     public interface ILobby
     {

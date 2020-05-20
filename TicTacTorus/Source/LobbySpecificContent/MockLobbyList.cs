@@ -29,7 +29,7 @@
         public string Description { get; set; }
         public Base64 Id { get; set; }
         public bool IsPrivate { get; set; }
-        private IList<IPlayer> _players;
+        private IList<IPlayer> _players = new List<IPlayer>();
         
         public bool addPlayer(IPlayer player)
         {

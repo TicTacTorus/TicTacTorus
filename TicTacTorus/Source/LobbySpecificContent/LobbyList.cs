@@ -12,11 +12,11 @@ namespace TicTacTorus.Source.LobbySpecificContent
             Lobbies = FetchAllActiveLobbies();
         }
         
-        public Dictionary<Base64, ILobby> FetchAllActiveLobbies()
+        private Dictionary<Base64, ILobby> FetchAllActiveLobbies()
         {
             //Need to fetch all currently open Lobby Hubs that is
             //stored in the external storage?
-            return null;
+            return MockLobbyList.GetAllLobbies();
         }
     }
 }
