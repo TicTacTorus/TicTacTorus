@@ -168,8 +168,14 @@ tr + td {
 }
 
 body {
-    background-image: url("../Media/Images/In-Game Prototyp.png");
+    background-image: url("../Media/Images/Spielfeld_Konzept.png");
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: cover;
+}
+
+#chat-area {
+    resize : none;
+    border : none;
+    columns: auto;
 }
