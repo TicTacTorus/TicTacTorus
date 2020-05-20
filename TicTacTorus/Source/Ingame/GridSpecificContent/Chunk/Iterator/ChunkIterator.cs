@@ -2,7 +2,7 @@
 using TicTacTorus.Source.Ingame.GridSpecificContent;
 using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk;
 
-namespace TicTacTorus.Source.GridSpecificContent.Chunk.Iterator
+namespace TicTacTorus.Source.Ingame.GridSpecificContent.Chunk.Iterator
 {
     public class ChunkIterator
     {
