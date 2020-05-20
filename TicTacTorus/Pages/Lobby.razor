@@ -3,11 +3,13 @@
 @using TicTacTorus.Source
 @using System.Drawing
 @using TicTacTorus.Source.Generator
+@using TicTacTorus.Source.LobbySpecificContent
 
 
 @{
     // if angemeldet 
     // else generiere Name/Player
+    
     IPlayer i_am;
 
     var name = AnonymPlayerNameGenerator.GetString();
@@ -15,7 +17,7 @@
     var symbol = ByteGenerator.GetByte();
     i_am = new HumanPlayer("xyz", name, color, symbol);
     
-    
+    InitLobby();
 }
 <div class="my-5 lobbies-grid">
     <button class="btn-back" onclick="location.href ='/';">
@@ -24,10 +26,11 @@
             <path fill-rule="evenodd" d="M2.5 8a.5.5 0 01.5-.5h10.5a.5.5 0 010 1H3a.5.5 0 01-.5-.5z" clip-rule="evenodd"/>
         </svg>
     </button>
-    <h1 class="headers">Tim's Lobby</h1>
+    <h1 class="headers">@_lobby.Name</h1>
+    <input name="show_title" type="text" style='display:none' id="show_title" size="64" class="w-100 align-bottom"/>
 </div>
 <div contenteditable="true" class="text-center my-3">
-    <p>@LobbyDescription</p>
+    <p>@_lobby.Description</p>
 </div>
 <div class="d-flex justify-content-center">
     
@@ -43,9 +46,17 @@
                             @foreach (var elem in PlayerList())
                             {
                                 <tr id="player_table_row">
-                                    <td><button onclick='MessageChatBox("@elem.ID got kicked")'>Kick</button></td>
-                                    <td>@elem.IngameName</td>
-                                    <td>@elem.Symbol</td>
+                                <td><button onclick='MessageChatBox("@elem.ID got kicked")'>Kick</button></td>
+                                <td>
+                                @{
+                                    var classText = "color:" + ColorTranslator.ToHtml(@elem.Color)+ ";" ;
+                                    classText += "\nfont-size: large;" +
+                                                 "\nfont-weight: bold;";
+                                    classText += "\ntext-shadow: 1px 1px 0px black;";
+                                    <div style="@classText">@elem.IngameName</div>
+                                } 
+                                </td>
+                                <td>@elem.Symbol</td>
                                 </tr>
                             }
                         </table>
@@ -93,11 +104,12 @@
                         <!-- Content goes here -->
                         <table>
                             <tr>
-                                <form name="description" action="" method="post">
-                                    <div>Description</div>
-                                    <input name="host_description" type="text" id="host_description" size="64" class="w-100 align-bottom"/>
+                                <EditForm Model="@_lobby" OnValidSubmit="HandleDescriptionChange">
+                                    <label>Description</label>
+                                    <InputText id="host_description" type="text" @bind-Value="_lobby.Description"
+                                               name="host_description" size="64" class="w-100 align-bottom"/>
                                     <input name="submit_description" type="submit" id="submit_description" value="Change"/>
-                                </form>
+                                </EditForm>
                             </tr>
                         </table>
                     </div>
@@ -108,31 +120,46 @@
 </div>
 
 @code{
-    private static ILobby _lobby = new Source.LobbySpecificContent.Lobby("Tim's Game", "Just opened", "Tim's Description", 4, false);
+    //private static ILobby _lobby = new Source.LobbySpecificContent.Lobby("Tim's Game", "Just opened", "Tim's Description", 4, false);
+    static ILobby _lobby = new Source.LobbySpecificContent.Lobby();
     private string LobbyName { get; set; } = _lobby.Name;
     private string LobbyDescription { get; set; } = "Blaabla";
     // var text = Request["host_description"];
-    private string LobbyStatus { get; set; } = _lobby.Status;
+
+    string GetColorStyle(Color c)
+    {
+        return "color:" + c.Name;
+    }
     
     private string InviteLink { get; set; } = "TicTacTorus.de/lobby/2nd83jf81";
 }
 
 @functions{
-    static ILobby lobby = new Source.LobbySpecificContent.Lobby("Tim's Wunderland", 3, true);
-    //Method that returns a iterator of all lobbies (yield return)    
-    static void InitPlayerList()
+    static void InitLobby()
     {
-        lobby.addPlayer(new HumanPlayer("Tim", "NicerDicer", Color.Coral, 111));
-        lobby.addPlayer(new HumanPlayer("Daniela", "Daisy", Color.Aquamarine, 120));
+        HumanPlayer creator = new HumanPlayer("Eleven", "Caaarl", Color.DodgerBlue, 3);
+        _lobby = Source.LobbySpecificContent.LobbyFactory.CreateLobby(creator);
+        
+        InitPlayerList();
     }
-
+    private static void InitPlayerList()
+    {
+        _lobby.addPlayer(new HumanPlayer("Tim", "NicerDicer", Color.Coral, 111));
+        _lobby.addPlayer(new HumanPlayer("Daniela", "Daisy", Color.Aquamarine, 120));
+    }
+    //Method that returns a iterator of all lobbies (yield return)   
     static IEnumerable<IPlayer> PlayerList()
     {
-        var lobbies = lobby.GetAllPlayers();
+        var lobbies = _lobby.GetAllPlayers();
         foreach (var elem in lobbies)
         {
             yield return elem;
         }
+    }
+
+    static void HandleDescriptionChange()
+    {
+        
     }
 
     static void MessageChatBox(string message)

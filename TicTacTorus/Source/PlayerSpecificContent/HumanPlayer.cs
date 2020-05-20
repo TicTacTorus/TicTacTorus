@@ -16,5 +16,10 @@ namespace TicTacTorus.Source
             Color = color;
             Symbol = symbol;
         }
+
+        public HumanPlayer()
+        {
+            
+        }
     }
 }

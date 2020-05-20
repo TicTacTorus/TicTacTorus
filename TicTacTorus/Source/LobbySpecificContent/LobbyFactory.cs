@@ -2,30 +2,25 @@
 {
     public class LobbyFactory
     {
-        public LobbyFactory()
+        public static ILobby CreateLobby(IPlayer owner)
         {
-            
+            return new Lobby(CreateLobbyName(owner), owner, CreateLobbyStatus(),
+                CreateLobbyDescription(owner), 5, true);
         }
 
-        public ILobby CreateLobby(IPlayer player)
+        private static string CreateLobbyName(IPlayer owner)
         {
-            return new Lobby(CreateLobbyName(player),CreateLobbyStatus(),
-                CreateLobbyDescription(player), 5, true);
+            return owner.IngameName + "'s Game";
         }
 
-        private string CreateLobbyName(IPlayer player)
-        {
-            return player.IngameName + "'s Game";
-        }
-
-        private string CreateLobbyStatus()
+        private static string CreateLobbyStatus()
         {
             return "just opened";
         }
 
-        private string CreateLobbyDescription(IPlayer player)
+        private static string CreateLobbyDescription(IPlayer owner)
         {
-            return player.IngameName + "'s Description";
+            return owner.IngameName + "'s Description";
         }
     }
 }

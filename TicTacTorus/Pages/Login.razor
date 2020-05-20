@@ -1,4 +1,6 @@
 ﻿@page "/login"
+@using TicTacTorus.Source
+@using System.ComponentModel.DataAnnotations
 
 <div class="min-vw-100">
     <div class="my-5 lobbies-grid">
@@ -29,7 +31,7 @@
                             </div>
                             <button type="submit" class="btn btn-primary" style="width: 100%">Sign In</button>
                         </form>
-                        <p class="text-center"><a href="#" class="btn">Forgot password?</a></p>
+                        <p class="text-center"><a href="#" class="btn">Forgot login name or password?</a></p>
                     </div>
                 </div>
             </div>
@@ -39,33 +41,63 @@
                     <div class="container">
                         <h4 class="text-center">Sign Up</h4>
                         <hr>
-                        <form>
+                        <EditForm Model="@_sign_in_player" OnValidSubmit="HandleValidSubmit">
                             <div class="form-group">
                                 <label for="registerLoginName">Login name*</label>
-                                <input type="text" id="registerLoginName" class="form-control" placeholder="Enter login name" required>
+                                <InputText id="registerLoginName" @bind-Value="_sign_in_player.Identifier" 
+                                           class="form-control" placeholder="Enter login name" required />
                             </div>
                             <div class="form-group">
                                 <label for="registerInGameName">In-Game name</label>
-                                <input type="text" id="registerInGameName" class="form-control" aria-describedby="inGameNameHelp" placeholder="Enter In-Game name">
+                                <InputText id="registerInGameName" @bind-Value="_sign_in_player.IngameName" 
+                                           class="form-control" aria-describedby="inGameNameHelp" placeholder="Standard name shown in game (can be edited)"/>
                             </div>
                             <div class="form-group">
-                                <label for="registerEmail">Email address</label>
-                                <input type="email" class="form-control" id="registerEmail" aria-describedby="emailHelp" placeholder="Enter email">
-                                <small id="emailHelp" class="form-text text-muted">Info: You cannot reset you password without an E-Mail!</small>
+                                <label for="registerEmail">Email address
+                                    <InputText type="email" id="registerEmail" @bind-Value="_sign_in_player.EMail" 
+                                               class="form-control" aria-describedby="emailHelp" placeholder="Enter email"/>
+                                    
+                                    <small id="emailHelp" class="form-text text-muted">Info: You cannot reset you password without an E-Mail!</small></label>
                             </div>
                             <div class="form-group">
                                 <label for="registerPassword">Password*</label>
-                                <input type="password" class="form-control" id="registerPassword" placeholder="Password" required>
+                                <InputText type="password" id="registerPassword" @bind-Value="_sign_in_player.Password"
+                                           class="form-control"  placeholder="Password" required/>
                             </div>
                             <div class="form-group">
                                 <label for="registerConfirmPassword">Confirm Password*</label>
-                                <input type="password" class="form-control" id="registerConfirmPassword" placeholder="Password" required>
+                                <input type="password" id="registerConfirmPassword" class="form-control" placeholder="Password" required>
                             </div>
                             <button type="submit" class="btn btn-primary" style="width: 100%">Sign Up</button>
-                        </form>
+                        </EditForm>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@code{
+
+    private  TemporaryLoginPlayer _sign_in_player = new TemporaryLoginPlayer();
+    
+    class TemporaryLoginPlayer
+    {
+        [Required]
+        [StringLength(16, ErrorMessage = "Identifier too long (16 character limit).")]
+        public string Identifier { get; set; }
+        
+        [Required]
+        public string Password { get; set; }
+
+        public string IngameName { get; set; }
+
+        public string EMail { get; set; }
+    }
+    
+    private void HandleValidSubmit()
+    {
+        Console.WriteLine("OnValidSubmit");
+    }
+
+}
