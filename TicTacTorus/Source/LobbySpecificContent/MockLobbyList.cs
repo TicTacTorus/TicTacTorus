@@ -1,33 +1,44 @@
 ﻿﻿using System.Collections.Generic;
+ using TicTacTorus.Source.Utility;
 
-namespace TicTacTorus.Source
+ namespace TicTacTorus.Source.LobbySpecificContent
 {
-    public class MockLobbyList
+    public class MockLobbyList : ILobby
     {
-        public string Name { get; private set; }
-        public int PlayerCount { get; private set; }
-        public int MaxPlayerCount { get; private set; }
-        public string Status { get; private set; }
-        public string Description { get; private set; }
-		
-        public string Id { get; }
-
+        
         public MockLobbyList(string name, int currentCount, int maxCount, string status, string desc)
         {
             Name = name;
-            PlayerCount = currentCount;
             MaxPlayerCount = maxCount;
             Status = status;
             Description = desc;
-            Id = "ioRuZr82";
         }
-        public static IEnumerable<MockLobbyList> GetAllLobbies()
+        public static Dictionary<Base64, ILobby> GetAllLobbies()
         {
-            IList<MockLobbyList> test = new List<MockLobbyList>();
-            test.Add(new MockLobbyList("Daniel's Cube World", 8, 10, "Waiting", "Cubes"));
-            test.Add(new MockLobbyList("Tim's Sauna Landschaft", 2, 5, "Waiting", "No nerds plz"));
-            test.Add(new MockLobbyList("Jack's DnD Dungeon", 12, 15, "Waiting", "Only DnD Fans!"));
-            return test;
+            return new Dictionary<Base64, ILobby>
+            {
+                {new Base64(), new MockLobbyList("Daniel's Cube World", 8, 10, "Waiting", "Cubes")},
+                {new Base64(), new MockLobbyList("Tim's Sauna Landschaft", 2, 5, "Waiting", "No nerds plz")},
+                {new Base64(), new MockLobbyList("Jack's DnD Dungeon", 12, 15, "Waiting", "Only DnD Fans!")}
+            };
+        }
+
+        public string Name { get; set; }
+        public int MaxPlayerCount { get; set; }
+        public string Status { get; set; }
+        public string Description { get; set; }
+        public Base64 Id { get; set; }
+        public bool IsPrivate { get; set; }
+        private IList<IPlayer> _players;
+        
+        public bool addPlayer(IPlayer player)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public IList<IPlayer> GetAllPlayers()
+        {
+            return _players;
         }
     }
 }

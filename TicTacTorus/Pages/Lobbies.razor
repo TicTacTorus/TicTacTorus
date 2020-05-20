@@ -1,7 +1,9 @@
 ﻿@page "/lobbies" 
+@using TicTacTorus.Source.LobbySpecificContent
+@using TicTacTorus.Source.Utility
 @using TicTacTorus.Source
-@using System.Net
 <!-- Maybe another tag for the lobbies site?? Open for possible solutions -->
+
 
 <div class="lobbies-grid my-5">
     <button class="btn-back" onclick="location.href ='/';">
@@ -15,25 +17,6 @@
 
 <table id="lobbies">
     <tr><th>Lobby</th><th class="playerCount">Players</th><th class="status">Status</th><th>Description</th></tr>
-    @foreach (var elem in InitLobbyList())
-    {
-        <tr id="lobbyRow" onclick="location.href ='game/@elem.Id';">
-            <td>@elem.Name</td>
-            <td class="playerCount">@elem.PlayerCount/@elem.MaxPlayerCount</td>
-            <td class="status">@elem.Status</td>
-            <td>@elem.Description</td>
-        </tr>
-    }
+    
 </table>
 
-@functions{
-    //Method that returns a iterator of all lobbies (yield return)    
-    static IEnumerable<MockLobbyList> InitLobbyList()
-    {
-        var lobbies = MockLobbyList.GetAllLobbies();
-        foreach (var elem in lobbies)
-        {
-            yield return elem;
-        }
-    }
-}
