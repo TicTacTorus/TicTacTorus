@@ -1,6 +1,9 @@
 ﻿@page "/lobbies" 
 @using TicTacTorus.Source.LobbySpecificContent
+@using TicTacTorus.Source.Utility
+@using TicTacTorus.Source
 <!-- Maybe another tag for the lobbies site?? Open for possible solutions -->
+
 
 <div class="lobbies-grid my-5">
     <button class="btn-back" onclick="location.href ='/';">
@@ -14,17 +17,6 @@
 
 <table id="lobbies">
     <tr><th>Lobby</th><th class="playerCount">Players</th><th class="status">Status</th><th>Description</th></tr>
-    @foreach (var (id, lobby) in _fetchedLobbies.Lobbies)
-    {
-        <tr id="lobbyRow" onclick="location.href ='game/@id';">
-            <td>@lobby.Name</td>
-            <td class="playerCount">@lobby.GetAllPlayers().Count/@lobby.MaxPlayerCount</td>
-            <td class="status">@lobby.Status</td>
-            <td>@lobby.Description</td>
-        </tr>
-    }
+    
 </table>
 
-@functions{
-    private readonly LobbyList _fetchedLobbies = new LobbyList();
-}
