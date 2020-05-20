@@ -14,9 +14,9 @@
 
 <table id="lobbies">
     <tr><th>Lobby</th><th class="playerCount">Players</th><th class="status">Status</th><th>Description</th></tr>
-    @foreach (var (Id, lobby) in _fetchedLobbies.Lobbies)
+    @foreach (var (id, lobby) in _fetchedLobbies.Lobbies)
     {
-        <tr id="lobbyRow" onclick="location.href ='game/@Id';">
+        <tr id="lobbyRow" onclick="location.href ='game/@id';">
             <td>@lobby.Name</td>
             <td class="playerCount">@lobby.GetAllPlayers().Count/@lobby.MaxPlayerCount</td>
             <td class="status">@lobby.Status</td>
@@ -25,6 +25,6 @@
     }
 </table>
 
-@{
+@functions{
     private readonly LobbyList _fetchedLobbies = new LobbyList();
 }
