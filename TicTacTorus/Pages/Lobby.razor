@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @using TicTacTorus.Source.Generator
 @using TicTacTorus.Source.LobbySpecificContent
+@inject NavigationManager NavigationManager
 
 
 @{
@@ -51,7 +52,6 @@
                                 </tr>
                             }
                         </table>
-                        
                         <!-- Content goes here -->
                     </div>
                 </div>
@@ -70,7 +70,7 @@
                                 @message<br>
                             }
                     </textarea>
-                    <input type="text" class="w-100 align-bottom"/>
+                    <input type="text" @onkeypress="SendMessage" class="w-100 align-bottom"/>
                 </div>
             </div>
             <div class="below-chat col">
@@ -148,9 +148,11 @@
     {
         if (e.Key == "Enter")
         {
+            
             Send();
         }
     }
+    
     
     protected override async Task OnInitializedAsync()
     {
