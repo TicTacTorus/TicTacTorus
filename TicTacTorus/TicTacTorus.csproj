@@ -59,7 +59,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Source\Persistence" />
+      <PackageReference Include="System.Data.SQLite.Core" Version="1.0.103" />
     </ItemGroup>
 
 </Project>
