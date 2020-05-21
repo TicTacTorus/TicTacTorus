@@ -29,7 +29,7 @@
       <Content Update="Pages\Ingame.razor">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       </Content>
-      <Content Update="Pages\Replay.razor">
+      <Content Update="Pages\PlayRecording.razor">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       </Content>
       <Content Update="wwwroot\css\custom.css">
@@ -48,9 +48,6 @@
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
-      <Content Update="Pages\Lobby.razor">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      </Content>
     </ItemGroup>
 
     <ItemGroup>
@@ -62,7 +59,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="3.1.4" />
+      <Folder Include="Source\Persistence" />
     </ItemGroup>
 
 </Project>
