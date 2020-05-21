@@ -1,5 +1,5 @@
 ﻿using System;
-using TicTacTorus.Source.GridSpecificContent.Chunk.Iterator;
+using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk.Iterator;
 
 namespace TicTacTorus.Source.Ingame.GridSpecificContent.Chunk
 {

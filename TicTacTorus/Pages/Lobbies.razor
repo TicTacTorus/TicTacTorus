@@ -17,6 +17,18 @@
 
 <table id="lobbies">
     <tr><th>Lobby</th><th class="playerCount">Players</th><th class="status">Status</th><th>Description</th></tr>
-    
+    @foreach (var (id, lobby) in _list.Lobbies)
+    {
+        <tr id="lobbyRow" onclick="location.href ='game/@id.ToString()';">
+            <td>@lobby.Name</td>
+            <td class="playerCount">@lobby.GetAllPlayers().Count/@lobby.MaxPlayerCount</td>
+            <td class="status">@lobby.Status</td>
+            <td>@lobby.Description</td>
+        </tr>
+    }
 </table>
 
+
+@functions{
+    private readonly LobbyList _list = new LobbyList();
+}

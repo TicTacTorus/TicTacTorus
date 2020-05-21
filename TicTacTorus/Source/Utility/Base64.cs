@@ -62,10 +62,10 @@ namespace TicTacTorus.Source.Utility
             var result = "";
             for (var i = 0; i < Data.Length / 3; ++i)
             {
-                result += 0                                 | Data[3 * i + 0] >> 2;
-                result += (Data[3 * i + 0] & 0b000011) << 4 | Data[3 * i + 1] >> 4;
-                result += (Data[3 * i + 1] & 0b001111) << 2 | Data[3 * i + 2] >> 6;
-                result += (Data[3 * i + 2] & 0b111111) << 0 | 0;
+                result += Alphabet[0                                 | Data[3 * i + 0] >> 2];
+                result += Alphabet[(Data[3 * i + 0] & 0b000011) << 4 | Data[3 * i + 1] >> 4];
+                result += Alphabet[(Data[3 * i + 1] & 0b001111) << 2 | Data[3 * i + 2] >> 6];
+                result += Alphabet[(Data[3 * i + 2] & 0b111111) << 0 | 0                   ];
             }
             return result;
         }

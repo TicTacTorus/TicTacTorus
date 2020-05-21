@@ -1,22 +1,22 @@
-﻿@using Microsoft.AspNetCore.SignalR.Client
+﻿@page "/game"
+
 @using TicTacTorus.Source
 @using System.Drawing
-@using System.Reflection.Metadata
 @using TicTacTorus.Source.Generator
-@inject NavigationManager NavigationManager
+
 
 @{
     // if angemeldet 
     // else generiere Name/Player
     IPlayer i_am;
-    
+
     var name = AnonymPlayerNameGenerator.GetString();
     var color = ColorGenerator.GetColor();
     var symbol = ByteGenerator.GetByte();
     i_am = new HumanPlayer("xyz", name, color, symbol);
+    
+    
 }
-
-@page "/game"
 <div class="my-5 lobbies-grid">
     <button class="btn-back" onclick="location.href ='/';">
         <svg class="bi bi-arrow-left" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -62,13 +62,10 @@
                 <div class="box-content">
                     <b><h3 class="text-center">Chat</h3></b>
                     <hr>
-                    <textarea id="messagesList" readonly>
-                            @foreach (var message in messages)
-                            {
-                                @message<br>
-                            }
-                    </textarea>
-                    <input @bind="_messageInput" type="text" @onkeyup="sendMessage" disabled="@(!IsConnected)" id="ChatInput" class="w-100 align-bottom"/>
+                    <div id="chatbox">
+                        <!-- Content goes here -->
+                    </div>
+                    <input type="text" class="w-100 align-bottom"/>
                 </div>
             </div>
             <div class="below-chat col">
@@ -118,11 +115,6 @@
     private string LobbyStatus { get; set; } = _lobby.Status;
     
     private string InviteLink { get; set; } = "TicTacTorus.de/lobby/2nd83jf81";
-    
-    private HubConnection _hubConnection;
-    private List<string> messages = new List<string>();
-    private string _messageInput;
-    
 }
 
 @functions{
@@ -143,33 +135,8 @@
         }
     }
 
-    private void sendMessage(KeyboardEventArgs e)
+    static void MessageChatBox(string message)
     {
-        if (e.Key == "Enter")
-        {
-            Send();
-        }
+        
     }
-
-    protected override async Task OnInitializedAsync()
-    {
-        _hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri("/chatHub"))
-            .Build();
-
-        _hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
-        {
-            var encodedMsg = $"{user}: {message}";
-            messages.Add(encodedMsg);
-            StateHasChanged();
-        });
-
-        await _hubConnection.StartAsync();
-    }
-    // TODO get logged in user from session
-    Task Send() =>
-        _hubConnection.SendAsync("SendMessage", "Tim", _messageInput);
-
-    public bool IsConnected =>
-        _hubConnection.State == HubConnectionState.Connected;
 }

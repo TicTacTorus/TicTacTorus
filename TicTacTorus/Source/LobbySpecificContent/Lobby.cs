@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using TicTacTorus.Source.Utility;
 
 namespace TicTacTorus.Source.LobbySpecificContent
@@ -8,6 +9,9 @@ namespace TicTacTorus.Source.LobbySpecificContent
         public string Name { get; set; }
         public int MaxPlayerCount { get; set; }
         public string Status { get; set; }
+        
+        [Required]
+        [StringLength(10, ErrorMessage = "Description is too long.")]
         public string Description { get; set; }
         public Base64 Id { get; set; }
         public bool IsPrivate { get; set; }
@@ -25,15 +29,18 @@ namespace TicTacTorus.Source.LobbySpecificContent
             Name = name;
             IsPrivate = isPrivate;
         }
-        public Lobby(string name, string status, string description, int maxPlayerCount, bool isPrivate)
+        public Lobby(string name, string status, string description, int maxPlayerCount, bool isPrivate) 
+            : this(name, maxPlayerCount, isPrivate)
         {
-            _players = new List<IPlayer>(maxPlayerCount);
-            MaxPlayerCount = maxPlayerCount;
-            Name = name;
-            IsPrivate = isPrivate;
             Status = status;
             Description = description;
         }
+        public Lobby(string name, IPlayer owner ,string status, string description, int maxPlayerCount, bool isPrivate) 
+            : this(name,status, description, maxPlayerCount, isPrivate)
+        {
+            _players.Add(owner);
+        }
+        
         public bool addPlayer(IPlayer player)
         {
             if (_players.Count < MaxPlayerCount)
