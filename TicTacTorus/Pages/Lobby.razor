@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.SignalR.Client
 @using TicTacTorus.Source
 @using System.Drawing
+@using System.Reflection.Metadata
 @using TicTacTorus.Source.Generator
 @inject NavigationManager NavigationManager
 
@@ -61,16 +62,13 @@
                 <div class="box-content">
                     <b><h3 class="text-center">Chat</h3></b>
                     <hr>
-                    <div id="chatbox">
-                        <ul id="messagesList">
+                    <textarea id="messagesList" readonly>
                             @foreach (var message in messages)
                             {
-                                <li>@message</li>
+                                @message<br>
                             }
-                        </ul>
-                    </div>
-                    <input @bind="_messageInput" type="text" id="ChatInput" class="w-100 align-bottom"/>
-                    <button @onclick="Send" disabled="@(!IsConnected)">Send</button>
+                    </textarea>
+                    <input @bind="_messageInput" type="text" @onkeyup="sendMessage" disabled="@(!IsConnected)" id="ChatInput" class="w-100 align-bottom"/>
                 </div>
             </div>
             <div class="below-chat col">
@@ -120,6 +118,11 @@
     private string LobbyStatus { get; set; } = _lobby.Status;
     
     private string InviteLink { get; set; } = "TicTacTorus.de/lobby/2nd83jf81";
+    
+    private HubConnection _hubConnection;
+    private List<string> messages = new List<string>();
+    private string _messageInput;
+    
 }
 
 @functions{
@@ -140,14 +143,13 @@
         }
     }
 
-    static void MessageChatBox(string message)
+    private void sendMessage(KeyboardEventArgs e)
     {
-        
+        if (e.Key == "Enter")
+        {
+            Send();
+        }
     }
-    
-    private HubConnection _hubConnection;
-    private List<string> messages = new List<string>();
-    private string _messageInput;
 
     protected override async Task OnInitializedAsync()
     {
@@ -164,7 +166,7 @@
 
         await _hubConnection.StartAsync();
     }
-
+    // TODO get logged in user from session
     Task Send() =>
         _hubConnection.SendAsync("SendMessage", "Tim", _messageInput);
 
