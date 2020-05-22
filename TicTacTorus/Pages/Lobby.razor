@@ -64,11 +64,10 @@
                 <div class="box-content">
                     <b><h3 class="text-center">Chat</h3></b>
                     <hr>
-                    <textarea id="messagesList" readonly>
-                        @foreach (var message in messages)
-                            {
-                                @message<br>
-                            }
+                    <textarea id="messagesList" readonly>@foreach (var message in messages)
+                        {
+                            @message<br>
+                        }
                     </textarea>
                     <input @bind="messageInput" @onkeyup="SendMessage" disabled="@(!IsConnected)" class="w-100 align-bottom"/>
                 </div>
