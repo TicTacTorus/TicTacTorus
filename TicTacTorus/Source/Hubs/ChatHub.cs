@@ -5,9 +5,19 @@ namespace TicTacTorus.Source.Hubs
 {
     public class ChatHub : Hub
     {
-        public async Task SendMessage(string user, string message)
+        public async Task SendMessage(string lobbyId, string user, string message)
         {
-            await Clients.All.SendAsync("ReceiveMessage", user, message);
+            await Clients.Group(lobbyId).SendAsync("ReceiveMessage", user, message);
+        }
+
+        public Task JoinLobby(string lobbyId)
+        {
+            return Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
+        }
+        
+        public Task LeaveLobby(string lobbyId)
+        {
+            return Groups.RemoveFromGroupAsync(Context.ConnectionId, lobbyId);
         }
     }
 }

@@ -1,10 +1,12 @@
 ﻿@page "/game"
+@page "/game/{IdString}"
 
 @using TicTacTorus.Source
 @using System.Drawing
 @using Microsoft.AspNetCore.SignalR.Client
 @using TicTacTorus.Source.Generator
 @using TicTacTorus.Source.LobbySpecificContent
+@using TicTacTorus.Source.Utility
 @inject NavigationManager NavigationManager
 
 
@@ -64,12 +66,12 @@
                 <div class="box-content">
                     <b><h3 class="text-center">Chat</h3></b>
                     <hr>
-                    <textarea id="messagesList" readonly>@foreach (var message in messages)
+                    <textarea id="messagesList" readonly>@foreach (var message in _messages)
                         {
                             @message<br>
                         }
                     </textarea>
-                    <input @bind="messageInput" @onkeyup="SendMessage" disabled="@(!IsConnected)" class="w-100 align-bottom"/>
+                    <input @bind="_messageInput" @onkeyup="SendMessage" disabled="@(!IsConnected)" class="w-100 align-bottom"/>
                 </div>
             </div>
             <div class="below-chat col">
@@ -118,11 +120,15 @@
     // var text = Request["host_description"];
     private string LobbyStatus { get; set; } = _lobby.Status;
     
-    private string InviteLink { get; set; } = "TicTacTorus.de/lobby/2nd83jf81";
+    private string InviteLink { get; set; } = "tictactorus.de/game/";
     
-    private HubConnection hubConnection;
-    private List<string> messages = new List<string>();
-    private string messageInput;
+    private HubConnection _hubConnection;
+    private List<string> _messages = new List<string>();
+    private string _messageInput;
+
+    [Parameter] public string IdString { get; set; }
+
+    private bool _joined = false;
 }
 
 @functions{
@@ -151,27 +157,33 @@
         }
     }
     
-    
+
     protected override async Task OnInitializedAsync()
     {
-        hubConnection = new HubConnectionBuilder()
+        
+        _hubConnection = new HubConnectionBuilder()
             .WithUrl(NavigationManager.ToAbsoluteUri("/chatHub"))
             .Build();
 
-        hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        
+        _hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
         {
             var encodedMsg = $"{user}: {message}";
-            messages.Add(encodedMsg);
+            _messages.Add(encodedMsg);
             StateHasChanged();
         });
 
-        await hubConnection.StartAsync();
+        await _hubConnection.StartAsync();
+        
+        await _hubConnection.SendAsync("JoinLobby", IdString);
     }
 
-    Task Send() =>
-        hubConnection.SendAsync("SendMessage", "Tim", messageInput);
+    void Send()
+    {
+        _hubConnection.SendAsync("SendMessage", IdString, "Tim", _messageInput);
+    }
 
     public bool IsConnected =>
-        hubConnection.State == HubConnectionState.Connected;
+        _hubConnection.State == HubConnectionState.Connected;
     
 }

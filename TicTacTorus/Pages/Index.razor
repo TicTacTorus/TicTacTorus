@@ -1,4 +1,6 @@
 ﻿@page "/"
+@using TicTacTorus.Source.Utility
+@inject NavigationManager NavigationManager
 
 <div class="d-flex justify-content-center my-5">
     <h1 class="headers">TicTacTorus</h1>
@@ -10,7 +12,7 @@
             <b><h3 class="text-center">Play</h3></b>
             <hr>
             <div class="d-flex align-content-between flex-wrap my-2">
-                <button class="btn btn-primary-custom p-2 w-100" onclick="location.href ='game';">
+                <button class="btn btn-primary-custom p-2 w-100" @onclick="CreateId">
                     <svg class="bi bi-play-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z"/>
                     </svg>
@@ -57,3 +59,16 @@
         </div>
     </div>
 </div>
+<CascadingValue Value="_idString"></CascadingValue>
+
+@functions
+{
+    private Base64 _id;
+    private string _idString;
+    private void CreateId()
+    {
+        _id = new Base64();
+        _idString = _id.ToString();
+        NavigationManager.NavigateTo("/game/" + _idString);
+    }
+}
