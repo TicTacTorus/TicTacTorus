@@ -12,7 +12,7 @@ namespace TicTacTorus.Source.Persistence
             
             SQLiteCommand command = new SQLiteCommand(con);
            
-             command.CommandText = $"create table User (ID integer not null primary key autoincrement," +
+            command.CommandText = $"create table User (ID integer not null primary key autoincrement," +
                      "Name varchar(100)not null)";
             command.ExecuteNonQuery();
             con.Close();

@@ -62,6 +62,7 @@ namespace TicTacTorus
             {
                 endpoints.MapBlazorHub();
                 endpoints.MapHub<ChatHub>("/chatHub");
+                endpoints.MapHub<LoginHub>("/loginHub");
                 endpoints.MapFallbackToPage("/_Host");
             });
         }

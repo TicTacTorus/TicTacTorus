@@ -4,10 +4,8 @@
 @using TicTacTorus.Source
 @using System.Drawing
 @using Microsoft.AspNetCore.SignalR.Client
-@using TicTacTorus.Source.CodeForRazor
 @using TicTacTorus.Source.Generator
 @using TicTacTorus.Source.LobbySpecificContent
-@using TicTacTorus.Source.Utility
 @inject NavigationManager NavigationManager
 
 
@@ -46,7 +44,7 @@
                     <hr>
                     <div>
                         <table id="player_table_in_lobby">
-                            @foreach (var elem in PlayerList())
+                            @foreach (var elem in _lobby.GetAllPlayers())
                             {
                                 <!--<tr id="player_table_row">
                                     <td><button onclick='MessageChatBox("@elem.ID got kicked")'>Kick</button></td>
