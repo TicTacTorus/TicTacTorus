@@ -6,13 +6,13 @@ namespace TicTacTorus.Source.LobbySpecificContent
 {
     public class Lobby : ILobby
     {
+        [Required]
+        [StringLength(10, ErrorMessage = "Description is too long.")] 
         public string Name { get; set; }
         public int MaxPlayerCount { get; set; }
         public string Status { get; set; }
-        
-        [Required]
-        [StringLength(10, ErrorMessage = "Description is too long.")]
         public string Description { get; set; }
+        
         public Base64 Id { get; set; }
         public bool IsPrivate { get; set; }
 
@@ -41,7 +41,7 @@ namespace TicTacTorus.Source.LobbySpecificContent
             _players.Add(owner);
         }
         
-        public bool addPlayer(IPlayer player)
+        public bool AddPlayer(IPlayer player)
         {
             if (_players.Count < MaxPlayerCount)
             {
@@ -50,6 +50,38 @@ namespace TicTacTorus.Source.LobbySpecificContent
             }
 
             return false;
+        }
+
+        public bool RemovePlayer(IPlayer player)
+        {
+            return _players.Remove(player);
+        }
+        public bool RemovePlayer(byte index)
+        {
+            if (_players.Count >= index)
+            {
+                return false;
+            }
+            _players.RemoveAt(index);
+            return true;
+        }
+
+        public IPlayer GetPlayerAt(byte index)
+        {
+            return _players[index];
+        }
+
+        public IPlayer GetPlayerById(string playerID)
+        {
+            foreach (var ePlayer in _players)
+            {
+                if (ePlayer.ID.Equals(playerID))
+                {
+                    return ePlayer;
+                }
+            }
+
+            return null;
         }
 
         public IList<IPlayer> GetAllPlayers()

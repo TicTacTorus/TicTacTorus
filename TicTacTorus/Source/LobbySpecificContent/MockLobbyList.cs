@@ -31,9 +31,24 @@
         public bool IsPrivate { get; set; }
         private IList<IPlayer> _players = new List<IPlayer>();
         
-        public bool addPlayer(IPlayer player)
+        public bool AddPlayer(IPlayer player)
         {
             throw new System.NotImplementedException();
+        }
+
+        public bool RemovePlayer(IPlayer player)
+        {
+            return _players.Remove(player);
+        }
+
+        public bool RemovePlayer(byte index)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public IPlayer GetPlayerAt(byte index)
+        {
+            return _players[index];
         }
 
         public IList<IPlayer> GetAllPlayers()

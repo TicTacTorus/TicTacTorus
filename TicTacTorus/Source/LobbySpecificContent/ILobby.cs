@@ -12,7 +12,10 @@ namespace TicTacTorus.Source.LobbySpecificContent
         public Base64 Id { get; set; }
         public bool IsPrivate { get; set; }
 
-        public bool addPlayer(IPlayer player);
+        public bool AddPlayer(IPlayer player);
+        public bool RemovePlayer(IPlayer player);
+        public bool RemovePlayer(byte index);
+        public IPlayer GetPlayerAt(byte index);
         public IList<IPlayer> GetAllPlayers();
     }
 }
