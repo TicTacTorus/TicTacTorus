@@ -9,6 +9,15 @@ namespace TicTacTorus.Source.Persistence
     {
         void SavePlayer(HumanPlayer savePlayer);
         IPlayer LoadPlayer(string loadPlayer);
+
+        /**
+         * Get Player, if id and pw are matching.
+         */
+        IPlayer LoadPlayer(string id, string pw);
+
+        bool CheckPlayerIdIsUnique(string id);
+        
+
         void SavePlayerStats(IPlayerStats savePlayStats);// PlayerStats implementiert?
 
         IPlayerStats LoadPlayerStats(string loadPlayStats);
