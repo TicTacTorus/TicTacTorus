@@ -1,5 +1,97 @@
 ﻿@page "/info"
+@using TicTacTorus.Source
+@using System.Drawing
+@using Microsoft.AspNetCore.SignalR.Client
 
-<h1>Info</h1>
 
-Here are some rules, changelog from the last version and the credits of the developers
+<div class="min-vw-100">
+    <div class="my-5 lobbies-grid">
+        <button class="btn-back" onclick="location.href ='/';">
+            <svg class="bi bi-arrow-left" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M5.854 4.646a.5.5 0 010 .708L3.207 8l2.647 2.646a.5.5 0 01-.708.708l-3-3a.5.5 0 010-.708l3-3a.5.5 0 01.708 0z" clip-rule="evenodd"/>
+                <path fill-rule="evenodd" d="M2.5 8a.5.5 0 01.5-.5h10.5a.5.5 0 010 1H3a.5.5 0 01-.5-.5z" clip-rule="evenodd"/>
+            </svg>
+        </button>
+        <h1 class="headers">Info</h1>
+    </div>
+</div>
+<div class="row">
+        <div class="col-sm-9 col-md-7 col-lg-4 mx-auto my-1">
+            <!-- Players Box -->
+            <div class="box box-info w-100">
+                <div class="box-content">
+                    <b><h3 class="text-center">Rules</h3></b>
+                    <hr>
+                    <div>
+                        <table id="rules">
+                            (Hier stehen die Regeln)
+                        </table>
+                        <!-- Content goes here -->
+                    </div>
+                    <hr>
+                </div>
+                <div class="box box-info w-50" >
+                    <div class="box-content" >
+                        <b><h3 class="text-center">Changelog</h3></b>
+                        <hr>
+                        <div>
+                           
+                            <div style="width:280px; height:80px; overflow:auto;">
+                                <table cellspacing="0" cellpadding="1" border="1" width="260">
+                                    <tr>
+                                        <td>w <p></p> w <p></p> w <p></p> w <p></p> w <p></p> w</td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                    </tr>
+                                    
+                                    </table>  
+                                </div>
+                            
+                            <!-- Content goes here -->
+                        </div>
+                    </div>
+                    </div><div class="box box-info w-50" >
+                                              <div class="box-content">
+                                                  <b><h3 class="text-center">Credits</h3></b>
+                                                  <hr>
+                                                  <div>
+                                                      <table  id="Creators">
+                                                          <tr>
+                                                              <td>Created by</td>
+                                                          </tr>
+                                                          <tr>
+                                                              <td></td>
+                                                          </tr>
+                                                          <tr>
+                                                              <td>Daniel Wiegert</td>
+                                                          </tr>
+                                                          <tr>
+                                                              <td>Tim Guddat</td>
+                                                          </tr>
+                                                          <tr>
+                                                              <td>Marco Riemer</td>
+                                                          </tr>
+                                                          <tr>
+                                                              <td>Sarah Müller</td>
+                                                          </tr>
+                                                          
+                                                          <tr>
+                                                              <td>Jack Maier</td>
+                                                          </tr>
+                                                          
+                                                          <tr>
+                                                              <td>Marco Velten</td>
+                                                          </tr>
+                                                          
+                                                          
+                                                      </table>
+                                                                  
+                                                                  
+                                                      <!-- Content goes here -->
+                                                  </div>
+                                              </div>
+                                              </div>
+                </div>
+        </div>
+        </div>

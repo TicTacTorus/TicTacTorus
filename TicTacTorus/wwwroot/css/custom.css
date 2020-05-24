@@ -95,6 +95,9 @@
 .box-lobby {
     max-height: 500px;
 }
+.box-lobby {
+    
+}
 
 .box:hover, .box-map:hover, .box-login:hover, .box-lobby:hover {
     box-shadow: 0 0 11px rgba(33,33,33,.2);
