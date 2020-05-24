@@ -189,6 +189,14 @@ tr + td {
     background-color: #000000;
 }
 
+.box-only {
+    display: inline-block;
+    width: 100%;
+    min-width: 170px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
 img {
     max-width: 150px;
     max-height: 150px;
