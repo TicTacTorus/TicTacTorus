@@ -223,6 +223,7 @@
     void SendChatMessage()
     {
         _hubConnection.SendAsync("SendMessage", IdString, "Tim", _messageInput);
+        _messageInput = "";
     }
 
     void SendSystemMessage(string message)

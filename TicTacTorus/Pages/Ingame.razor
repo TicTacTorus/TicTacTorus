@@ -1,4 +1,7 @@
-﻿@page "/ingame"
+﻿@page "/ingame/{IdString}"
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager NavigationManager
+
 <!-- Dont know we nee to think about a link name for this site -->
 
 <div>
@@ -27,6 +30,12 @@
                 <div class="tab-content p-1">
                     <div role="tabpanel" class="@_navContentOne" id="chat-content">
                         Chat Content
+                        <textarea id="messagesListIngame" readonly>@foreach (var message in _messages)
+                                                                   {
+                                                                       @message<br>
+                                                                   }
+                                            </textarea>
+                        <input @bind="_messageInput" @onkeyup="SendMessage" disabled="@(!IsConnected)" class="w-100 align-bottom"/>
                     </div>
                     <div role="tabpanel" class="@_navContentTwo" id="player-content">
                         Player Content
@@ -45,6 +54,12 @@
     private string _navOne = "nav-link active";
     private string _navTwo = "nav-link";
     private bool _navClicked;
+    
+    [Parameter] public string IdString { get; set; }
+    
+    private HubConnection _hubConnection;
+    private List<string> _messages = new List<string>();
+    private string _messageInput;
 
     private void NavClick()
     {
@@ -68,4 +83,50 @@
         }
     }
     
+    void SendMessage(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            SendChatMessage();
+        }
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/chatHub"))
+            .Build();
+
+
+        _hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        {
+            var encodedMsg = $"{user}: {message}";
+            _messages.Add(encodedMsg);
+            StateHasChanged();
+        });
+
+        await _hubConnection.StartAsync();
+
+        await _hubConnection.SendAsync("JoinLobby", IdString);
+    }
+
+    void SendChatMessage()
+    {
+        _hubConnection.SendAsync("SendMessage", IdString, "Tim", _messageInput);
+        _messageInput = "";
+    }
+
+    void SendSystemMessage(string message)
+    {
+        _hubConnection.SendAsync("SendMessage", IdString, "Game", message);
+    }
+    /*
+    void SendChangedLobbyParameter(string lobbyParam, string changedValue)
+    {
+        _hubConnection.SendAsync("ChangeLobbyStat", IdString, lobbyParam, changedValue);
+    }*/
+
+    public bool IsConnected =>
+        _hubConnection.State == HubConnectionState.Connected;
 }

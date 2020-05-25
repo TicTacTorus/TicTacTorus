@@ -216,3 +216,8 @@ body {
     width : 100%;
     height: 300px;
 }
+
+#messagesListIngame {
+    width : 100%;
+    height: 90px;
+}
