@@ -86,7 +86,7 @@
                                                              @message<br>
                                                          }
                     </textarea>
-                    <input @bind="_messageInput" @onkeyup="SendMessage" disabled="@(!IsConnected)" class="w-100 align-bottom"/>
+                    <input @bind="_messageInput" @onkeyup="SendChatMessage" disabled="@(!IsConnected)" class="w-100 align-bottom"/>
                 </div>
             </div>
             <div class="below-chat col">
@@ -196,15 +196,6 @@
         SendSystemMessage(player.IngameName + " was removed by the Host");
     }
 
-    void SendMessage(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter")
-        {
-            SendChatMessage();
-        }
-    }
-
-
     protected override async Task OnInitializedAsync()
     {
         _id = IdString;
@@ -225,10 +216,13 @@
         await _hubConnection.SendAsync("JoinLobby", IdString);
     }
 
-    void SendChatMessage()
+    void SendChatMessage(KeyboardEventArgs e)
     {
-        _hubConnection.SendAsync("SendMessage", IdString, "Tim", _messageInput);
-        _messageInput = "";
+        if (e.Key == "Enter")
+        {
+            _hubConnection.SendAsync("SendMessage", IdString, "Tim", _messageInput);
+            _messageInput = "";
+        }
     }
 
     void SendSystemMessage(string message)
