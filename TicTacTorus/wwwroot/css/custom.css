@@ -220,6 +220,11 @@ body {
     height: 300px;
 }
 
+#messagesListIngame {
+    width : 100%;
+    height: 90px;
+}
+
 .password_reset{
     margin-bottom: -5px;
     margin-top: 20px;

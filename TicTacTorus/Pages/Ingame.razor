@@ -30,8 +30,7 @@
                 </ul>
                 <div class="tab-content p-1">
                     <div role="tabpanel" class="@_navContentOne" id="chat-content">
-                        <textarea id="messagesListIngame" readonly>
-                            @foreach (var message in _messages)
+                        <textarea id="messagesListIngame" readonly>@foreach (var message in _messages)
                             {
                                 @message<br>
                             } 
