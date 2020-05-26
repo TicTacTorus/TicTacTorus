@@ -1,5 +1,48 @@
 ﻿@page "/reset"
 
-<h1>Password Reset</h1>
+<body onload="setUsername()">
 
-Here can the user give his profil a new password if he/she/it (das s muss mit) was too dump to remember
+<div class="min-vw-100">
+    <div class="my-5 lobbies-grid">
+        <button class="btn-back" onclick="location.href ='/';">
+            <svg class="bi bi-arrow-left" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M5.854 4.646a.5.5 0 010 .708L3.207 8l2.647 2.646a.5.5 0 01-.708.708l-3-3a.5.5 0 010-.708l3-3a.5.5 0 01.708 0z" clip-rule="evenodd"/>
+                <path fill-rule="evenodd" d="M2.5 8a.5.5 0 01.5-.5h10.5a.5.5 0 010 1H3a.5.5 0 01-.5-.5z" clip-rule="evenodd"/>
+            </svg>
+        </button>
+        <h1 class="headers">Passwort Reset</h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-9 col-md-7 col-lg-4 mx-auto my-1">
+        <!-- Players Box -->
+        <div class="box box-info w-100">
+            <div class="box-content">
+                <b><h3 class="text-center">Passwor-Reset Formular</h3></b>
+                <div>
+                    Passwort wird für den folgenden User "<b id="username"></b>" geändert
+                    <p> </p>
+                    <div class="container">
+                        <form action="/action_page.php">
+                      
+                            <label class="password_reset" for="psw">Passwort</label>
+                            <input  type="password" id="psw" name="psw"  title="" required>
+                      
+                            <label class="password_reset" for="psw">Bestätige Passwort</label>
+                            <input type="password" id="conf-psw" name="conf-psw"  title="Geben Sie ihr Passwort erneut ein" required>
+                        
+                            <div id="wrong_conf-psw">
+                                Passwörter stimmen nicht überein
+                            </div>
+                        
+                            <input type="submit" value="Submit">
+                        
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
