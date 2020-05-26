@@ -1,6 +1,8 @@
 ﻿@page "/reset"
+@using TicTacTorus.Source.LoginContent.Validation
+@using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.AspNetCore.Connections
 
-<body onload="setUsername()">
 
 <div class="min-vw-100">
     <div class="my-5 lobbies-grid">
@@ -10,7 +12,7 @@
                 <path fill-rule="evenodd" d="M2.5 8a.5.5 0 01.5-.5h10.5a.5.5 0 010 1H3a.5.5 0 01-.5-.5z" clip-rule="evenodd"/>
             </svg>
         </button>
-        <h1 class="headers">Passwort Reset</h1>
+        <h1 class="headers">TicTacTorus</h1>
     </div>
 </div>
 <div class="row">
@@ -18,31 +20,40 @@
         <!-- Players Box -->
         <div class="box box-info w-100">
             <div class="box-content">
-                <b><h3 class="text-center">Passwor-Reset Formular</h3></b>
+                <b><h3 class="text-center">Password Reset</h3></b>
                 <div>
-                    Passwort wird für den folgenden User "<b id="username"></b>" geändert
-                    <p> </p>
+                    <div class="text-center">Password for user <b id="username"></b> gets changed</div>
                     <div class="container">
-                        <form action="/action_page.php">
-                      
-                            <label class="password_reset" for="psw">Passwort</label>
-                            <input  type="password" id="psw" name="psw"  title="" required>
-                      
-                            <label class="password_reset" for="psw">Bestätige Passwort</label>
-                            <input type="password" id="conf-psw" name="conf-psw"  title="Geben Sie ihr Passwort erneut ein" required>
-                        
-                            <div id="wrong_conf-psw">
-                                Passwörter stimmen nicht überein
+                        <EditForm Model="@_validation" OnInvalidSubmit="CheckForm">
+                            <div class="form-group">
+                                <label class="password_reset" for="psw">Password</label>
+                                <input @bind-value="_validation.Password" type="password" id="psw" name="psw" title="Enter new password" placeholder="Enter new password" required>
                             </div>
-                        
-                            <input type="submit" value="Submit">
-                        
-                        </form>
+                            <div class="form-group">
+                                <label class="password_reset" for="psw">Confirm Password</label>
+                                <input @bind-value="_validation.PasswordConfirm" type="password" id="conf-psw" name="conf-psw" title="Enter password again" placeholder="Enter new password again" required>
+                            </div>
+                            <label class="text-center collapse" id="wrong_conf-psw">
+                                Passwords don't match!
+                            </label>
+                            <button class="btn btn-primary-custom" type="submit">Submit</button>
+                        </EditForm>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-</body>
 
+
+@code{
+    private readonly UserValidation _validation = new UserValidation();
+}
+
+@functions
+{
+    private void CheckForm()
+    {
+        //TODO: Validate at Server (just in case) the password
+    }
+}

@@ -225,18 +225,7 @@ body {
     height: 90px;
 }
 
-.password_reset{
-    margin-bottom: -5px;
-    margin-top: 20px;
-    
-}
-
-.password_reset{
-    margin-bottom: -5px;
-    margin-top: 20px;
-
-}
-#wrong_conf-psw{
+#wrong_conf-psw {
     color: red;
     margin-bottom: -5px;
     margin-top: 20px;
@@ -244,10 +233,8 @@ body {
 
 input {
     width: 100%;
-    padding: 12px;
+    padding: 5px;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
-    margin-top: 5px;
-    margin-bottom: 5px;
 }

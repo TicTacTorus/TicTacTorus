@@ -63,12 +63,11 @@
 
 @functions
 {
-    private Base64 _id;
     private string _idString;
     private void CreateId()
     {
-        _id = new Base64();
-        _idString = _id.ToString();
+        //Todo: Before creation of Id we need to check if Id is available
+        _idString = new Base64().ToString();
         NavigationManager.NavigateTo("/game/" + _idString);
     }
 }
