@@ -1,5 +1,65 @@
 ﻿@page "/recordings"
 
-<h1>Recordings/Replays what ever</h1>
+<div class="min-vw-100">
+    <div class="my-5 lobbies-grid">
+        <button class="btn-back" onclick="location.href ='/';">
+            <svg class="bi bi-arrow-left" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M5.854 4.646a.5.5 0 010 .708L3.207 8l2.647 2.646a.5.5 0 01-.708.708l-3-3a.5.5 0 010-.708l3-3a.5.5 0 01.708 0z" clip-rule="evenodd"/>
+                <path fill-rule="evenodd" d="M2.5 8a.5.5 0 01.5-.5h10.5a.5.5 0 010 1H3a.5.5 0 01-.5-.5z" clip-rule="evenodd"/>
+            </svg>
+        </button>
+        <h1 class="headers">TicTacTorus</h1>
+    </div>
 
-Here are all the filthy secret videos the user
+    <div class="d-flex justify-content-center">
+        <div class="col-sm-9 col-md-9 col-lg-8 mx-auto m-2">
+            <div class="box p-3" style="min-width: 100%">
+                <h3 class="text-center mt-1"><b>Replays</b></h3>
+                <hr>
+                @foreach(var replay in _replays)
+                {
+                    <div class="box-only w-100 p-3">
+                        <div class="row">
+                            <div class="col-3 text-center">@replay</div>
+                            <div class="col-6 text-center">Game-ID</div>
+                            <button class="col-1 text-center" data-toggle="collapse" 
+                                    data-target="#replay1">
+                                <svg id="expand" class="bi bi-play-fill" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z"/>
+                                    <use xlink:href="#expand" transform="rotate(90)"/>
+                                </svg>
+                            </button>
+                            <button class="col-2 text-center">
+                                <svg class="bi bi-play-fill" width="2em" height="2em" viewBox="0 0 16 16" fill="#0F0" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="replay1" class="collapse show mt-1">
+                        <div class="box-only w-100 p-3">
+                            ROFL DA IST JA NOCH MEHR
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+@code{
+
+    private List<bool> _replays = new List<bool>(10);
+
+}
+
+@functions
+{
+    protected override void OnInitialized()
+    {
+        _replays.Add(true);
+    }
+}

@@ -1,4 +1,8 @@
 ﻿@page "/ingame"
+@page "/ingame/{IdString}"
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager NavigationManager
+
 <!-- Dont know we nee to think about a link name for this site -->
 
 <div>
@@ -7,14 +11,14 @@
 
 <div class="h-100">
     <div class="nav-container">
-        <div class="box-map">
-            <div class="p-5">
+        <div class="box box-map">
+            <div class="p-5 text-center">
                 <!-- Minimap goes here -->
                 Minimap Content
             </div>
         </div>
-    
-        <div class="box-map">
+                
+        <div class=" box box-map">
             <div class="box-game">
                 <ul class="nav nav-tabs">
                     <li class="nav-item">
@@ -26,7 +30,13 @@
                 </ul>
                 <div class="tab-content p-1">
                     <div role="tabpanel" class="@_navContentOne" id="chat-content">
-                        Chat Content
+                        <textarea id="messagesListIngame" readonly>
+                            @foreach (var message in _messages)
+                            {
+                                @message<br>
+                            } 
+                        </textarea> 
+                        <input @bind="_messageInput" @onkeyup="SendMessage" disabled="@(!IsConnected)" class="w-100 align-bottom"/>
                     </div>
                     <div role="tabpanel" class="@_navContentTwo" id="player-content">
                         Player Content
@@ -45,14 +55,20 @@
     private string _navOne = "nav-link active";
     private string _navTwo = "nav-link";
     private bool _navClicked;
+    
+    [Parameter] public string IdString { get; set; }
+    
+    private HubConnection _hubConnection;
+    private List<string> _messages = new List<string>();
+    private string _messageInput;
 
     private void NavClick()
     {
-        //I know can be simplified, but I'm lazy (Sorry ^^)
+    //I know can be simplified, but I'm lazy (Sorry ^^)
         _navClicked = !_navClicked;
         if (_navClicked)
         {
-            //Player Tab is now Active
+    //Player Tab is now Active
             _navContentTwo = _navContentOne;
             _navContentOne = _navContentOne.Substring(0, _navContentOne.IndexOf(" ", StringComparison.Ordinal));
             _navTwo = _navOne;
@@ -60,7 +76,7 @@
         }
         else
         {
-            //Chat Tab is now Active
+    //Chat Tab is now Active
             _navContentOne = _navContentTwo;
             _navContentTwo = _navContentTwo.Substring(0, _navContentTwo.IndexOf(" ", StringComparison.Ordinal));
             _navOne = _navTwo;
@@ -68,4 +84,50 @@
         }
     }
     
+    void SendMessage(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            SendChatMessage();
+        }
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/gameHub"))
+            .Build();
+
+
+        _hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        {
+            var encodedMsg = $"{user}: {message}";
+            _messages.Add(encodedMsg);
+            StateHasChanged();
+        });
+
+        await _hubConnection.StartAsync();
+        
+        await _hubConnection.SendAsync("JoinLobby", IdString);
+    }
+
+    void SendChatMessage()
+    {
+        _hubConnection.SendAsync("SendMessage", IdString, "Tim", _messageInput);
+        _messageInput = "";
+    }
+
+    void SendSystemMessage(string message)
+    {
+        _hubConnection.SendAsync("SendMessage", IdString, "Game", message);
+    }
+    /*
+    void SendChangedLobbyParameter(string lobbyParam, string changedValue)
+    {
+        _hubConnection.SendAsync("ChangeLobbyStat", IdString, lobbyParam, changedValue);
+    }*/
+
+    public bool IsConnected =>
+        _hubConnection.State == HubConnectionState.Connected;
 }

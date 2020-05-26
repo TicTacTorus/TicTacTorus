@@ -82,9 +82,9 @@
                     <b><h3 class="text-center">Chat</h3></b>
                     <hr>
                     <textarea id="messagesList" readonly>@foreach (var message in _messages)
-                        {
-                            @message<br>
-                        }
+                                                         {
+                                                             @message<br>
+                                                         }
                     </textarea>
                     <input @bind="_messageInput" @onkeyup="SendMessage" disabled="@(!IsConnected)" class="w-100 align-bottom"/>
                 </div>
@@ -95,7 +95,7 @@
                     http://www.brammens.com
                 </div>-->
                 <button id="link-copy" class="btn btn-primary-custom p-2" onclick="CopyText"> @InviteLink </button>
-                <button class="btn btn-primary-custom p-2" onclick="location.href ='ingame';">
+                <button class="btn btn-primary-custom p-2" @onclick="CreateGame">
                     <svg class="bi bi-play-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z"/>
                     </svg>
@@ -130,6 +130,7 @@
         </div>
     </div>
 </div>
+<CascadingValue Value="_id"></CascadingValue>
 
 @code{
     static ILobby _lobby = new Source.LobbySpecificContent.Lobby();
@@ -148,9 +149,8 @@
     private string _messageInput;
 
     [Parameter] public string IdString { get; set; }
+    private static string _id;
 
-    private bool _joined = false;
-    
     // for changing text-elements etc.
     ElementReference DisplayDescriptionReference;
 }
@@ -167,6 +167,11 @@
     {
         _lobby.AddPlayer(new HumanPlayer("Eleven", "Caaarl", Color.DodgerBlue, 3));
         _lobby.AddPlayer(new HumanPlayer("Daniela", "Daisy", Color.Aquamarine, 120));
+    }
+
+    private void CreateGame()
+    {
+        NavigationManager.NavigateTo("/ingame/" + _id);
     }
     
     //Method that returns a iterator of all lobbies (yield return)   
@@ -202,9 +207,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-
+        _id = IdString;
         _hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri("/chatHub"))
+            .WithUrl(NavigationManager.ToAbsoluteUri("/gameHub"))
             .Build();
 
 
@@ -223,6 +228,7 @@
     void SendChatMessage()
     {
         _hubConnection.SendAsync("SendMessage", IdString, "Tim", _messageInput);
+        _messageInput = "";
     }
 
     void SendSystemMessage(string message)

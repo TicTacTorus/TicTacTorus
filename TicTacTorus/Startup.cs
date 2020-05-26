@@ -61,7 +61,7 @@ namespace TicTacTorus
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapBlazorHub();
-                endpoints.MapHub<ChatHub>("/chatHub");
+                endpoints.MapHub<GameHub>("/gameHub");
                 endpoints.MapHub<LoginHub>("/loginHub");
                 endpoints.MapFallbackToPage("/_Host");
             });

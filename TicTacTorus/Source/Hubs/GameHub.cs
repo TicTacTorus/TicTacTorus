@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace TicTacTorus.Source.Hubs
 {
-    public class ChatHub : Hub
+    public class GameHub : Hub
     {
         public async Task SendMessage(string lobbyId, string user, string message)
         {
