@@ -219,3 +219,30 @@ body {
     width : 100%;
     height: 300px;
 }
+
+.password_reset{
+    margin-bottom: -5px;
+    margin-top: 20px;
+    
+}
+
+.password_reset{
+    margin-bottom: -5px;
+    margin-top: 20px;
+
+}
+#wrong_conf-psw{
+    color: red;
+    margin-bottom: -5px;
+    margin-top: 20px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
