@@ -15,11 +15,14 @@ namespace TicTacTorus.Source.Persistence
          */
         IPlayer LoadPlayer(string id, string pw);
 
+        //Checks if Password of userId is correct
+        bool VerifyPassword(string id, string pw);
+
+        //Checks if id is already taken
         bool CheckPlayerIdIsUnique(string id);
         
 
         void SavePlayerStats(IPlayerStats savePlayStats);// PlayerStats implementiert?
-
         IPlayerStats LoadPlayerStats(string loadPlayStats);
         void SaveGame(Game game);
         Replay LoadGame(Base64 base64);
