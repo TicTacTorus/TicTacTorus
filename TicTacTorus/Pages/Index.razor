@@ -77,9 +77,9 @@
             .WithUrl(NavigationManager.ToAbsoluteUri("/gameHub"))
             .Build();
         
-        _hubConnection.On<Source.Utility.Base64>("ReceiveLobbyId", (id) =>
+        _hubConnection.On<string>("ReceiveLobbyId", (id) =>
         {
-            _id = id;
+            _id = new Base64(id);
             NavigationManager.NavigateTo("/game/" + _id);
         });
 

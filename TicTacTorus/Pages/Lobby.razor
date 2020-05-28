@@ -7,6 +7,7 @@
 @using TicTacTorus.Source.Generator
 @using TicTacTorus.Source.LobbySpecificContent
 @using TicTacTorus.Source.PlayerSpecificContent
+@using TicTacTorus.Source.Utility
 @inject NavigationManager NavigationManager
 
 @{
@@ -18,8 +19,7 @@
     var color = ColorGenerator.GetColor();
     var symbol = ByteGenerator.GetByte();
     i_am = new HumanPlayer("xyz", name, color, symbol);
-    
-    InitLobby();
+
 }
 <div class="my-5 lobbies-grid">
     <button class="btn-back" onclick="location.href ='/';">
@@ -133,15 +133,8 @@
 
 @code{
     static ILobby _lobby = new Source.LobbySpecificContent.Lobby();
-    // var text = Request["host_description"];
-    /*private string LobbyStatus
-    {
-        get { return _lobby.Status; }
-        set { _lobby.Status = value; }
-    //set { SendChangedLobbyParameter(LobbyParameterAsString.Status, value); }
-    } */
 
-    private string InviteLink { get; set; } = "tictactorus.de/game/";
+    private string InviteLink { get; set; } = "tictactorus.de/game/" + _id;
     
     private HubConnection _hubConnection;
     private List<string> _messages = new List<string>();
@@ -149,7 +142,7 @@
 
     [Parameter] 
     public string IdString { get; set; }
-    private static string _id;
+    private static Base64 _id;
 
     // for changing text-elements etc.
     ElementReference DisplayDescriptionReference;
@@ -171,6 +164,7 @@
 
     private void CreateGame()
     {
+        
         NavigationManager.NavigateTo("/ingame/" + _id);
     }
     
@@ -190,14 +184,16 @@
     void RemovePlayerFromLobby(IPlayer player)
     {
         // remove them
-        _lobby.RemovePlayer(player);
+        _hubConnection.SendAsync("RemovePlayerFromLobby", _id, player);
         // message remaining players
         SendSystemMessage(player.IngameName + " was removed by the Host");
     }
 
     protected override async Task OnInitializedAsync()
     {
-        _id = IdString;
+        InitLobby();
+        
+        _id = new Base64(IdString);
         _hubConnection = new HubConnectionBuilder()
             .WithUrl(NavigationManager.ToAbsoluteUri("/gameHub"))
             .Build();
@@ -207,6 +203,25 @@
         {
             var encodedMsg = $"{user}: {message}";
             _messages.Add(encodedMsg);
+            StateHasChanged();
+        });
+        
+        _hubConnection.On<ILobby>("GetLobby", (lobby) =>
+        {
+            _lobby = lobby;
+            StateHasChanged();
+        });
+
+        _hubConnection.On<IPlayer, bool>("PlayerListChanged", (player, isAdded) =>
+        {
+            if (isAdded)
+            {
+                _lobby.AddPlayer(player);
+            }
+            else
+            {
+                _lobby.RemovePlayer(player);
+            }
             StateHasChanged();
         });
 

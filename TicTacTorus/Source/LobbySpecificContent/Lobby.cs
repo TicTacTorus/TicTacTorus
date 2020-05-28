@@ -41,10 +41,10 @@ namespace TicTacTorus.Source.LobbySpecificContent
         {
             _players.Add(owner);
         }
-        public Lobby(Base64 id,string name, IPlayer owner ,string status, string description, int maxPlayerCount, bool isPrivate) 
+        public Lobby(Base64 id, string name, IPlayer owner ,string status, string description, int maxPlayerCount, bool isPrivate) 
             : this(name, owner, status, description, maxPlayerCount, isPrivate)
         {
-            _players.Add(owner);
+            Id = id;
         }
         
         public bool AddPlayer(IPlayer player)
