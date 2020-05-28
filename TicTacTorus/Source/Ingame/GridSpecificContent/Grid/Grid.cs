@@ -16,13 +16,6 @@ using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk.Iterator;
 
         private readonly bool _autoReplace;
         
-        //todo remove this
-        //_maxChunkSize is for testing purposes with smaller chunks for a more digestible size of test data.
-        //this will be replaced with hard 256s later, or even more performant operations like:
-        //x % MaxChunkSize.X -> unchecked((byte)x)
-        //x / MaxChunkSize.X -> (x >> 8)
-        public static readonly GlobalPos MaxChunkSize = new GlobalPos(0x100, 0x100);
-        
         public Grid(int width, int height, bool replaceChunks = false) : this(new GlobalPos(width, height), replaceChunks)
         {
         }
@@ -32,8 +25,8 @@ using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk.Iterator;
             Size = pos;
             _chunkCount = new GlobalPos
             (
-                SlotsNeeded(Width , MaxChunkSize.X),
-                SlotsNeeded(Height, MaxChunkSize.Y)
+                SlotsNeeded(Width , 0x100),
+                SlotsNeeded(Height, 0x100)
             );
             _autoReplace = replaceChunks;
             CreateChunks();
@@ -42,19 +35,14 @@ using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk.Iterator;
 
         private void CreateChunks()
         {
-            var rest = new LocalPos((byte)(Width % MaxChunkSize.X), (byte)(Height % MaxChunkSize.Y));
-            if (rest.X == 0) rest.X = (byte)MaxChunkSize.X;
-            if (rest.Y == 0) rest.Y = (byte)MaxChunkSize.Y;
-            
-            //todo when getting rid of MaxChunkSize
-            //var rest = unchecked(new LocalPos((byte)Width, (byte)Height));
+            var rest = unchecked(new LocalPos((byte)Width, (byte)Height));
 
             //regular chunk size, border right size, border bottom size, corner bottom right size
             var sizes = unchecked(new LocalPos[]
             {
-                new LocalPos((byte)MaxChunkSize.X, (byte)MaxChunkSize.Y),
-                new LocalPos(rest.X, (byte)MaxChunkSize.Y),
-                new LocalPos((byte)MaxChunkSize.X, rest.Y),
+                new LocalPos(0, 0),
+                new LocalPos(rest.X, 0),
+                new LocalPos(0, rest.Y),
                 rest
             });
             
@@ -107,21 +95,15 @@ using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk.Iterator;
         
         private BasicChunk GetChunkAt(GlobalPos pos)
         {
-            var x = pos.X / MaxChunkSize.X;
-            var y = pos.Y / MaxChunkSize.Y;
-            //todo when getting rid of MaxChunkSize
-            //var x = pos.X >> 8;
-            //var y = pos.Y >> 8;
+            var x = pos.X >> 8;
+            var y = pos.Y >> 8;
             return _chunks[ChunkIndex(x, y)];
         }
 
         private void SetChunkAt(GlobalPos pos, BasicChunk newChunk)
         {
-            var x = pos.X / MaxChunkSize.X;
-            var y = pos.Y / MaxChunkSize.Y;
-            //todo when getting rid of MaxChunkSize
-            //var x = pos.X >> 8;
-            //var y = pos.Y >> 8;
+            var x = pos.X >> 8;
+            var y = pos.Y >> 8;
             var oldChunk = _chunks[ChunkIndex(x, y)];
             oldChunk.UpdateNeighbors(newChunk);
             _chunks[ChunkIndex(x, y)] = newChunk;
@@ -129,18 +111,14 @@ using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk.Iterator;
         
         public byte GetSymbol(GlobalPos pos)
         {
-            var local = new LocalPos((byte)(pos.X % MaxChunkSize.X), (byte)(pos.Y % MaxChunkSize.Y));
-            //todo when getting rid of MaxChunkSize
-            //var local = unchecked(new LocalPos((byte)pos.X, (byte)pos.Y));
+            var local = unchecked(new LocalPos((byte)pos.X, (byte)pos.Y));
             var chunk = GetChunkAt(pos);
             return chunk.GetSymbol(local);
         }
 
         public bool SetSymbol(GlobalPos pos, byte owner, bool overwrite = false)
         {
-            var local = new LocalPos((byte)(pos.X % MaxChunkSize.X), (byte)(pos.Y % MaxChunkSize.Y));
-            //todo when getting rid of MaxChunkSize
-            //var local = unchecked(new LocalPos((byte)pos.X, (byte)pos.Y));
+            var local = unchecked(new LocalPos((byte)pos.X, (byte)pos.Y));
             var chunk = GetChunkAt(pos);
             var result = chunk.SetSymbol(local, owner, overwrite);
             if (_autoReplace)
@@ -156,9 +134,7 @@ using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk.Iterator;
 
         public ChunkIterator GetIterator(GlobalPos pos)
         {
-            var local = new LocalPos((byte)(pos.X % MaxChunkSize.X), (byte)(pos.Y % MaxChunkSize.Y));
-            //todo when getting rid of MaxChunkSize
-            //var local = unchecked(new LocalPos((byte)pos.X, (byte)pos.Y));
+            var local = unchecked(new LocalPos((byte)pos.X, (byte)pos.Y));
             return new ChunkIterator(GetChunkAt(pos), local);
         }
 
