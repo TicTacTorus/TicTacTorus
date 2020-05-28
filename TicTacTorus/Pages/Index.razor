@@ -1,5 +1,7 @@
 ﻿@page "/"
 @using TicTacTorus.Source.Utility
+@using TicTacTorus.Source
+@using Microsoft.AspNetCore.SignalR.Client
 @inject NavigationManager NavigationManager
 
 <div class="d-flex justify-content-center my-5">
@@ -12,7 +14,7 @@
             <b><h3 class="text-center">Play</h3></b>
             <hr>
             <div class="d-flex align-content-between flex-wrap my-2">
-                <button class="btn btn-primary-custom p-2 w-100" @onclick="CreateId">
+                <button class="btn btn-primary-custom p-2 w-100" @onclick="SendNewLobbyRequest">
                     <svg class="bi bi-play-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z"/>
                     </svg>
@@ -60,13 +62,32 @@
     </div>
 </div>
 
+@code
+{
+
+    private HubConnection _hubConnection;
+    private Source.Utility.Base64 _id;
+
+}
 @functions
 {
-    private string _id;
-    private void CreateId()
+    protected override async Task OnInitializedAsync()
     {
-        //Todo: Before creation of Id we need to check if Id is available
-        _id = new Base64().ToString();
-        NavigationManager.NavigateTo("/game/" + _id);
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/gameHub"))
+            .Build();
+        
+        _hubConnection.On<Source.Utility.Base64>("ReceiveLobbyId", (id) =>
+        {
+            _id = id;
+            NavigationManager.NavigateTo("/game/" + _id);
+        });
+
+        await _hubConnection.StartAsync();
+    }
+
+    private void SendNewLobbyRequest()
+    {
+        _hubConnection.SendAsync("CreateLobby");
     }
 }

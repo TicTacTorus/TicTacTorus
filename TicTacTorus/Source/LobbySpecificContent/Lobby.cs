@@ -37,7 +37,12 @@ namespace TicTacTorus.Source.LobbySpecificContent
             Description = description;
         }
         public Lobby(string name, IPlayer owner ,string status, string description, int maxPlayerCount, bool isPrivate) 
-            : this(name,status, description, maxPlayerCount, isPrivate)
+            : this(name, status, description, maxPlayerCount, isPrivate)
+        {
+            _players.Add(owner);
+        }
+        public Lobby(Base64 id,string name, IPlayer owner ,string status, string description, int maxPlayerCount, bool isPrivate) 
+            : this(name, owner, status, description, maxPlayerCount, isPrivate)
         {
             _players.Add(owner);
         }

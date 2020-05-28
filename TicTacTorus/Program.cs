@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using TicTacTorus.Source;
 using TicTacTorus.Source.Persistence;
 
 namespace TicTacTorus
@@ -16,7 +17,7 @@ namespace TicTacTorus
     {
         public static void Main(string[] args)
         {
-            //Database.Init();  
+            //Database.Init(); 
             CreateHostBuilder(args).Build().Run();
         }
 

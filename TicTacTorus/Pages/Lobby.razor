@@ -161,7 +161,7 @@
     static void InitLobby()
     {
         HumanPlayer creator = new HumanPlayer("Tim", "NicerDicer", Color.Coral, 111);
-        _lobby = Source.LobbySpecificContent.LobbyFactory.CreateLobby(creator);
+        _lobby = Source.LobbySpecificContent.LobbyFactory.CreateLobbyNoId(creator);
         InitPlayerList();
     }
     static void InitPlayerList()

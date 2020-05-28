@@ -19,10 +19,18 @@ namespace TicTacTorus.Source
             Color = color;
             Symbol = symbol;
         }
+        
+        public HumanPlayer(string ingameName, Color color, byte symbol)
+        {
+            ID = null;
+            IngameName = ingameName;
+            Color = color;
+            Symbol = symbol;
+        }
 
         public HumanPlayer()
         {
-            
+            ID = null;
         }
     }
 }
