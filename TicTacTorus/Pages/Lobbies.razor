@@ -15,18 +15,28 @@
     <h1 class="headers">TicTacTorus</h1>
 </div>
 
-<table id="lobbies">
-    <tr><th>Lobby</th><th class="playerCount">Players</th><th class="status">Status</th><th>Description</th></tr>
-    @foreach (var (id, lobby) in _list.Lobbies)
-    {
-        <tr id="lobbyRow" onclick="location.href ='game/@id.ToString()';">
-            <td>@lobby.Name</td>
-            <td class="playerCount">@lobby.GetAllPlayers().Count/@lobby.MaxPlayerCount</td>
-            <td class="status">@lobby.Status</td>
-            <td>@lobby.Description</td>
-        </tr>
-    }
-</table>
+<div class="d-flex justify-content-center m-1">
+    <div class="col-sm-8 col-md-5 col-lg-5 mx-auto m-2">
+        <div class="box w-100 h-100 p-3">
+            <h3 class="text-center mt-1"><b>Lobbies</b></h3>
+            <hr>
+            <table id="lobbies">
+                <tr id="table-header"><th>Lobby</th><th class="playerCount">Players</th><th class="status">Status</th><th>Description</th></tr>
+                @foreach (var (id, lobby) in _list.Lobbies)
+                {
+                    <tr id="lobbyRow" onclick="location.href ='game/@id.ToString()';">
+                        <td>@lobby.Name</td>
+                        <td class="playerCount">@lobby.GetAllPlayers().Count/@lobby.MaxPlayerCount</td>
+                        <td class="status">@lobby.Status</td>
+                        <td>@lobby.Description</td>
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+</div>
+
+
 
 
 @functions{

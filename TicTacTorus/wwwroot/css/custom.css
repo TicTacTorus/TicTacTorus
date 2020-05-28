@@ -134,6 +134,8 @@
     text-align: center;
     font-size: 550%;
     font-weight: bold;
+    color: orange;
+    -webkit-text-stroke: 3px black;
 }
 
 th, td {
@@ -152,12 +154,16 @@ tr + td {
 #lobbies {
     color: #fff;
     width: 100%;
-    background-color: #21D4FD;
-    background-image: linear-gradient(19deg, #21D4FD 0%, #B721FF 100%);
+    border-radius: 8px;
+    background-color: #b0b0b0;
 }
 
 #lobbyRow:hover {
     color: #000;
+}
+
+#table-header {
+    background-color: #7a7a7a;
 }
 
 .lobbies-grid {
@@ -209,7 +215,7 @@ img {
 }
 
 body {
-    background-image: url("../Media/Images/Spielfeld_Konzept.png");
+    background-image: url("../Media/Images/background_temp.png");
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: cover;
