@@ -1,8 +1,9 @@
-﻿using System;
+﻿﻿using System;
 using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk.Iterator;
-using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk;
+using TicTacTorus.Source.Ingame.GridSpecificContent.Grid;
+using TicTacTorus.Source.Ingame.GridSpecificContent.Position;
 
-namespace TicTacTorus.Source.Ingame.Referee
+ namespace TicTacTorus.Source.Ingame.Referee
 {
     public class LineReferee : IReferee
     {
@@ -13,7 +14,7 @@ namespace TicTacTorus.Source.Ingame.Referee
             SymbolsNeeded = length;
         }
         
-        public bool HasWon(Grid grid, GlobalPos pos)
+        public bool HasWon(IGrid grid, GlobalPos pos)
         {
             var iterator = grid.GetIterator(pos);
             for (var i = 0; i < 4; ++i)

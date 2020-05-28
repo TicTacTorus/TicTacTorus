@@ -1,9 +1,10 @@
-﻿using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk;
+﻿using TicTacTorus.Source.Ingame.GridSpecificContent.Grid;
+using TicTacTorus.Source.Ingame.GridSpecificContent.Position;
 
 namespace TicTacTorus.Source.Ingame.Referee
 {
     public interface IReferee
     {
-        bool HasWon(Grid grid, GlobalPos pos);
+        bool HasWon(IGrid grid, GlobalPos pos);
     }
 }
