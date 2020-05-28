@@ -4,10 +4,15 @@ namespace TicTacTorus.Source.Utility
 {
     public class Base64
     {
+        #region Fields
+
         private const int StandardLength = 8;
-        private const int BitsPerDigit = 6;
-        public const string Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-        public byte[] Data { get; }
+                private const int BitsPerDigit = 6;
+                public const string Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+                public byte[] Data { get; }
+
+        #endregion
+        #region Constructors
 
         public Base64()
         {
@@ -46,7 +51,7 @@ namespace TicTacTorus.Source.Utility
                     var c = init[segment.Length * i + j];
                     if (!Alphabet.Contains(c))
                     {
-                         throw new ArgumentOutOfRangeException("The character " + c + " is not a base 64 digit.");  
+                        throw new ArgumentOutOfRangeException("The character " + c + " is not a base 64 digit.");  
                     }
                     segment[j] = c;
                 }
@@ -57,17 +62,22 @@ namespace TicTacTorus.Source.Utility
             }
         }
 
+        #endregion
+        #region Access / Functionality
+
         public override string ToString()
-        {
-            var result = "";
-            for (var i = 0; i < Data.Length / 3; ++i)
-            {
-                result += Alphabet[0                                 | Data[3 * i + 0] >> 2];
-                result += Alphabet[(Data[3 * i + 0] & 0b000011) << 4 | Data[3 * i + 1] >> 4];
-                result += Alphabet[(Data[3 * i + 1] & 0b001111) << 2 | Data[3 * i + 2] >> 6];
-                result += Alphabet[(Data[3 * i + 2] & 0b111111) << 0 | 0                   ];
-            }
-            return result;
-        }
+                {
+                    var result = "";
+                    for (var i = 0; i < Data.Length / 3; ++i)
+                    {
+                        result += Alphabet[0                                 | Data[3 * i + 0] >> 2];
+                        result += Alphabet[(Data[3 * i + 0] & 0b000011) << 4 | Data[3 * i + 1] >> 4];
+                        result += Alphabet[(Data[3 * i + 1] & 0b001111) << 2 | Data[3 * i + 2] >> 6];
+                        result += Alphabet[(Data[3 * i + 2] & 0b111111) << 0 | 0                   ];
+                    }
+                    return result;
+                }
+
+        #endregion
     }
 }

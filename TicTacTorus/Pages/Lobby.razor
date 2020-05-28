@@ -130,7 +130,6 @@
         </div>
     </div>
 </div>
-<CascadingValue Value="_id"></CascadingValue>
 
 @code{
     static ILobby _lobby = new Source.LobbySpecificContent.Lobby();
@@ -148,7 +147,8 @@
     private List<string> _messages = new List<string>();
     private string _messageInput;
 
-    [Parameter] public string IdString { get; set; }
+    [Parameter] 
+    public string IdString { get; set; }
     private static string _id;
 
     // for changing text-elements etc.
@@ -174,7 +174,6 @@
         NavigationManager.NavigateTo("/ingame/" + _id);
     }
     
-    //Method that returns a iterator of all lobbies (yield return)   
     static IEnumerable<IPlayer> PlayerList()
     {
         var lobbies = _lobby.GetAllPlayers();
@@ -237,5 +236,4 @@
 
     public bool IsConnected =>
         _hubConnection.State == HubConnectionState.Connected;
-    
 }

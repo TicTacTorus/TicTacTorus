@@ -59,15 +59,14 @@
         </div>
     </div>
 </div>
-<CascadingValue Value="_idString"></CascadingValue>
 
 @functions
 {
-    private string _idString;
+    private string _id;
     private void CreateId()
     {
         //Todo: Before creation of Id we need to check if Id is available
-        _idString = new Base64().ToString();
-        NavigationManager.NavigateTo("/game/" + _idString);
+        _id = new Base64().ToString();
+        NavigationManager.NavigateTo("/game/" + _id);
     }
 }

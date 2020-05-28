@@ -3,10 +3,8 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @inject NavigationManager NavigationManager
 
-<!-- Dont know we nee to think about a link name for this site -->
+<div class="canvas">
 
-<div>
-    <!-- Game goes here -->
 </div>
 
 <div class="h-100">
@@ -124,4 +122,5 @@
 
     public bool IsConnected =>
         _hubConnection.State == HubConnectionState.Connected;
+    
 }
