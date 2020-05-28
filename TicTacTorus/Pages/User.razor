@@ -1,5 +1,6 @@
 ﻿@page "/user"
 @using System.Net.Mime
+@using System.Diagnostics
 
 <div class="min-vw-100">
     <div class="my-5 lobbies-grid">
@@ -83,7 +84,15 @@
     //Picture Click
     private static void ChangePicture()
     {
-        
+        var process = new Process();
+        var startInfo = new ProcessStartInfo
+        {
+            WindowStyle = ProcessWindowStyle.Hidden, FileName = "cmd.exe"
+        };
+        var path = "C:/Users/";
+        startInfo.Arguments = string.Format("/C start {0}", path);
+        process.StartInfo = startInfo;
+        process.Start();
     }
 
     private static void ChangeSymbol()
