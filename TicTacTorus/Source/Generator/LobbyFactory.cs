@@ -22,7 +22,7 @@
 
         private static ILobby AddId(ILobby l)
         {
-            Utility.Base64 id = new Base64();
+            Utility.Base64 id = Base64.Random();
             if (Server.Instance.LobbyIdIsUnique(id))
             {
                 l.Id = id;
