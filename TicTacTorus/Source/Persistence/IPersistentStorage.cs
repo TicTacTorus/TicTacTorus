@@ -30,6 +30,12 @@ namespace TicTacTorus.Source.Persistence
 		//Checks if id is already taken
 		bool CheckPlayerIdIsUnique(string id);
 
-		#endregion   
+		#endregion
+		#region Update Methods
+
+		void UpdateUserName(string id, string name);
+		void UpdateProfilePic(string id, string picPath);
+
+		#endregion
 	}
 }
