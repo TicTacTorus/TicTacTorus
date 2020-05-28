@@ -63,7 +63,7 @@ namespace TicTacTorus.Source.Utility
         }
 
         #endregion
-        #region Access / Functionality
+        #region String Representations
 
         public override string ToString()
                 {

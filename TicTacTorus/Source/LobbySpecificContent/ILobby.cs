@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using TicTacTorus.Source.PlayerSpecificContent;
 using Base64 = TicTacTorus.Source.Utility.Base64;
 
 namespace TicTacTorus.Source.LobbySpecificContent

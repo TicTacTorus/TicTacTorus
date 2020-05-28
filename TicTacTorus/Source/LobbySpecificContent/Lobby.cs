@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using TicTacTorus.Source.PlayerSpecificContent;
 using TicTacTorus.Source.Utility;
 
 namespace TicTacTorus.Source.LobbySpecificContent

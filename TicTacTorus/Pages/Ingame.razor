@@ -83,7 +83,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-
         _hubConnection = new HubConnectionBuilder()
             .WithUrl(NavigationManager.ToAbsoluteUri("/gameHub"))
             .Build();

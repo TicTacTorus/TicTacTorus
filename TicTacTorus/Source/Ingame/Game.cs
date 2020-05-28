@@ -6,6 +6,7 @@ using TicTacTorus.Source.Ingame.GridSpecificContent.Position;
 using TicTacTorus.Source.Ingame.Move;
 using TicTacTorus.Source.Ingame.Referee;
 using TicTacTorus.Source.LobbySpecificContent;
+using TicTacTorus.Source.PlayerSpecificContent;
 using TicTacTorus.Source.Utility;
 
 namespace TicTacTorus.Source.Ingame

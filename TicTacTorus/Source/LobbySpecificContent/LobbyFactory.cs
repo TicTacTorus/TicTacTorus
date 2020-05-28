@@ -1,4 +1,6 @@
-﻿﻿namespace TicTacTorus.Source.LobbySpecificContent
+﻿﻿using TicTacTorus.Source.PlayerSpecificContent;
+
+ namespace TicTacTorus.Source.LobbySpecificContent
 {
     public class LobbyFactory
     {

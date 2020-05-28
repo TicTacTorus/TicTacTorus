@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
-using System.Dynamic;
+using Microsoft.AspNetCore.SignalR.Client;
 
-namespace TicTacTorus.Source
+namespace TicTacTorus.Source.PlayerSpecificContent
 {
     public interface IPlayer
     {
@@ -9,5 +9,6 @@ namespace TicTacTorus.Source
         public string IngameName { get; set; }
         public Color Color { get; set; }
         public byte Symbol { get; set; }
+        public HubConnection Connection { get; set; }
     }
 }
