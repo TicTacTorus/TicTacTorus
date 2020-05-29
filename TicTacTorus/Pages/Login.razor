@@ -32,6 +32,7 @@
                                 <label for="loginPassword">Password*</label>
                                 <InputText type="password" @bind-Value="_sign_in_player.LoginPassword" class="form-control" id="loginPassword" placeholder="Enter Password" required/>
                             </div>
+                            <div id="messageOutput" bind-Value="@loginMessage"></div>
                             <button type="submit" class="btn btn-primary" style="width: 100%">Sign In</button>
                         </EditForm>
                         <p class="text-center"><a href="#" class="btn">Forgot login name or password?</a></p>
@@ -84,7 +85,7 @@
 {
     private ConnectionHubClient _client;
     private string userInput;
-    private string messageInput;
+    private string loginMessage;
     
     TemporaryLoginPlayer _sign_in_player = new TemporaryLoginPlayer();
     
@@ -128,6 +129,12 @@
             {
                 
             }
+            StateHasChanged();
+        });
+        
+        _client.Connection.On<string>("LoginFailed", message =>
+        {
+            loginMessage = message;
             StateHasChanged();
         });
     }
