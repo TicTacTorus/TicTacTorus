@@ -2,6 +2,7 @@
 @using TicTacTorus.Source
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.SignalR.Client
+@using TicTacTorus.Source.Hubs
 @inject NavigationManager NavigationManager
 
 <div class="min-vw-100">
@@ -81,6 +82,10 @@
 
 @code
 {
+    private ConnectionHubClient _client;
+    private string userInput;
+    private string messageInput;
+    
     TemporaryLoginPlayer _sign_in_player = new TemporaryLoginPlayer();
     
     class TemporaryLoginPlayer
@@ -109,6 +114,23 @@
 
         public string EMail { get; set; }
     }
+}
+
+@functions
+{
+    protected override void OnInitialized()
+    {
+        _client = new ConnectionHubClient(NavigationManager);
+
+        _client.Connection.On<HumanPlayer>("ReceiveConfirmation", (player) =>
+        {
+            if (player == null)
+            {
+                
+            }
+            StateHasChanged();
+        });
+    }
     
     private void HandleValidSubmit()
     {
@@ -119,34 +141,10 @@
     {
         TryLogin();
     }
-
-    
-    private HubConnection _hubConnection;
-    private string userInput;
-    private string messageInput;
-
-    
-    protected override async Task OnInitializedAsync()
-    {
-        _hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri("/loginHub"))
-            .Build();
-
-        _hubConnection.On<HumanPlayer>("ReceiveConfirmation", (player) =>
-        {
-            if (player == null)
-            {
-                
-            }
-            StateHasChanged();
-        });
-
-        await _hubConnection.StartAsync();
-    }
     
     Task TryLogin() =>
-        _hubConnection.SendAsync("ConfirmLogin", _sign_in_player.LoginID, _sign_in_player.LoginPassword );
+        _client.Connection.SendAsync("ConfirmLogin", _sign_in_player.LoginID, _sign_in_player.LoginPassword );
 
     public bool IsConnected =>
-        _hubConnection.State == HubConnectionState.Connected;
+        _client.Connection.State == HubConnectionState.Connected;
 }

@@ -1,9 +1,7 @@
 ﻿@page "/lobbies" 
 @using TicTacTorus.Source.LobbySpecificContent
-@using TicTacTorus.Source.Utility
-@using TicTacTorus.Source
-<!-- Maybe another tag for the lobbies site?? Open for possible solutions -->
-
+@using TicTacTorus.Source.Hubs
+@inject NavigationManager NavigationManager
 
 <div class="lobbies-grid my-5">
     <button class="btn-back" onclick="location.href ='/';">
@@ -36,9 +34,18 @@
     </div>
 </div>
 
-
+@code
+{
+    private ConnectionHubClient _client;
+}
 
 
 @functions{
     private readonly LobbyList _list = new LobbyList();
+
+    protected override void OnInitialized()
+    {
+        _client = new ConnectionHubClient(NavigationManager);
+    }
+
 }

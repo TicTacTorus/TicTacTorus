@@ -1,4 +1,6 @@
 ﻿@page "/recordings"
+@using TicTacTorus.Source.Hubs
+@inject NavigationManager NavigationManager
 
 <div class="min-vw-100">
     <div class="my-5 lobbies-grid">
@@ -51,7 +53,7 @@
 
 
 @code{
-
+    private ConnectionHubClient _client;
     private List<bool> _replays = new List<bool>(10);
 
 }
@@ -60,6 +62,7 @@
 {
     protected override void OnInitialized()
     {
+        _client = new ConnectionHubClient(NavigationManager);
         _replays.Add(true);
     }
 }

@@ -11,9 +11,9 @@ namespace TicTacTorus.Source.Hubs
     {
         public async Task CreateLobby()
         {
-            Server server = Server.Instance;
-            HumanPlayer hp = PlayerFactory.CreateHumanPlayer();
-            ILobby lobby = LobbyFactory.CreateLobbyWithId(hp);
+            var server = Server.Instance;
+            var hp = PlayerFactory.CreateHumanPlayer();
+            var lobby = LobbyFactory.CreateLobbyWithId(hp);
             server.AddLobby(lobby);
             await Clients.Caller.SendAsync("ReceiveLobbyId", lobby.Id.ToString());
         }
@@ -37,7 +37,7 @@ namespace TicTacTorus.Source.Hubs
 
         public async Task JoinLobby(string lobbyId)
         {
-            Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
+            await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
             ILobby lobby = Server.Instance.GetLobbyById(new Base64(lobbyId));
             await Clients.Caller.SendAsync("GetLobby", lobby);
             //return Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);

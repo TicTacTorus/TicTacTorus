@@ -1,6 +1,7 @@
 ﻿@page "/ingame"
 @page "/ingame/{IdString}"
 @using Microsoft.AspNetCore.SignalR.Client
+@using TicTacTorus.Source.Hubs
 @inject NavigationManager NavigationManager
 
 <div class="canvas">
@@ -44,21 +45,24 @@
     </div>
 </div>
 
-
-@functions
+@code
 {
+    private ConnectionHubClient _client;
     private string _navContentOne = "tab-pane active";
     private string _navContentTwo = "tab-pane";
     private string _navOne = "nav-link active";
     private string _navTwo = "nav-link";
     private bool _navClicked;
     
-    [Parameter] public string IdString { get; set; }
-    
-    private HubConnection _hubConnection;
     private List<string> _messages = new List<string>();
     private string _messageInput;
+    
+    [Parameter] public string IdString { get; set; }
+}
 
+@functions
+{
+    
     private void NavClick()
     {
     //I know can be simplified, but I'm lazy (Sorry ^^)
@@ -83,35 +87,23 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri("/gameHub"))
-            .Build();
+        _client = new ConnectionHubClient(NavigationManager);
 
-
-        _hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
-        {
-            var encodedMsg = $"{user}: {message}";
-            _messages.Add(encodedMsg);
-            StateHasChanged();
-        });
-
-        await _hubConnection.StartAsync();
-        
-        await _hubConnection.SendAsync("JoinLobby", IdString);
+        await _client.Connection.SendAsync("JoinLobby", IdString);
     }
 
     void SendChatMessage(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
         {
-            _hubConnection.SendAsync("SendMessage", IdString, "Tim", _messageInput);
+            _client.Connection.SendAsync("SendMessage", IdString, "Tim", _messageInput);
             _messageInput = "";
         }
     }
 
     void SendSystemMessage(string message)
     {
-        _hubConnection.SendAsync("SendMessage", IdString, "Game", message);
+        _client.Connection.SendAsync("SendMessage", IdString, "Game", message);
     }
     /*
     void SendChangedLobbyParameter(string lobbyParam, string changedValue)
@@ -120,6 +112,6 @@
     }*/
 
     public bool IsConnected =>
-        _hubConnection.State == HubConnectionState.Connected;
+        _client.Connection.State == HubConnectionState.Connected;
     
 }

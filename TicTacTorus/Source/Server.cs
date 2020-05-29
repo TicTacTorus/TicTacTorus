@@ -11,14 +11,14 @@ namespace TicTacTorus.Source
     {
         private Dictionary<Base64,ILobby> _lobbies = new Dictionary<Base64, ILobby>();
         private Dictionary<Base64,Game> _games = new Dictionary<Base64, Game>();
-        // For being Threadsave ("full lazy instantiation" - https://csharpindepth.com/articles/singleton)
+        // For being Thread-safe ("full lazy instantiation" - https://csharpindepth.com/articles/singleton)
         public static Server Instance { get { return Nested.instance; } }
         private Server()
         {
             _lobbies = new Dictionary<Base64, ILobby>();
             _games = new Dictionary<Base64, Game>();
         }
-        // Makes Singleton Threadsave
+        // Makes Singleton Thread-safe
         private class Nested
         {
             // Explicit static constructor to tell C# compiler

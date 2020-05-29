@@ -5,6 +5,7 @@
 @using System.Drawing
 @using Microsoft.AspNetCore.SignalR.Client
 @using TicTacTorus.Source.Generator
+@using TicTacTorus.Source.Hubs
 @using TicTacTorus.Source.LobbySpecificContent
 @using TicTacTorus.Source.PlayerSpecificContent
 @using TicTacTorus.Source.Utility
@@ -132,11 +133,11 @@
 </div>
 
 @code{
+    private ConnectionHubClient _client;
     static ILobby _lobby = new Source.LobbySpecificContent.Lobby();
 
     private string InviteLink { get; set; } = "tictactorus.de/game/" + _id;
     
-    private HubConnection _hubConnection;
     private List<string> _messages = new List<string>();
     private string _messageInput;
 
@@ -153,7 +154,7 @@
     static void InitLobby()
     {
         HumanPlayer creator = new HumanPlayer("Tim", "NicerDicer", Color.Coral, 111);
-        _lobby = Source.LobbySpecificContent.LobbyFactory.CreateLobbyNoId(creator);
+        _lobby = LobbyFactory.CreateLobbyNoId(creator);
         InitPlayerList();
     }
     static void InitPlayerList()
@@ -184,7 +185,7 @@
     void RemovePlayerFromLobby(IPlayer player)
     {
         // remove them
-        _hubConnection.SendAsync("RemovePlayerFromLobby", _id, player);
+        _client.Connection.SendAsync("RemovePlayerFromLobby", _id, player);
         // message remaining players
         SendSystemMessage(player.IngameName + " was removed by the Host");
     }
@@ -193,26 +194,24 @@
     {
         InitLobby();
         
-        _id = new Base64(IdString);
-        _hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri("/gameHub"))
-            .Build();
+        _client = new ConnectionHubClient(NavigationManager);
 
-
-        _hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        #region Listener Methods
+        
+        _client.Connection.On<string, string>("ReceiveMessage", (user, message) =>
         {
             var encodedMsg = $"{user}: {message}";
             _messages.Add(encodedMsg);
             StateHasChanged();
         });
         
-        _hubConnection.On<ILobby>("GetLobby", (lobby) =>
+        _client.Connection.On<ILobby>("GetLobby", (lobby) =>
         {
             _lobby = lobby;
             StateHasChanged();
         });
 
-        _hubConnection.On<IPlayer, bool>("PlayerListChanged", (player, isAdded) =>
+        _client.Connection.On<IPlayer, bool>("PlayerListChanged", (player, isAdded) =>
         {
             if (isAdded)
             {
@@ -224,24 +223,24 @@
             }
             StateHasChanged();
         });
-
-        await _hubConnection.StartAsync();
-
-        await _hubConnection.SendAsync("JoinLobby", IdString);
+        
+        #endregion
+        
+        await _client.Connection.SendAsync("JoinLobby", IdString);
     }
 
     void SendChatMessage(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
         {
-            _hubConnection.SendAsync("SendMessage", IdString, "Tim", _messageInput);
+            _client.Connection.SendAsync("SendMessage", IdString, "Tim", _messageInput);
             _messageInput = "";
         }
     }
 
     void SendSystemMessage(string message)
     {
-        _hubConnection.SendAsync("SendMessage", IdString, "Game", message);
+        _client.Connection.SendAsync("SendMessage", IdString, "Game", message);
     }
     /*
     void SendChangedLobbyParameter(string lobbyParam, string changedValue)
@@ -250,5 +249,5 @@
     }*/
 
     public bool IsConnected =>
-        _hubConnection.State == HubConnectionState.Connected;
+        _client.Connection.State == HubConnectionState.Connected;
 }

@@ -1,7 +1,7 @@
 ﻿@page "/reset"
 @using TicTacTorus.Source.LoginContent.Validation
-@using Microsoft.AspNetCore.SignalR.Client
-@using Microsoft.AspNetCore.Connections
+@using TicTacTorus.Source.Hubs
+@inject NavigationManager NavigationManager
 
 
 <div class="min-vw-100">
@@ -41,11 +41,17 @@
 
 
 @code{
+    private ConnectionHubClient _client;
     private readonly UserValidation _validation = new UserValidation();
 }
 
 @functions
 {
+    protected override void OnInitialized()
+    {
+        _client = new ConnectionHubClient(NavigationManager);
+    }
+
     private void CheckForm()
     {
         //TODO: Validate at Server (just in case) the password

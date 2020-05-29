@@ -1,7 +1,7 @@
 ﻿@page "/info"
-@using TicTacTorus.Source
-@using System.Drawing
-@using Microsoft.AspNetCore.SignalR.Client
+
+@using TicTacTorus.Source.Hubs
+@inject NavigationManager NavigationManager
 
 
 <div class="min-vw-100">
@@ -52,3 +52,16 @@
         </div>
     </div>
 </div>
+
+@code
+{
+    private ConnectionHubClient _client;
+}
+
+@functions
+{
+    protected override void OnInitialized()
+    {
+        _client = new ConnectionHubClient(NavigationManager);
+    }
+}

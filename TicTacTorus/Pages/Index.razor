@@ -2,6 +2,7 @@
 @using TicTacTorus.Source.Utility
 @using TicTacTorus.Source
 @using Microsoft.AspNetCore.SignalR.Client
+@using TicTacTorus.Source.Hubs
 @inject NavigationManager NavigationManager
 
 <div class="d-flex justify-content-center my-5">
@@ -64,30 +65,24 @@
 
 @code
 {
-
-    private HubConnection _hubConnection;
-    private Source.Utility.Base64 _id;
-
+    private ConnectionHubClient _client;
+    private Base64 _id;
 }
 @functions
 {
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        _hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri("/gameHub"))
-            .Build();
+        _client = new ConnectionHubClient(NavigationManager);
         
-        _hubConnection.On<string>("ReceiveLobbyId", (id) =>
+        _client.Connection.On<string>("ReceiveLobbyId", (id) =>
         {
             _id = new Base64(id);
             NavigationManager.NavigateTo("/game/" + _id);
         });
-
-        await _hubConnection.StartAsync();
     }
 
     private void SendNewLobbyRequest()
     {
-        _hubConnection.SendAsync("CreateLobby");
+        _client.Connection.SendAsync("CreateLobby");
     }
 }

@@ -1,8 +1,8 @@
-﻿﻿using Microsoft.VisualBasic.CompilerServices;
- using TicTacTorus.Source.PlayerSpecificContent;
- using TicTacTorus.Source.Utility;
+﻿using TicTacTorus.Source.LobbySpecificContent;
+using TicTacTorus.Source.PlayerSpecificContent;
+using TicTacTorus.Source.Utility;
 
- namespace TicTacTorus.Source.LobbySpecificContent
+namespace TicTacTorus.Source.Generator
 {
     public class LobbyFactory
     {
@@ -22,7 +22,7 @@
 
         private static ILobby AddId(ILobby l)
         {
-            Utility.Base64 id = Base64.Random();
+            var id = Base64.Random();
             if (Server.Instance.LobbyIdIsUnique(id))
             {
                 l.Id = id;

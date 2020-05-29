@@ -1,5 +1,6 @@
 ﻿@page "/player/"
-
+@using TicTacTorus.Source.Hubs
+@inject NavigationManager NavigationManager
 
 <div>
     <!-- Game goes here -->
@@ -70,11 +71,21 @@
 
 @functions
 {
+    private ConnectionHubClient _client;
+    
     private string _navContentOne = "tab-pane active";
     private string _navContentTwo = "tab-pane";
     private string _navOne = "nav-link active";
     private string _navTwo = "nav-link";
     private bool _navClicked;
+}
+
+@functions
+{
+    protected override void OnInitialized()
+    {
+        _client = new ConnectionHubClient(NavigationManager);
+    }
 
     private void NavClick()
     {
@@ -97,5 +108,4 @@
             _navTwo = _navTwo.Substring(0, _navTwo.IndexOf(" ", StringComparison.Ordinal));
         }
     }
-    
 }

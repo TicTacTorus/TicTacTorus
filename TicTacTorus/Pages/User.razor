@@ -1,6 +1,8 @@
 ﻿@page "/user"
-@using System.Net.Mime
+
 @using System.Diagnostics
+@using TicTacTorus.Source.Hubs
+@inject NavigationManager NavigationManager
 
 <div class="min-vw-100">
     <div class="my-5 lobbies-grid">
@@ -78,10 +80,18 @@
     </div>
 </div>
 
-
+@code
+{
+    private ConnectionHubClient _client;
+}
 
 @functions
 {
+    protected override void OnInitialized()
+    {
+        _client = new ConnectionHubClient(NavigationManager);
+    }
+
     //Picture Click
     private static void ChangePicture()
     {
