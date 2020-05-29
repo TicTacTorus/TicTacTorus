@@ -8,7 +8,7 @@ using TicTacTorus.Source.Utility;
 
 namespace TicTacTorus.Source.Hubs
 {
-    public class GameHub : Hub
+    public class ConnectionHubServer : Hub
     {
         public async Task CreateLobby()
         {

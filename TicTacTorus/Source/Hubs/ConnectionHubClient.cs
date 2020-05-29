@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.VisualBasic;
-using TicTacTorus.Source.Utility;
 
 namespace TicTacTorus.Source.Hubs
 {
@@ -17,7 +15,7 @@ namespace TicTacTorus.Source.Hubs
 		public ConnectionHubClient(NavigationManager nav)
 		{
 			Connection = new HubConnectionBuilder()
-				.WithUrl(nav.ToAbsoluteUri("/gameHub"))
+				.WithUrl(nav.ToAbsoluteUri("/connectionHub"))
 				.Build();
 			Connection.StartAsync();
 		}
