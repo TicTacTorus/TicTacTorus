@@ -23,7 +23,7 @@ namespace TicTacTorus.Source.Generator
         private static ILobby AddId(ILobby l)
         {
             var id = Base64.Random();
-            if (Server.Instance.LobbyIdIsUnique(id))
+            if (Server.Instance.LobbyIdIsUnique(id.ToString()))
             {
                 l.Id = id;
                 return l;

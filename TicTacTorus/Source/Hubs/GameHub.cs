@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json;
 using TicTacTorus.Source.Generator;
 using TicTacTorus.Source.LobbySpecificContent;
 using TicTacTorus.Source.PlayerSpecificContent;
@@ -22,13 +23,13 @@ namespace TicTacTorus.Source.Hubs
             await Clients.Group(lobbyId).SendAsync("ReceiveMessage", user, message);
         }
 
-        public async Task RemovePlayerFromLobby(Base64 lobbyId, IPlayer player)
+        public async Task RemovePlayerFromLobby(string lobbyId, IPlayer player)
         {
             Server.Instance.GetLobbyById(lobbyId).RemovePlayer(player);
             // signal everyone, that player is removed (=false)
             await Clients.Group(lobbyId.ToString()).SendAsync("PlayerListChanged", player, false);    
         }
-        public async Task AddPlayerToLobby(Base64 lobbyId, IPlayer player)
+        public async Task AddPlayerToLobby(string lobbyId, IPlayer player)
         {
             Server.Instance.GetLobbyById(lobbyId).AddPlayer(player);
             // signal everyone, that player is added (=true)
@@ -38,8 +39,9 @@ namespace TicTacTorus.Source.Hubs
         public async Task JoinLobby(string lobbyId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
-            ILobby lobby = Server.Instance.GetLobbyById(new Base64(lobbyId));
-            await Clients.Caller.SendAsync("GetLobby", lobby);
+            ILobby lobby = Server.Instance.GetLobbyById(lobbyId);
+            string jsLobby = JsonConvert.SerializeObject(lobby);
+            await Clients.Caller.SendAsync("GetLobby", jsLobby);
             //return Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
         }
 

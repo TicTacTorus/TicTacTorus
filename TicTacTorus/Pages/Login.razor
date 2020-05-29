@@ -142,6 +142,27 @@
         TryLogin();
     }
     
+    private HubConnection _hubConnection;
+
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/loginHub"))
+            .Build();
+
+        _hubConnection.On<HumanPlayer>("ReceiveConfirmation", (player) =>
+        {
+            if (player == null)
+            {
+                
+            }
+            StateHasChanged();
+        });
+
+        await _hubConnection.StartAsync();
+    }
+    
     Task TryLogin() =>
         _client.Connection.SendAsync("ConfirmLogin", _sign_in_player.LoginID, _sign_in_player.LoginPassword );
 

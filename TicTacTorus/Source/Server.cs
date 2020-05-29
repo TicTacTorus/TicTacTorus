@@ -9,14 +9,14 @@ namespace TicTacTorus.Source
 {
     public sealed class Server
     {
-        private Dictionary<Base64,ILobby> _lobbies = new Dictionary<Base64, ILobby>();
-        private Dictionary<Base64,Game> _games = new Dictionary<Base64, Game>();
+        private Dictionary<string,ILobby> _lobbies = new Dictionary<string, ILobby>();
+        private Dictionary<string,Game> _games = new Dictionary<string, Game>();
         // For being Thread-safe ("full lazy instantiation" - https://csharpindepth.com/articles/singleton)
         public static Server Instance { get { return Nested.instance; } }
         private Server()
         {
-            _lobbies = new Dictionary<Base64, ILobby>();
-            _games = new Dictionary<Base64, Game>();
+            _lobbies = new Dictionary<string, ILobby>();
+            _games = new Dictionary<string, Game>();
         }
         // Makes Singleton Thread-safe
         private class Nested
@@ -36,21 +36,21 @@ namespace TicTacTorus.Source
 
         public bool AddLobby(ILobby lobby)
         {
-            if (LobbyIdIsUnique(lobby.Id))
+            if (LobbyIdIsUnique(lobby.Id.ToString()))
             {
-                _lobbies.Add(lobby.Id ,lobby);
+                _lobbies.Add(lobby.Id.ToString() ,lobby);
                 return true;
             }
 
             return false;
         }
 
-        public ILobby GetLobbyById(Base64 id)
+        public ILobby GetLobbyById(string id)
         {
             return _lobbies[id];
         }
 
-        public bool LobbyIdIsUnique(Base64 id)
+        public bool LobbyIdIsUnique(string id)
         {
             return !_lobbies.ContainsKey(id);
         }
@@ -60,21 +60,21 @@ namespace TicTacTorus.Source
 
         public bool AddGame(Game game)
         {
-            if (GameIdIsUnique(game.ID))
+            if (GameIdIsUnique(game.ID.ToString()))
             {
-                _games.Add(game.ID, game);
+                _games.Add(game.ID.ToString(), game);
                 return true;
             }
 
             return false;
         }
 
-        public Game GetGameById(Base64 id)
+        public Game GetGameById(string id)
         {
             return _games[id];
         }
 
-        public bool GameIdIsUnique(Base64 id)
+        public bool GameIdIsUnique(string id)
         {
             return _games.ContainsKey(id);
         }
@@ -91,10 +91,10 @@ namespace TicTacTorus.Source
         public Game CreateGameFromLobby(ILobby lobby)
         {
             Game game = null;
-            if (_games.ContainsKey(lobby.Id) && _lobbies.Remove(lobby.Id))
+            if (_games.ContainsKey(lobby.Id.ToString()) && _lobbies.Remove(lobby.Id.ToString()))
             {
                 game = new Game(lobby);
-                _games.Add(game.ID, game);
+                _games.Add(game.ID.ToString(), game);
             }
 
             return game;

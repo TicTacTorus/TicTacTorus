@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace TicTacTorus.Source.Utility
 {
-    public class Base64
+    public class Base64 : IEquatable<Base64>
     {
         #region Fields
 
@@ -108,6 +108,21 @@ namespace TicTacTorus.Source.Utility
                 result += Alphabet[(Data[3 * i + 2] & 0b111111) << 0 | 0                   ];
             }
             return result;
+        }
+
+        public bool Equals(Base64 obj)
+        {
+            return this == obj;
+        }
+        
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Base64);
+        }
+
+        public override int GetHashCode()
+        {
+            return (Data != null ? Data.GetHashCode() : 0);
         }
 
         #endregion

@@ -4,6 +4,7 @@
 @using TicTacTorus.Source
 @using System.Drawing
 @using Microsoft.AspNetCore.SignalR.Client
+@using Newtonsoft.Json
 @using TicTacTorus.Source.Generator
 @using TicTacTorus.Source.Hubs
 @using TicTacTorus.Source.LobbySpecificContent
@@ -30,10 +31,11 @@
         </svg>
     </button>
     <h1 class="headers">@_lobby.Name</h1>
+
 </div>
-<div contenteditable="true" class="text-center my-3">
+<section contenteditable="true" class="text-center my-3">
     <p @ref="DisplayDescriptionReference">@_lobby.Description</p>
-</div>
+</section>
 <div class="d-flex justify-content-center">
     
     <div class="row">
@@ -41,7 +43,9 @@
             <!-- Players Box -->
             <div class="box box-lobby w-100">
                 <div class="box-content">
-                    <b><h3 class="text-center">Players (0/0)</h3></b>
+                    <b><h3 class="text-center">Players (@{
+                                                            var playerCount = _lobby.GetAllPlayers().Count;
+                                                        }@playerCount/20)</h3></b>
                     <hr>
                     <div>
                         <table id="player_table_in_lobby">
@@ -59,10 +63,10 @@
                                     }
                                     <td>
                                         @{
-                                            var classText = "color:" + ColorTranslator.ToHtml(@elem.Color) + ";";
-                                            classText += "\nfont-size: large;" +
-                                                         "\nfont-weight: bold;";
-                                            classText += "\ntext-shadow: 1px 1px 0px black;";
+                                            var classText = "color:" + ColorTranslator.ToHtml(@elem.Color) + ";" + 
+                                                            "\nfont-size: large;" +
+                                                            "\nfont-weight: bold;" +
+                                                            "\ntext-shadow: 1px 1px 0px black;";
                                             <div style="@classText">@elem.IngameName</div>
                                         }
                                     </td>
@@ -205,9 +209,9 @@
             StateHasChanged();
         });
         
-        _client.Connection.On<ILobby>("GetLobby", (lobby) =>
+        _client.Connection.On<string>("GetLobby", (lobby) =>
         {
-            _lobby = lobby;
+            _lobby = JsonConvert.DeserializeObject<ILobby>(lobby);
             StateHasChanged();
         });
 
