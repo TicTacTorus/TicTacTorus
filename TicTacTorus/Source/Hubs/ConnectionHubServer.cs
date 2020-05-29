@@ -1,8 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System.Data.SQLite;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using TicTacTorus.Source.Generator;
 using TicTacTorus.Source.LobbySpecificContent;
+using TicTacTorus.Source.Persistence;
 using TicTacTorus.Source.PlayerSpecificContent;
 using TicTacTorus.Source.Utility;
 
@@ -10,6 +12,7 @@ namespace TicTacTorus.Source.Hubs
 {
     public class ConnectionHubServer : Hub
     {
+        #region Lobby
         public async Task CreateLobby()
         {
             var server = Server.Instance;
@@ -18,11 +21,6 @@ namespace TicTacTorus.Source.Hubs
             server.AddLobby(lobby);
             await Clients.Caller.SendAsync("ReceiveLobbyId", lobby.Id.ToString());
         }
-        public async Task SendMessage(string lobbyId, string user, string message)
-        {
-            await Clients.Group(lobbyId).SendAsync("ReceiveMessage", user, message);
-        }
-
         public async Task RemovePlayerFromLobby(string lobbyId, IPlayer player)
         {
             Server.Instance.GetLobbyById(lobbyId).RemovePlayer(player);
@@ -35,7 +33,6 @@ namespace TicTacTorus.Source.Hubs
             // signal everyone, that player is added (=true)
             await Clients.Group(lobbyId.ToString()).SendAsync("PlayerListChanged", player, true);    
         }
-
         public async Task JoinLobby(string lobbyId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
@@ -49,5 +46,37 @@ namespace TicTacTorus.Source.Hubs
         {
             return Groups.RemoveFromGroupAsync(Context.ConnectionId, lobbyId);
         }
+        #endregion
+        #region Chat
+        public async Task SendMessage(string lobbyId, string user, string message)
+        {
+            await Clients.Group(lobbyId).SendAsync("ReceiveMessage", user, message);
+        }
+        #endregion
+        #region Login / Register
+
+        public async Task ConfirmLogin(string playerId, string playerPw)
+        {
+            // Check in Database
+            IPlayer playerFromDatabase = null;
+            try
+            {
+                // playerFromDatabase IPersistanceStorage.GetPlayer(playerID, playerPW);
+                playerFromDatabase = PersistenceStorage.LoadPlayer(playerId, playerPw);
+                    
+                string playerJson = JsonConvert.SerializeObject(playerFromDatabase);
+                await Clients.Client(Context.ConnectionId)
+                    .SendAsync("ReceiveConfirmation", playerJson);
+            }
+            catch (SQLiteException e)
+            {
+                await Clients.Caller.SendAsync("LoginFailed", "Login failed. Wrong userID or Password.");
+            }
+
+            await Clients.Client(Context.ConnectionId)
+                .SendAsync("ReceiveConfirmation", playerFromDatabase);
+        }
+
+        #endregion
     }
 }
