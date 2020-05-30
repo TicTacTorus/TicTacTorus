@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 
-namespace TicTacTorus.Source.Security
+namespace TicTacTorus.Source.LoginContent.Security
 {
     public class SaltedHash
     {

@@ -10,7 +10,7 @@ namespace TicTacTorus.Source
         public string IngameName { get; set; }
         public Color Color { get; set; }
         public byte Symbol { get; set; }
-        public HubConnection Connection { get; set; }
+
 
         public HumanPlayer(string id, string ingameName, Color color, byte symbol)
         {
