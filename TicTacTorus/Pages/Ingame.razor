@@ -8,42 +8,41 @@
 
 </div>
 
-<div class="h-100">
-    <div class="nav-container">
-        <div class="box box-map">
-            <div class="p-5 text-center">
-                <!-- Minimap goes here -->
-                Minimap Content
-            </div>
+
+<div class="nav-container float-right position-absolute" style="top: 0px; right: 0px">
+    <div class="box box-map">
+        <div class="p-5 text-center">
+            Minimap Content
         </div>
+    </div>
                 
-        <div class=" box box-map">
-            <div class="box-game">
-                <ul class="nav nav-tabs">
-                    <li class="nav-item">
-                        <a class="@_navOne" @onclick="NavClick">Chat</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="@_navTwo" @onclick="NavClick">Players</a>
-                    </li>
-                </ul>
-                <div class="tab-content p-1">
-                    <div role="tabpanel" class="@_navContentOne" id="chat-content">
-                        <textarea id="messagesListIngame" readonly>@foreach (var message in _messages)
-                            {
-                                @message<br>
-                            } 
+    <div class=" box box-map">
+        <div class="box-game">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="@_navOne" @onclick="NavClick">Chat</a>
+                </li>
+                <li class="nav-item">
+                    <a class="@_navTwo" @onclick="NavClick">Players</a>
+                </li>
+            </ul>
+            <div class="tab-content p-1">
+                <div role="tabpanel" class="@_navContentOne" id="chat-content">
+                    <textarea id="messagesListIngame" readonly>@foreach (var message in _messages)
+                                                               {
+                                                                   @message<br>
+                                                               } 
                         </textarea> 
-                        <input @bind="_messageInput" @onkeyup="SendChatMessage" disabled="@(!IsConnected)" class="w-100 align-bottom"/>
-                    </div>
-                    <div role="tabpanel" class="@_navContentTwo" id="player-content">
-                        Player Content
-                    </div>
+                    <input @bind="_messageInput" @onkeyup="SendChatMessage" disabled="@(!IsConnected)" class="w-100 align-bottom"/>
+                </div>
+                <div role="tabpanel" class="@_navContentTwo" id="player-content">
+                    Player Content
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 
 @code
 {
@@ -88,8 +87,13 @@
     protected override async Task OnInitializedAsync()
     {
         _client = new ConnectionHubClient(NavigationManager);
-
         await _client.Connection.SendAsync("JoinLobby", IdString);
+        
+    #region Client Listeners
+        
+    //TODO Methods for the Clients In Game Logic 
+        
+    #endregion
     }
 
     void SendChatMessage(KeyboardEventArgs e)

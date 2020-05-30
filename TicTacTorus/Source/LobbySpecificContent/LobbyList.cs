@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TicTacTorus.Source.Utility;
 
 namespace TicTacTorus.Source.LobbySpecificContent
 {
     public class LobbyList
     {
-        public Dictionary<Base64, ILobby> Lobbies { get; private set; }
+        public Dictionary<Base64, ILobby> Lobbies { get; }
 
         public LobbyList()
         {

@@ -1,6 +1,7 @@
 ﻿@page "/lobbies" 
 @using TicTacTorus.Source.LobbySpecificContent
 @using TicTacTorus.Source.Hubs
+@using Microsoft.AspNetCore.SignalR.Client
 @inject NavigationManager NavigationManager
 
 <div class="lobbies-grid my-5">
@@ -14,7 +15,7 @@
 </div>
 
 <div class="d-flex justify-content-center m-1">
-    <div class="col-sm-8 col-md-5 col-lg-5 mx-auto m-2">
+    <div class="col-sm-8 col-md-8 col-lg-8 mx-auto m-2">
         <div class="box w-100 h-100 p-3">
             <h3 class="text-center mt-1"><b>Lobbies</b></h3>
             <hr>
@@ -37,15 +38,23 @@
 @code
 {
     private ConnectionHubClient _client;
+    private LobbyList _list;
 }
 
-
 @functions{
-    private readonly LobbyList _list = new LobbyList();
-
     protected override void OnInitialized()
     {
         _client = new ConnectionHubClient(NavigationManager);
+
+        _client.Connection.SendAsync("GetCurrentLobbies");
+        /*
+         * Method receives, from the server, a List with all current Lobbies as a LobbyList Object
+         */
+        _client.Connection.On<LobbyList>("ReceiveCurrentLobbies", (list) =>
+        {
+            _list = list;
+            StateHasChanged();
+        });
     }
 
 }
