@@ -14,15 +14,24 @@ namespace TicTacTorus.Source
         public byte[] Hash { get;  } // Besprechen
         public byte[] Salt { get;  }// Besprechen
 
+        public HumanPlayer(string id, string ingameName, Color color, byte symbol)
+        {
+            ID = id;
+            IngameName = ingameName;
+            Color = color;
+            Symbol = symbol;
+      
+
+        }
         public HumanPlayer(string id, string ingameName, Color color, byte symbol, string pwd)
         {
             ID = id;
             IngameName = ingameName;
             Color = color;
             Symbol = symbol;
-             SaltedHash s = new SaltedHash(pwd); // Besprechen
-             Hash = s.Hash;// Besprechen
-             Salt = s.Salt;// Besprechen
+            SaltedHash s = new SaltedHash(pwd); // Besprechen
+            Hash = s.Hash;// Besprechen
+            Salt = s.Salt;// Besprechen
 
         }
         
