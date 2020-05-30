@@ -9,5 +9,8 @@ namespace TicTacTorus.Source.PlayerSpecificContent
         public string IngameName { get; set; }
         public Color Color { get; set; }
         public byte Symbol { get; set; }
+        
+        public byte[] Salt { get;  } // Besprechen
+        public byte[] Hash { get; } //Besprechen
     }
 }
