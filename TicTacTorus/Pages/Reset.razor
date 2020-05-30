@@ -1,6 +1,7 @@
 ﻿@page "/reset"
 @using TicTacTorus.Source.LoginContent.Validation
 @using TicTacTorus.Source.Hubs
+@using Microsoft.AspNetCore.SignalR.Client
 @inject NavigationManager NavigationManager
 
 
@@ -50,6 +51,14 @@
     protected override void OnInitialized()
     {
         _client = new ConnectionHubClient(NavigationManager);
+
+        /*
+         * Method receives bool from server if validation was successful
+         */
+        _client.Connection.On<bool>("ValidationResult", (valid) =>
+        {
+
+        });
     }
 
     private void CheckForm()
