@@ -139,14 +139,13 @@
     private ConnectionHubClient _client;
     static ILobby _lobby = new Source.LobbySpecificContent.Lobby();
 
-    private string InviteLink { get; set; } = "tictactorus.de/game/" + _id;
+    private string InviteLink { get; set; } = "tictactorus.de/game/";
     
     private List<string> _messages = new List<string>();
     private string _messageInput;
 
     [Parameter] 
     public string IdString { get; set; }
-    private static Base64 _id;
 
     // for changing text-elements etc.
     ElementReference DisplayDescriptionReference;
@@ -170,7 +169,7 @@
     private void CreateGame()
     {
         
-        NavigationManager.NavigateTo("/ingame/" + _id);
+        NavigationManager.NavigateTo("/ingame/" + IdString);
     }
     
     static IEnumerable<IPlayer> PlayerList()
@@ -189,7 +188,7 @@
     void RemovePlayerFromLobby(IPlayer player)
     {
         // remove them
-        _client.Connection.SendAsync("RemovePlayerFromLobby", _id, player);
+        _client.Connection.SendAsync("RemovePlayerFromLobby", IdString, player);
         // message remaining players
         SendSystemMessage(player.IngameName + " was removed by the Host");
     }
