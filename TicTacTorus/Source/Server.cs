@@ -93,7 +93,6 @@ namespace TicTacTorus.Source
         }
 
         #endregion
-
         #region ConvertLobbyToGame
 
         /// <summary>

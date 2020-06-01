@@ -1,5 +1,4 @@
-﻿@page "/game"
-@page "/game/{IdString}"
+﻿@page "/game/{IdString}"
 
 @using TicTacTorus.Source
 @using System.Drawing
@@ -30,7 +29,7 @@
             <path fill-rule="evenodd" d="M2.5 8a.5.5 0 01.5-.5h10.5a.5.5 0 010 1H3a.5.5 0 01-.5-.5z" clip-rule="evenodd"/>
         </svg>
     </button>
-    <h1 class="headers">@_lobby.Name</h1>
+    <h1 class="headers my-auto">@_lobby.Name</h1>
 
 </div>
 <section contenteditable="true" class="text-center my-3">
@@ -193,6 +192,14 @@
         _client.Connection.SendAsync("RemovePlayerFromLobby", _id, player);
         // message remaining players
         SendSystemMessage(player.IngameName + " was removed by the Host");
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Server.Instance.LobbyIdIsUnique(IdString))
+        { 
+            NavigationManager.NavigateTo("/?error=lobbyNotFound");
+        }
     }
 
     protected override async Task OnInitializedAsync()

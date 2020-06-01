@@ -37,11 +37,10 @@ namespace TicTacTorus.Source.Hubs
         }
         public async Task JoinLobby(string lobbyId)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
             ILobby lobby = Server.Instance.GetLobbyById(lobbyId);
             string jsLobby = JsonConvert.SerializeObject(lobby);
             await Clients.Caller.SendAsync("GetLobby", jsLobby);
-            //return Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
+            await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
         }
 
         public Task LeaveLobby(string lobbyId)
@@ -49,7 +48,6 @@ namespace TicTacTorus.Source.Hubs
             return Groups.RemoveFromGroupAsync(Context.ConnectionId, lobbyId);
         }
         #endregion
-
         #region Lobbies
 
         #region Lobbies
