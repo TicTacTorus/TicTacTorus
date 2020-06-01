@@ -9,10 +9,14 @@ namespace TicTacTorus.Source
 {
     public sealed class Server
     {
-        private Dictionary<string,ILobby> _lobbies = new Dictionary<string, ILobby>();
-        private Dictionary<string,Game> _games = new Dictionary<string, Game>();
+        private readonly Dictionary<string, ILobby> _lobbies;
+        private readonly Dictionary<string, Game> _games;
+
+        #region Instance
+
         // For being Thread-safe ("full lazy instantiation" - https://csharpindepth.com/articles/singleton)
-        public static Server Instance { get { return Nested.instance; } }
+        public static Server Instance => Nested.Instance;
+
         private Server()
         {
             _lobbies = new Dictionary<string, ILobby>();
@@ -27,11 +31,20 @@ namespace TicTacTorus.Source
             {
             }
 
-            internal static readonly Server instance = new Server();
+            // ReSharper disable once MemberHidesStaticFromOuterClass
+            internal static readonly Server Instance = new Server();
         }
         
-    
+        public Dictionary<string,ILobby> Lobbies
+        {
+            get { return _lobbies; }
+        }
+        public Dictionary<string,Game> Games
+        {
+            get { return _games; }
+        }
 
+        #endregion
         #region Lobby
 
         public bool AddLobby(ILobby lobby)
@@ -80,7 +93,9 @@ namespace TicTacTorus.Source
         }
 
         #endregion
-        
+
+        #region ConvertLobbyToGame
+
         /// <summary>
         /// Create and save a new Instance of Game based on ILobby.
         /// </summary>
@@ -99,5 +114,8 @@ namespace TicTacTorus.Source
 
             return game;
         }
+
+        #endregion
+        
     }
 }

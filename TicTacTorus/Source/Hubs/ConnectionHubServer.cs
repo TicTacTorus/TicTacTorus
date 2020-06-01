@@ -1,5 +1,7 @@
-﻿using System.Data.SQLite;
+﻿using System.Collections.Generic;
+using System.Data.SQLite;
 using System.Threading.Tasks;
+using System.Xml.Schema;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using TicTacTorus.Source.Generator;
@@ -46,6 +48,20 @@ namespace TicTacTorus.Source.Hubs
         {
             return Groups.RemoveFromGroupAsync(Context.ConnectionId, lobbyId);
         }
+        #endregion
+
+        #region Lobbies
+
+        #region Lobbies
+
+        async Task GetCurrentLobbies()
+        {
+            Dictionary<string, ILobby> list = Server.Instance.Lobbies;
+            var lobbies = new List<ILobby>(list.Values);
+            await Clients.Caller.SendAsync("ReceiveCurrentLobbies", lobbies);
+        }
+        #endregion
+
         #endregion
         #region Chat
         public async Task SendMessage(string lobbyId, string user, string message)

@@ -14,13 +14,13 @@
             Status = status;
             Description = desc;
         }
-        public static Dictionary<Base64, ILobby> GetAllLobbies()
+        public static Dictionary<string, ILobby> GetAllLobbies()
         {
-            return new Dictionary<Base64, ILobby>
+            return new Dictionary<string, ILobby>
             {
-                {Base64.Random(), new MockLobbyList("Daniel's Cube World", 8, 10, "Waiting", "Cubes")},
-                {Base64.Random(), new MockLobbyList("Tim's Sauna Landschaft", 2, 5, "Waiting", "No nerds plz")},
-                {Base64.Random(), new MockLobbyList("Jack's DnD Dungeon", 12, 15, "Waiting", "Only DnD Fans!")}
+                {Base64.Random().ToString(), new MockLobbyList("Daniel's Cube World", 8, 10, "Waiting", "Cubes")},
+                {Base64.Random().ToString(), new MockLobbyList("Tim's Sauna Landschaft", 2, 5, "Waiting", "No nerds plz")},
+                {Base64.Random().ToString(), new MockLobbyList("Jack's DnD Dungeon", 12, 15, "Waiting", "Only DnD Fans!")}
             };
         }
 
