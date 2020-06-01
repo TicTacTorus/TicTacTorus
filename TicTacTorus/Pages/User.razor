@@ -1,11 +1,14 @@
-﻿@page "/user"
+﻿@page "/user/{userid}"
 
 @using System.Diagnostics
 @using Microsoft.AspNetCore.SignalR.Client
 @using TicTacTorus.Source.Hubs
 @using TicTacTorus.Source.PlayerSpecificContent
+@using TicTacTorus.Source.Persistence
+@using System.Drawing
 @inject NavigationManager NavigationManager
 
+<!-- if user exists show page else error message -->
 
 <div class="my-5 lobbies-grid">
     <button class="btn-back" onclick="location.href ='/';">
@@ -21,15 +24,19 @@
     <div class="row">
         <div class="col-sm-8 col-md-5 col-lg-4 mx-auto m-2">
             <div class="box w-100">
-                <div class="profile-pic text-center" @onclick="ChangePicture">
-                    <input type="file" id="profile-pic" name="profile-pic">
-                    <img src="/Media/Images/profile-test.png" title="Change profile picture" alt="profile picture"/>
+                <div class="profile-pic text-center">
+                    <!-- if logged in player == userid -->
+                    <input type="file" id="profile-pic" @bind="_pic" name="profile-pic">
+                    // 
+                    <img src=_pic title="Change profile picture" alt="profile picture"/>
                 </div>
                 <div class="text-center mx-4">
                     <div class="my-3">
-                        <b><h1>Tim</h1></b>
+                        <b>
+                            <h1>@userid</h1></b>
                     </div>
                     <div><b>In-Game Name</b></div>
+                    <!-- if logged in player == userid inputs enabled else disabled ### -->
                     <input type="text" placeholder="HankMcAwesome"/>
                     <div class="mt-2"><b>Password</b></div>
                     <input type="password" placeholder="**********"/>
@@ -41,7 +48,8 @@
                     </div>
                     <div class="text-center my-3">
                         <b>Symbol Color</b>
-                        <input type="color"/>
+                        <input type="color" @bind="_color"/>
+                    <!-- ### -->
                     </div>
                 </div>
                 <button class="btn btn-end-custom">Replay List</button>
@@ -84,7 +92,12 @@
 
 @code
 {
+    [Parameter] 
+    public string userid { get; set; }
+    
     private ConnectionHubClient _client;
+    private static string _pic;
+    private Color _color;
 }
 
 @functions
@@ -106,19 +119,24 @@
     //Picture Click
     private static void ChangePicture()
     {
-        var process = new Process();
-        var startInfo = new ProcessStartInfo
-        {
-            WindowStyle = ProcessWindowStyle.Hidden, FileName = "cmd.exe"
-        };
-        const string path = "C:/Users/";
-        startInfo.Arguments = $"/C start {path}";
-        process.StartInfo = startInfo;
-        process.Start();
+        // TODO Send message to server, add/update picture to database
+       
     }
 
     private static void ChangeSymbol()
     {
-        
+        // TODO Send message to server, add/update symbol to database
     }
+
+    private static void ChangeColor()
+    {
+        // TODO
+    }
+
+    private static void ChangePlayerName()
+    {
+        // TODO
+    }
+    
+    
 }
