@@ -23,6 +23,7 @@ namespace TicTacTorus.Source.Hubs
             server.AddLobby(lobby);
             await Clients.Caller.SendAsync("ReceiveLobbyId", lobby.Id.ToString());
         }
+        /* later
         public async Task RemovePlayerFromLobby(string lobbyId, IPlayer player)
         {
             Server.Instance.GetLobbyById(lobbyId).RemovePlayer(player);
@@ -34,11 +35,11 @@ namespace TicTacTorus.Source.Hubs
             Server.Instance.GetLobbyById(lobbyId).AddPlayer(player);
             // signal everyone, that player is added (=true)
             await Clients.Group(lobbyId.ToString()).SendAsync("PlayerListChanged", player, true);    
-        }
-        public async Task JoinLobby(string lobbyId)
+        }*/
+        async Task JoinLobby(string lobbyId)
         {
-            ILobby lobby = Server.Instance.GetLobbyById(lobbyId);
-            string jsLobby = JsonConvert.SerializeObject(lobby);
+            var lobby = Server.Instance.GetLobbyById(lobbyId);
+            var jsLobby = JsonConvert.SerializeObject(lobby);
             await Clients.Caller.SendAsync("GetLobby", jsLobby);
             await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
         }
@@ -56,8 +57,8 @@ namespace TicTacTorus.Source.Hubs
         {
             var list = new LobbyList().Lobbies;
             var lobbies = new List<ILobby>(list.Values);
-            string lobbiesJSON = JsonConvert.SerializeObject(lobbies);
-            await Clients.Caller.SendAsync("ReceiveCurrentLobbies", lobbiesJSON);
+            var lobbiesJson = JsonConvert.SerializeObject(lobbies);
+            await Clients.Caller.SendAsync("ReceiveCurrentLobbies", lobbiesJson);
         }
         
         #endregion

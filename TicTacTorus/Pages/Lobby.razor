@@ -9,18 +9,12 @@
 @using TicTacTorus.Source.LobbySpecificContent
 @using TicTacTorus.Source.PlayerSpecificContent
 @using TicTacTorus.Source.Utility
+@using static TicTacTorus.Source.LobbySpecificContent.Lobby
 @inject NavigationManager NavigationManager
 
 @{
     // if angemeldet 
     // else generiere Name/Player
-    IPlayer i_am;
-
-    var name = AnonymPlayerNameGenerator.GetString();
-    var color = ColorGenerator.GetColor();
-    var symbol = ByteGenerator.GetByte();
-    i_am = new HumanPlayer("xyz", name, color, symbol);
-
 }
 <div class="my-5 lobbies-grid">
     <button class="btn-back" onclick="location.href ='/';">
@@ -29,12 +23,18 @@
             <path fill-rule="evenodd" d="M2.5 8a.5.5 0 01.5-.5h10.5a.5.5 0 010 1H3a.5.5 0 01-.5-.5z" clip-rule="evenodd"/>
         </svg>
     </button>
-    <h1 class="headers my-auto">@_lobby.Name</h1>
+    @if (_lobby != null)
+    {
+        <h1 class="headers my-auto">@_lobby.Name</h1>
+    }
 
 </div>
-<section contenteditable="true" class="text-center my-3">
-    <p @ref="DisplayDescriptionReference">@_lobby.Description</p>
-</section>
+@if (_lobby != null)
+{
+    <section contenteditable="true" class="text-center my-3">
+        <p>@_lobby.Description</p>
+    </section>
+}
 <div class="d-flex justify-content-center">
     
     <div class="row">
@@ -42,35 +42,40 @@
             <!-- Players Box -->
             <div class="box box-lobby w-100">
                 <div class="box-content">
-                    <b><h3 class="text-center">Players (@{
+                    <b><h3 class="text-center">Players (@if (_lobby != null)
+                                                        {
                                                             var playerCount = _lobby.GetAllPlayers().Count;
-                                                        }@playerCount/20)</h3></b>
+                                                            <inline>@playerCount/20)</inline>
+                                                        }</h3></b>
                     <hr>
                     <div>
                         <table id="player_table_in_lobby">
-                            @foreach (var elem in _lobby.GetAllPlayers())
+                            @if (_lobby != null)
                             {
-                                <!--<tr id="player_table_row">
-                                    <td><button onclick='MessageChatBox("@elem.ID got kicked")'>Kick</button></td>
-                                    <td>@elem.IngameName</td>
-                                    <td>@elem.Symbol</td>
-                                </tr>-->
-                                <tr id="player_table_row">
-                                    @if (@elem != _lobby.GetPlayerAt(0))
-                                    {
-                                        <td><button @onclick="@(() => RemovePlayerFromLobby(@elem))">Kick</button></td>
-                                    }
-                                    <td>
-                                        @{
-                                            var classText = "color:" + ColorTranslator.ToHtml(@elem.Color) + ";" + 
-                                                            "\nfont-size: large;" +
-                                                            "\nfont-weight: bold;" +
-                                                            "\ntext-shadow: 1px 1px 0px black;";
-                                            <div style="@classText">@elem.IngameName</div>
+                                @foreach (var elem in _lobby.GetAllPlayers())
+                                {
+                                    <!--<tr id="player_table_row">
+                                        <td><button onclick='MessageChatBox("@elem.ID got kicked")'>Kick</button></td>
+                                        <td>@elem.IngameName</td>
+                                        <td>@elem.Symbol</td>
+                                    </tr>-->
+                                    <tr id="player_table_row">
+                                        @if (@elem != _lobby.GetPlayerAt(0))
+                                        {
+                                            <td><button @onclick="@(() => RemovePlayerFromLobby(@elem))">Kick</button></td>
                                         }
-                                    </td>
-                                    <td>@elem.Symbol</td>
-                                </tr>
+                                        <td>
+                                            @{
+                                                var classText = "color:" + ColorTranslator.ToHtml(@elem.Color) + ";" +
+                                                                "\nfont-size: large;" +
+                                                                "\nfont-weight: bold;" +
+                                                                "\ntext-shadow: 1px 1px 0px black;";
+                                                <div style="@classText">@elem.IngameName</div>
+                                            }
+                                        </td>
+                                        <td>@elem.Symbol</td>
+                                    </tr>
+                                }
                             }
                         </table>
                         <!-- Content goes here -->
@@ -98,7 +103,7 @@
                 <!--<div style="border-style: solid; border-width: 1px; border-radius: 10px; background: #ffffff" class="text-center my-2">
                     http://www.brammens.com
                 </div>-->
-                <button id="link-copy" class="btn btn-primary-custom p-2" onclick="CopyText"> @InviteLink </button>
+                <button id="link-copy" class="btn btn-primary-custom p-2" onclick="CopyText">@InviteLink</button>
                 <button class="btn btn-primary-custom p-2" @onclick="CreateGame">
                     <svg class="bi bi-play-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z"/>
@@ -118,7 +123,7 @@
                         <!-- Content goes here -->
                         <table>
                             <tr>
-                                <!--<EditForm Model="@_lobby" OnValidSubmit="HandleDescriptionChange">
+                                <!--<EditForm Model="@_lobby">
                                     <label>Description</label>
                                     <InputText id="host_description" type="text" @bind-value="_lobby.Description"
                                                name="host_description" size="64" class="w-100 align-bottom"/>
@@ -137,18 +142,15 @@
 
 @code{
     private ConnectionHubClient _client;
-    static ILobby _lobby = new Source.LobbySpecificContent.Lobby();
+    static Source.LobbySpecificContent.ILobby _lobby;
 
     private string InviteLink { get; set; } = "tictactorus.de/game/";
     
-    private List<string> _messages = new List<string>();
+    private readonly List<string> _messages = new List<string>();
     private string _messageInput;
 
-    [Parameter] 
+    [Parameter]
     public string IdString { get; set; }
-
-    // for changing text-elements etc.
-    ElementReference DisplayDescriptionReference;
 }
 
 @functions{
@@ -162,27 +164,13 @@
     
     static void InitPlayerList()
     {
-        _lobby.AddPlayer(new HumanPlayer("Eleven", "Caaarl", Color.DodgerBlue, 3));
-        _lobby.AddPlayer(new HumanPlayer("Daniela", "Daisy", Color.Aquamarine, 120));
+        //_lobby.AddPlayer(new HumanPlayer("Eleven", "Caaarl", Color.DodgerBlue, 3));
+        //_lobby.AddPlayer(new HumanPlayer("Daniela", "Daisy", Color.Aquamarine, 120));
     }
 
     private void CreateGame()
     {
-        
         NavigationManager.NavigateTo("/ingame/" + IdString);
-    }
-    
-    static IEnumerable<IPlayer> PlayerList()
-    {
-        var lobbies = _lobby.GetAllPlayers();
-        foreach (var elem in lobbies)
-        {
-            yield return elem;
-        }
-    }
-    static void HandleDescriptionChange()
-    {
-        // TODO: HubConnection for Whole Lobby
     }
 
     void RemovePlayerFromLobby(IPlayer player)
@@ -201,11 +189,15 @@
         }
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        InitLobby();
+        //InitLobby();
         
         _client = new ConnectionHubClient(NavigationManager);
+        
+        _client.Connection.SendAsync("JoinLobby", IdString);
+
+        InviteLink += IdString;
 
         #region Listener Methods
         
@@ -218,13 +210,13 @@
         
         _client.Connection.On<string>("GetLobby", (lobby) =>
         {
-            _lobby = JsonConvert.DeserializeObject<ILobby>(lobby);
+            _lobby = JsonConvert.DeserializeObject<Source.LobbySpecificContent.Lobby>(lobby);
             StateHasChanged();
         });
 
         _client.Connection.On<IPlayer, bool>("PlayerListChanged", (player, isAdded) =>
         {
-            if (isAdded)
+            /*if (isAdded)
             {
                 _lobby.AddPlayer(player);
             }
@@ -232,12 +224,11 @@
             {
                 _lobby.RemovePlayer(player);
             }
-            StateHasChanged();
+            StateHasChanged();*/
         });
         
         #endregion
         
-        await _client.Connection.SendAsync("JoinLobby", IdString);
     }
 
     void SendChatMessage(KeyboardEventArgs e)

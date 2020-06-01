@@ -6,7 +6,7 @@ namespace TicTacTorus.Source.Generator
 {
     public class LobbyFactory
     {
-        public static ILobby CreateLobbyNoId(IPlayer owner)
+        public static Lobby CreateLobbyNoId(IPlayer owner)
         {
             return new Lobby(CreateLobbyName(owner), owner, CreateLobbyStatus(),
                 CreateLobbyDescription(owner), 5, true);
