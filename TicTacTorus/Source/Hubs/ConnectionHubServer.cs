@@ -54,12 +54,21 @@ namespace TicTacTorus.Source.Hubs
 
         #region Lobbies
 
+        /*
         async Task GetCurrentLobbies()
         {
             Dictionary<string, ILobby> list = Server.Instance.Lobbies;
             var lobbies = new List<ILobby>(list.Values);
             await Clients.Caller.SendAsync("ReceiveCurrentLobbies", lobbies);
+        }*/
+        async Task GetCurrentLobbies()
+        {
+            var list = new MockLobbyList().Lobbies;
+            var lobbies = new List<ILobby>(list.Values);
+            string lobbiesJSON = JsonConvert.SerializeObject(lobbies);
+            await Clients.Caller.SendAsync("ReceiveCurrentLobbies", lobbiesJSON);
         }
+        
         #endregion
 
         #endregion

@@ -2,6 +2,7 @@
 @using TicTacTorus.Source.LobbySpecificContent
 @using TicTacTorus.Source.Hubs
 @using Microsoft.AspNetCore.SignalR.Client
+@using Newtonsoft.Json
 @inject NavigationManager NavigationManager
 
 <div class="lobbies-grid my-5">
@@ -38,7 +39,7 @@
 @code
 {
     private ConnectionHubClient _client;
-    private LobbyList _list;
+    private LobbyList _list = new LobbyList();
 }
 
 @functions{
@@ -50,9 +51,9 @@
         /*
          * Method receives, from the server, a List with all current Lobbies as a LobbyList Object
          */
-        _client.Connection.On<LobbyList>("ReceiveCurrentLobbies", (list) =>
+        _client.Connection.On<string>("ReceiveCurrentLobbies", (list) =>
         {
-            _list = list;
+            _list = JsonConvert.DeserializeObject<LobbyList>(list);
             StateHasChanged();
         });
     }
