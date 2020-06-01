@@ -87,13 +87,22 @@
     protected override async Task OnInitializedAsync()
     {
         _client = new ConnectionHubClient(NavigationManager);
-        await _client.Connection.SendAsync("JoinLobby", IdString);
+        
         
     #region Client Listeners
+        
+        _client.Connection.On<string, string>("ReceiveMessage", (user, message) =>
+        {
+            var encodedMsg = $"{user}: {message}";
+            _messages.Add(encodedMsg);
+            StateHasChanged();
+        });
         
     //TODO Methods for the Clients In Game Logic 
         
     #endregion
+        
+        await _client.Connection.SendAsync("JoinLobby", IdString);
     }
 
     void SendChatMessage(KeyboardEventArgs e)
