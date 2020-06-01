@@ -20,6 +20,13 @@ namespace TicTacTorus.Source.Generator
             return lobby;
         }
 
+        public static ILobby CreateRandomLobbyWithId()
+        {
+            IPlayer owner = new HumanPlayer(AnonymPlayerNameGenerator.GetString(), ColorGenerator.GetColor(),
+                ByteGenerator.GetByte());
+            return CreateLobbyWithId(owner);
+        }
+
         private static ILobby AddId(ILobby l)
         {
             var id = Base64.Random();

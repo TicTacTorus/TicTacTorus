@@ -1,12 +1,33 @@
 ﻿﻿using System.Collections.Generic;
+ using System.Transactions;
+ using TicTacTorus.Source.Generator;
  using TicTacTorus.Source.PlayerSpecificContent;
  using TicTacTorus.Source.Utility;
 
  namespace TicTacTorus.Source.LobbySpecificContent
 {
-    public class MockLobbyList : ILobby
+    public class MockLobbyList : LobbyList
     {
+        public MockLobbyList()
+        {
+            UpdateLobbies();
+        }
+
         
+        private new Dictionary<string, ILobby> FetchAllActiveLobbies()
+        {
+            var lobbies = new Dictionary<string, ILobby>
+            {
+                {Base64.Random().ToString(), new Lobby("Daniel's Cube World", "Waiting", "Cubes", 8, false)},
+                {Base64.Random().ToString(), new Lobby("Tim's Sauna Landschaft", "Waiting", "Oh Boi...", 5, false)},
+                {Base64.Random().ToString(), new Lobby("Jack's DnD Dungeon", "Starting soon", "Only DnD Fans!", 12, false )}
+            };
+            var lob = LobbyFactory.CreateRandomLobbyWithId();
+            lobbies.Add(lob.Id.ToString() ,lob);
+            return lobbies;
+        }
+        
+        /*
         public MockLobbyList(string name, int currentCount, int maxCount, string status, string desc)
         {
             Name = name;
@@ -56,5 +77,6 @@
         {
             return _players;
         }
+        */
     }
 }
