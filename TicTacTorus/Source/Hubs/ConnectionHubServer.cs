@@ -36,7 +36,7 @@ namespace TicTacTorus.Source.Hubs
             // signal everyone, that player is added (=true)
             await Clients.Group(lobbyId.ToString()).SendAsync("PlayerListChanged", player, true);    
         }*/
-        async Task JoinLobby(string lobbyId)
+        public async Task JoinLobby(string lobbyId)
         {
             var lobby = Server.Instance.GetLobbyById(lobbyId);
             var jsLobby = JsonConvert.SerializeObject(lobby);

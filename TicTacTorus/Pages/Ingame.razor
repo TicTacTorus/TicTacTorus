@@ -88,8 +88,7 @@
     {
         _client = new ConnectionHubClient(NavigationManager);
         
-        
-    #region Client Listeners
+        #region Client Listeners
         
         _client.Connection.On<string, string>("ReceiveMessage", (user, message) =>
         {
@@ -98,9 +97,9 @@
             StateHasChanged();
         });
         
-    //TODO Methods for the Clients In Game Logic 
+        //TODO Methods for the Clients In Game Logic 
         
-    #endregion
+        #endregion
         
         await _client.Connection.SendAsync("JoinLobby", IdString);
     }

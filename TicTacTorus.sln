@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicTacTorus", "TicTacTorus\TicTacTorus.csproj", "{790AD976-2E3C-4EB5-A80F-3BC15A4717AE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicTacTorusTests", "TicTacTorusTests\TicTacTorusTests.csproj", "{9E7DDA6C-04E2-4F35-8FC0-325541A3DE73}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{790AD976-2E3C-4EB5-A80F-3BC15A4717AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{790AD976-2E3C-4EB5-A80F-3BC15A4717AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{790AD976-2E3C-4EB5-A80F-3BC15A4717AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E7DDA6C-04E2-4F35-8FC0-325541A3DE73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E7DDA6C-04E2-4F35-8FC0-325541A3DE73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E7DDA6C-04E2-4F35-8FC0-325541A3DE73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E7DDA6C-04E2-4F35-8FC0-325541A3DE73}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
