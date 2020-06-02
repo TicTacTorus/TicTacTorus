@@ -187,6 +187,7 @@
 
     protected override void OnParametersSet()
     {
+        //TODO send request to server
         if (Server.Instance.LobbyIdIsUnique(IdString))
         { 
             NavigationManager.NavigateTo("/?error=lobbyNotFound");
