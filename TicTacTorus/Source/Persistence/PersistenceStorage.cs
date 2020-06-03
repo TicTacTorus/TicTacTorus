@@ -14,11 +14,12 @@ namespace TicTacTorus.Source.Persistence
 {
 	public static class PersistenceStorage
 	{
-		private static  SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+		// private static  SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 		#region Save Methods
 
 		public static bool CreatePlayer(HumanPlayer createPlayer) //NUR notNull Variable
 		{
+			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			//neuer Player wird bei Registrierung der Datenbank hinzugefügt
 			if (createPlayer.ID != null ){
 				_con.Open();
@@ -49,6 +50,7 @@ namespace TicTacTorus.Source.Persistence
 		//If other users want to look at your account site
 		public static IPlayer LoadPlayer(string id)
 		{  
+			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			HumanPlayer player = new HumanPlayer();
 			_con.Open();
                                  
@@ -64,7 +66,7 @@ namespace TicTacTorus.Source.Persistence
 				player.IngameName = reader[3] as string;
 				//  player.Email = reader[4] as string;
 
-				// player.Color = Color.FromArgb((int) reader[6]);
+				player.Color = Color.FromArgb(Convert.ToInt32(reader[6]));
 				// player.Symbol = (byte) reader[7];
 			}
 			_con.Close();
@@ -73,6 +75,7 @@ namespace TicTacTorus.Source.Persistence
 
 		public static IPlayer LoadPlayer(string id, string pw)
 		{
+			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			HumanPlayer player = new HumanPlayer();
 			SaltedHash s = new SaltedHash(pw);
 
@@ -111,6 +114,7 @@ namespace TicTacTorus.Source.Persistence
 		//Checks if Password of userId is correct
 		public static bool VerifyPassword(string id, string pw)
 		{
+			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			SaltedHash s =new SaltedHash(pw);
 			var answer = false;
 			_con.Open();
@@ -133,7 +137,7 @@ namespace TicTacTorus.Source.Persistence
 		//Checks if id is already taken
 		public static bool CheckPlayerIdIsUnique(string id)
 		{
-
+			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			_con.Open();
                                  
 			SQLiteCommand command = new SQLiteCommand(_con);
@@ -154,6 +158,7 @@ namespace TicTacTorus.Source.Persistence
 
 		public static void UpdateInGameName(string id, string name)
 		{
+			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			_con.Open();
                                  
 			SQLiteCommand command = new SQLiteCommand(_con);
@@ -165,6 +170,7 @@ namespace TicTacTorus.Source.Persistence
 
 		public static void UpdateSaltHash(string id,byte[]newSalt,byte[]newHash)
 		{
+			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			_con.Open();
                                  
 			SQLiteCommand command = new SQLiteCommand(_con);
@@ -177,6 +183,7 @@ namespace TicTacTorus.Source.Persistence
         
 		public static void UpdateEmail(string id, string email)
 		{
+			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			_con.Open();
                                  
 			SQLiteCommand command = new SQLiteCommand(_con);
@@ -188,6 +195,7 @@ namespace TicTacTorus.Source.Persistence
 		
 		public static void UpdateColor(string id, Color color)
 		{
+			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			_con.Open();
                                  
 			SQLiteCommand command = new SQLiteCommand(_con);
@@ -199,6 +207,7 @@ namespace TicTacTorus.Source.Persistence
 		
 		public static void UpdatePlayerSymbol(string id, byte symbol)
 		{
+			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			_con.Open();
                                  
 			SQLiteCommand command = new SQLiteCommand(_con);
@@ -211,7 +220,7 @@ namespace TicTacTorus.Source.Persistence
 		#region Symbol
 
 		// Symbol, das hinter dem byte steht
-		public static Blob GetSybol(byte id)
+		public static Blob GetSymbol(byte id)
 		{
 			Blob blob = new Blob();
 			return blob;

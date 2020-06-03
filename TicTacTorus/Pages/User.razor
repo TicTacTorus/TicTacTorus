@@ -8,8 +8,6 @@
 @using System.Drawing
 @inject NavigationManager NavigationManager
 
-<!-- if user exists show page else error message -->
-
 <div class="my-5 lobbies-grid">
     <button class="btn-back" onclick="location.href ='/';">
         <svg class="bi bi-arrow-left" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -40,8 +38,8 @@
                     </div>
                     <div class="text-center my-3">
                         <b>Symbol Color</b>
-                        <input type="color" @bind="_color"/>
-                    <!-- ### -->
+                        <input type="color" value="@HexConverter(PersistenceStorage.LoadPlayer(userid).Color)"/>
+                        <!-- ### -->
                     </div>
                 </div>
                 <button class="btn btn-end-custom">Replay List</button>
@@ -88,12 +86,36 @@
     public string userid { get; set; }
     
     private ConnectionHubClient _client;
-    private static string _pic;
-    private Color _color;
+    private string _color;
+    IPlayer player;
 }
 
 @functions
 {
+    private static string HexConverter(System.Drawing.Color c)
+    {
+        String rtn = String.Empty;
+        try
+        {
+            rtn = "#" + c.R.ToString("X2") + c.G.ToString("X2") + c.B.ToString("X2");
+        }
+        catch (Exception ex)
+        {
+            //doing nothing
+        }
+
+        return rtn;
+    }
+    
+    protected override async void OnParametersSet()
+    {
+    //TODO send request to server
+        if (!PersistenceStorage.CheckPlayerIdIsUnique(userid))
+        { 
+            NavigationManager.NavigateTo("/?error=userDoesNotExist");
+        }
+    }
+    
     protected override void OnInitialized()
     {
         _client = new ConnectionHubClient(NavigationManager);
@@ -129,6 +151,4 @@
     {
         // TODO
     }
-    
-    
 }
