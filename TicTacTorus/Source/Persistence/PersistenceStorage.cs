@@ -1,10 +1,12 @@
-﻿using TicTacTorus.Pages;
+﻿using System.Collections.Generic;
+using TicTacTorus.Pages;
 using TicTacTorus.Source.Ingame;
 using TicTacTorus.Source.PlayerSpecificContent;
 using TicTacTorus.Source.Utility;
 using System.Data.SQLite;
 using System.Drawing;
-
+using System.Net.Mime;
+using System.Reflection.Metadata;
 using TicTacTorus.Source.LoginContent.Security;
 
 namespace TicTacTorus.Source.Persistence
@@ -203,6 +205,24 @@ namespace TicTacTorus.Source.Persistence
 			command.ExecuteNonQuery();
 			_con.Close();   
 		}
+		#endregion
+
+		#region Symbol
+
+		// Symbol, das hinter dem byte steht
+		public static Blob GetSybol(byte id)
+		{
+			Blob blob = new Blob();
+			return blob;
+		}
+
+		// List von allen Symbolen (für Auswahl in Lobby/User)
+		public static List<Blob> GetSymbols()
+		{
+			List<Blob> blobs = new List<Blob>();
+			return blobs;
+		}
+
 		#endregion
 	}
 }
