@@ -24,12 +24,6 @@
     <div class="row">
         <div class="col-sm-8 col-md-5 col-lg-4 mx-auto m-2">
             <div class="box w-100">
-                <div class="profile-pic text-center">
-                    <!-- if logged in player == userid -->
-                    <input type="file" id="profile-pic" @bind="_pic" name="profile-pic">
-                    // 
-                    <img src=_pic title="Change profile picture" alt="profile picture"/>
-                </div>
                 <div class="text-center mx-4">
                     <div class="my-3">
                         <b>
@@ -37,11 +31,9 @@
                     </div>
                     <div><b>In-Game Name</b></div>
                     <!-- if logged in player == userid inputs enabled else disabled ### -->
-                    <input type="text" placeholder="HankMcAwesome"/>
+                    <input type="text" placeholder=@PersistenceStorage.LoadPlayer(userid).IngameName/>
                     <div class="mt-2"><b>Password</b></div>
                     <input type="password" placeholder="**********"/>
-                    <div class="mt-2"><b>E-Mail</b></div>
-                    <input type="email" placeholder="hank@awesome.de"/>
                     <hr class="mx-2">
                     <div class="box-only mt-2 p-1" @onclick="ChangeSymbol">
                         <img src="/Media/Images/circle.png" title="Change profile picture" alt="profile picture"/>

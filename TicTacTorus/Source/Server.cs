@@ -1,5 +1,7 @@
 ﻿using System.Buffers.Text;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 using TicTacTorus.Source.Ingame;
 using TicTacTorus.Source.LobbySpecificContent;
@@ -9,8 +11,8 @@ namespace TicTacTorus.Source
 {
     public sealed class Server
     {
-        private readonly Dictionary<string, ILobby> _lobbies;
-        private readonly Dictionary<string, Game> _games;
+        private readonly IDictionary<string, ILobby> _lobbies;
+        private readonly IDictionary<string, Game> _games;
 
         #region Instance
 
@@ -19,8 +21,8 @@ namespace TicTacTorus.Source
 
         private Server()
         {
-            _lobbies = new Dictionary<string, ILobby>();
-            _games = new Dictionary<string, Game>();
+            _lobbies = new ConcurrentDictionary<string, ILobby>();
+            _games = new ConcurrentDictionary<string, Game>();
         }
         // Makes Singleton Thread-safe
         private class Nested
@@ -35,11 +37,11 @@ namespace TicTacTorus.Source
             internal static readonly Server Instance = new Server();
         }
         
-        public Dictionary<string,ILobby> Lobbies
+        public IDictionary<string,ILobby> Lobbies
         {
             get { return _lobbies; }
         }
-        public Dictionary<string,Game> Games
+        public IDictionary<string,Game> Games
         {
             get { return _games; }
         }
@@ -66,6 +68,12 @@ namespace TicTacTorus.Source
         public bool LobbyIdIsUnique(string id)
         {
             return !_lobbies.ContainsKey(id);
+        }
+
+        public IDictionary<string, ILobby> GetPublicLobbies()
+        {
+            return _lobbies.Where(kvp => kvp.Value.IsPrivate)
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
 
         #endregion
