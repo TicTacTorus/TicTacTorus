@@ -1,6 +1,7 @@
 ﻿using System.Buffers.Text;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 using TicTacTorus.Source.Ingame;
 using TicTacTorus.Source.LobbySpecificContent;
@@ -67,6 +68,12 @@ namespace TicTacTorus.Source
         public bool LobbyIdIsUnique(string id)
         {
             return !_lobbies.ContainsKey(id);
+        }
+
+        public IDictionary<string, ILobby> GetPublicLobbies()
+        {
+            return _lobbies.Where(kvp => kvp.Value.IsPrivate)
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
 
         #endregion
