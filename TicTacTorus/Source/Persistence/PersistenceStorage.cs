@@ -14,7 +14,7 @@ namespace TicTacTorus.Source.Persistence
 {
 	public static class PersistenceStorage
 	{
-		private static  SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTactTorus.dat");
+		private static  SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 		#region Save Methods
 
 		public static bool CreatePlayer(HumanPlayer createPlayer) //NUR notNull Variable
@@ -133,19 +133,20 @@ namespace TicTacTorus.Source.Persistence
 		//Checks if id is already taken
 		public static bool CheckPlayerIdIsUnique(string id)
 		{
-			bool result = false;
+
 			_con.Open();
                                  
 			SQLiteCommand command = new SQLiteCommand(_con);
             
 			command.CommandText = $"select count(*) from User where loginName = '"+id+"';";
-			var reader = command.ExecuteReader();
+			
 			if (Convert.ToInt32(command.ExecuteScalar()) > 0)
 			{
+				_con.Close(); 
 				return true;
 			}
 			_con.Close(); 
-			return result;
+			return false;
 		}
 
 		#endregion
