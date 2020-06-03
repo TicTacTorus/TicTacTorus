@@ -2,8 +2,11 @@
 using System.Data.SQLite;
 using System.Net.Mime;
 using System.Numerics;
+using System.Threading.Tasks;
+//using System.Windows;
 using Blazor.Extensions;
 using Blazor.Extensions.Canvas;
+using Blazor.Extensions.Canvas.Canvas2D;
 using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk;
 using TicTacTorus.Source.Ingame.GridSpecificContent.Position;
 
@@ -14,93 +17,120 @@ namespace TicTacTorus.Source.Canvas
         private Grid _data;
         //private Image[] _symbols;
 
-        private const int DefaultZoomSize = 32;
+        private const int DefaultZoomSize = 100;
         //4th root of 2: zooming in 4 times doubles the zoom.
         private const double ZoomFactor = 1.18920711500272;
-        private const double ZoomMax = 8.0;
+        private const double ZoomMax = 2;
         private const double ZoomMin = 1/ZoomMax;
         
         private double _zoom = 1;
-        private Vector<double> _viewPoint = new Vector<double>(new double[] {0, 0});
+        private double _viewX = 0, _viewY = 0;
         
         public GameRenderer(Grid grid /*, params Image[] symbols*/)
         {
             _data = grid;
         }
 
-        public async void Draw(BECanvasComponent canvas)
+        public async Task Draw(int width, int height, Canvas2DContext canvas)
         {
-            var symbolSize = (int)(DefaultZoomSize * _zoom);
+            //Console.WriteLine("GameRenderer::Draw(" + width + ", " + height + ", canvas)");
 
-            var visible = new Vector<double>(new double[]{canvas.Width, canvas.Height}) * (DefaultZoomSize / _zoom);
-            var center = _viewPoint * (DefaultZoomSize / _zoom);
-            var begin = center + visible * 0.5;
-            var end   = center - visible * 0.5;
+            await canvas.BeginBatchAsync();
+            await canvas.SetFillStyleAsync("White");
+            await canvas.FillRectAsync(0, 0, width, height);
             
-            for (var y = (int) begin[1]; y < end[1]; ++y)
-            {
-                var drawY = GetTileDrawY(y);
-                DrawLine(canvas, 0, drawY, (int)canvas.Height, drawY);
-            }
-            for (var x = (int) begin[0]; x < end[0]; ++x)
-            {
-                var deltaX = x - _viewPoint[0];
-                var drawX = (int)(deltaX * symbolSize);
-                DrawLine(canvas, drawX, 0, drawX, (int)canvas.Width);
-            }
+            var symbolSize = DefaultZoomSize * _zoom;
+
+            var visibleX = width  / symbolSize;
+            var visibleY = height / symbolSize;
+            var centerX = _viewX / symbolSize;
+            var centerY = _viewY / symbolSize;
+            var top    = centerY - visibleY / 2;
+            var bottom = centerY + visibleY / 2;
+            var left   = centerX - visibleX / 2;
+            var right  = centerX + visibleX / 2;
             
-            GlobalPos gridPos = new GlobalPos();
-            for (gridPos.Y = (int)begin[1]; gridPos.Y < end[1]; ++gridPos.Y)
+            await canvas.BeginPathAsync();
+            for (var y = (int) top; y < bottom; ++y)
             {
-                //apparently vectors can't be constructed partially, since they have no this[] setters... bah!
-                var drawY = GetTileDrawY(gridPos.Y);
-                for (gridPos.X = (int)begin[0]; gridPos.X < end[0]; ++gridPos.X)
+                //horizontal lines
+                var drawY = GetTileDrawY(y, height);
+                await DrawLine(canvas, 0, drawY, width, drawY);
+            }
+            for (var x = (int) left; x < right; ++x)
+            {
+                //vertical lines
+                var drawX = GetTileDrawX(x, width);
+                await DrawLine(canvas, drawX, 0, drawX, height);
+            }
+            await canvas.StrokeAsync();
+            
+            var gridPos = new GlobalPos();
+            for (gridPos.Y = (int)left; gridPos.Y < right; ++gridPos.Y)
+            {
+                var drawY = GetTileDrawY(gridPos.Y, height);
+                for (gridPos.X = (int)left; gridPos.X < right; ++gridPos.X)
                 {
-                    var drawX = GetTileDrawX(gridPos.X);
+                    var drawX = GetTileDrawX(gridPos.X, width);
                     var owner = _data.GetSymbol(gridPos);
-                    DrawSymbol(canvas, drawX, drawY, symbolSize, symbolSize, owner);
+                    await DrawSymbol(canvas, drawX, drawY, (int)symbolSize, (int)symbolSize, owner);
                 }
             }
+            await canvas.EndBatchAsync();
         }
 
-        private void DrawSymbol(BECanvasComponent canvas, int x, int y, int width, int height, byte owner)
+        private async Task DrawSymbol(Canvas2DContext canvas, int x, int y, int width, int height, byte owner)
         {
-            //todo
+            if (owner == BasicChunk.NoOwner)
+            {
+                return;
+            }
             
+            Console.WriteLine("GameRenderer::DrawSymbol(canvas, " + x + ", " + y + ", " + width + ", " + height + ", 0x" + owner.ToString("x2") + ")");
+            var border = 0.1;
+            int x1 = (int)(x + width  * border), y1 = (int) (y + height * border);
+            int w1 = (int) (width * (1 - 2 * border)), h1 = (int) (height * (1 - 2 * border));
+
+            await canvas.SetFillStyleAsync("black");
+            await canvas.FillRectAsync(x1, y1, w1, h1);
+            
+            //await DrawLine(canvas, x1, y1, x1+w1, y1+h1);
+            //await DrawLine(canvas, x1, y1+h1, x1+w1, y1);
         }
 
-        private void DrawLine(BECanvasComponent canvas, int x1, int y1, int x2, int y2)
+        private async Task DrawLine(Canvas2DContext canvas, int x1, int y1, int x2, int y2)
         {
-            //todo
-            //MoveTo(x1, y1);
-            //LineTo(x2, y2);
+            //Console.WriteLine("GameRenderer::DrawLine(canvas, " + x1 + ", " + y1 + ", " + x2 + ", " + y2 + ")");
+            await canvas.MoveToAsync(x1, y1);
+            await canvas.LineToAsync(x2, y2);
         }
 
-        int GetTileDrawX(int x)
+        private int GetTileDrawX(int x, int width = 0)
         {
-            var symbolSize = (int)(DefaultZoomSize * _zoom);
-            var deltaX = x - _viewPoint[0];
-            return (int)(deltaX * symbolSize);
+            var symbolSize = DefaultZoomSize * _zoom;
+            var delta = x - _viewX;
+            return (int)(delta * symbolSize) + width/2;
+        }
+
+        private int GetTileDrawY(int y, int height = 0)
+        {
+            var symbolSize = DefaultZoomSize * _zoom;
+            var delta = y - _viewY;
+            return (int) (delta * symbolSize) + height / 2;
+        }
+
+        public void MoveZoomedViewpoint(double dx, double dy)
+        {
+            MoveViewpoint(dx * (1/_zoom), dy * (1/_zoom));
         }
         
-        int GetTileDrawY(int y)
+        public void MoveViewpoint(double dx, double dy)
         {
-            var symbolSize = (int)(DefaultZoomSize * _zoom);
-            var deltaX = y - _viewPoint[1];
-            return (int)(deltaX * symbolSize);
+            _viewX += dx;
+            _viewY += dy;
         }
 
-        public void MoveZoomedViewpoint(Vector<double> delta)
-        {
-            MoveViewpoint(delta * (1 / _zoom));
-        }
-        
-        public void MoveViewpoint(Vector<double> delta)
-        {
-            _viewPoint += delta;
-        }
-
-        public void Zoom(int steps)
+        public void Zoom(int steps, double fixPointX = 0, double fixPointY = 0)
         {
             if (steps == 0)
             {
@@ -108,16 +138,17 @@ namespace TicTacTorus.Source.Canvas
             }
             if (steps > 0)
             {
-                ZoomIn(steps);
+                ZoomIn(steps, fixPointX, fixPointY);
             }
             else
             {
-                ZoomOut(-steps);
+                ZoomOut(-steps, fixPointX, fixPointY);
             }
         }
         
-        public void ZoomIn(int steps = 1)
+        public void ZoomIn(int steps = 1, double fixPointX = 0, double fixPointY = 0)
         {
+            var oldZoom = _zoom;
             for (var i = 0; i < steps; ++i)
             {
                 _zoom *= ZoomFactor;
@@ -127,10 +158,13 @@ namespace TicTacTorus.Source.Canvas
                     break;
                 }
             }
+
+            AdjustViewpoint(oldZoom, fixPointX, fixPointY);
         }
 
-        public void ZoomOut(int steps = 1)
+        public void ZoomOut(int steps = 1, double fixPointX = 0, double fixPointY = 0)
         {
+            var oldZoom = _zoom;
             for (var i = 0; i < steps; ++i)
             {
                 _zoom /= ZoomFactor;
@@ -140,6 +174,20 @@ namespace TicTacTorus.Source.Canvas
                     break;
                 }
             }
+
+            AdjustViewpoint(oldZoom, fixPointX, fixPointY);
+        }
+
+        private void AdjustViewpoint(double oldZoom, double fixPointX, double fixPointY)
+        {
+            //todo: future me, look further into this, it seems a bit fucky for now.
+            
+            var change = _zoom / oldZoom;
+            var destX = _viewX + fixPointX;
+            var destY = _viewY + fixPointY;
+            
+            _viewX += (destX - _viewX) * (1 - 1 / change);
+            _viewY += (destY - _viewY) * (1 - 1 / change);
         }
     }
 }

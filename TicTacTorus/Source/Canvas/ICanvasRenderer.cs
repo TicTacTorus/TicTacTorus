@@ -1,9 +1,11 @@
-﻿using Blazor.Extensions;
+﻿using System.Threading.Tasks;
+using Blazor.Extensions;
+using Blazor.Extensions.Canvas.Canvas2D;
 
 namespace TicTacTorus.Source.Canvas
 {
     public interface ICanvasRenderer
     {
-        void Draw(BECanvasComponent canvas);
+        Task Draw(int width, int height, Canvas2DContext canvas);
     }
 }

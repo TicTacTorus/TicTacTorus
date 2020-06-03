@@ -2,18 +2,27 @@
 @page "/ingame/{IdString}"
 @using Microsoft.AspNetCore.SignalR.Client
 @using TicTacTorus.Source.Hubs
+@using Blazor.Extensions.Canvas.Canvas2D
+@using Blazor.Extensions
+@using TicTacTorus.Source.Canvas
+@using TicTacTorus.Source.Generator
+@using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk
+@using TicTacTorus.Source.Ingame.GridSpecificContent.Position
+@using System.Security.Principal
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime;
 
-<div class="canvas">
-
+<div class="canvas" onresize="stretch_first_canvas" @onwheel="MouseScrollHandler">
+    <BECanvas @ref="_canvasGame" Width="640" Height="480"></BECanvas>
 </div>
 
 
 <div class="nav-container float-right position-absolute" style="top: 0px; right: 0px">
     <div class="box box-map">
-        <div class="p-5 text-center">
+        <!--<div class="p-5 text-center">
             Minimap Content
-        </div>
+        </div>-->
+        <BECanvas @ref="_canvasMap" Width="100" Height="100"></BECanvas>
     </div>
                 
     <div class=" box box-map">
@@ -57,10 +66,23 @@
     private string _messageInput;
     
     [Parameter] public string IdString { get; set; }
+    
+    
+    //canvas stuff
+    private static Canvas2DContext _contextGame, _contextMap;
+    protected static BECanvasComponent _canvasGame, _canvasMap;
+
+    private static Grid _grid = GenerateTempMockGrid();
+    private static GlobalPos _lastChange = new GlobalPos(0, 0);
+
+    private static GameRenderer _rendererGame = new GameRenderer(_grid);
+    private static MapRenderer _rendererMap = new MapRenderer(null);
+
 }
 
 @functions
 {
+    #region Navigation Stuff
     
     private void NavClick()
     {
@@ -103,6 +125,9 @@
         
         await _client.Connection.SendAsync("JoinLobby", IdString);
     }
+    
+    #endregion
+    #region Site Functionality
 
     void SendChatMessage(KeyboardEventArgs e)
     {
@@ -125,5 +150,91 @@
 
     public bool IsConnected =>
         _client.Connection.State == HubConnectionState.Connected;
+
+    public async void MouseScrollHandler(WheelEventArgs evnt)
+    {
+        if (Math.Abs(evnt.DeltaY) < 0.0001)
+        {
+            return;
+        }
+
+        var width = await JSRuntime.InvokeAsync<double>("client_width");
+        var height = await JSRuntime.InvokeAsync<double>("client_height");
+        var dx = evnt.ClientX - width/2;
+        var dy = evnt.ClientY - height/2;
+        
+        _rendererGame.Zoom(-Math.Sign(evnt.DeltaY));
+        await RedrawGame();
+    }
+    
+    #endregion
+    #region Canvas
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        //todo current problems:
+        //resizing the window also needs to trigger a resize of the canvas.
+        //moving the viewpoint of the game renderer stops new lines from rendering.
+
+        
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("stretch_first_canvas");
+            var width = await JSRuntime.InvokeAsync<int>("client_width");
+            var height = await JSRuntime.InvokeAsync<int>("client_height");
+
+            _canvasGame.Width = width;
+            _canvasGame.Height = height;
+        }
+        
+        _contextGame = await _canvasGame.CreateCanvas2DAsync();
+        _contextMap = await _canvasMap.CreateCanvas2DAsync();
+        
+        if (firstRender)
+        {
+            await RedrawGame();
+            await RedrawMap();
+            
+            await _rendererGame.Draw((int)_canvasGame.Width, (int)_canvasGame.Height, _contextGame);
+            await _rendererMap.Draw((int) _canvasMap.Width, (int) _canvasMap.Height, _contextMap);
+        }
+    }
+
+    public static async Task RedrawGame()
+    {
+        _contextGame = await _canvasGame.CreateCanvas2DAsync();
+        await _rendererGame.Draw((int)_canvasGame.Width, (int)_canvasGame.Height, _contextGame);
+    }
+    
+    public static async Task RedrawMap()
+    {
+        _contextMap = await _canvasMap.CreateCanvas2DAsync();
+        await _rendererMap.Draw((int)_canvasMap.Width, (int)_canvasMap.Height, _contextMap);
+    }
+    
+    public static Grid GenerateTempMockGrid()
+    {
+        //todo remove me once we synchronize the real grid!
+        const int width = 50, height = 50, players = 20;
+        var items = (int)Math.Sqrt(width * height);
+        
+        var grid = new Grid(width, height);
+        var rnd = new Random();
+        var posGen = new PositionGenerator(rnd);
+        grid.SetSymbol(new GlobalPos(0, 0), 0);
+        for (var i = 0; i < items; ++i)
+        {
+            var pos = posGen.GetGlobalPos(width, height);
+            grid.SetSymbol(pos, (byte)rnd.Next(players), false);
+        }
+        return grid;
+    }
+
+    void CanvasResizeHandler()
+    {
+        Console.WriteLine("Resize, bitches!");
+    }
+    
+    #endregion
     
 }

@@ -111,8 +111,11 @@ using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk.Iterator;
         
         public byte GetSymbol(GlobalPos pos)
         {
-            var local = unchecked(new LocalPos((byte)pos.X, (byte)pos.Y));
-            var chunk = GetChunkAt(pos);
+            //automatic wraparound for easier usage.
+            var inside = new GlobalPos(PositiveMod(pos.X, Width), PositiveMod(pos.Y, Height));
+            
+            var local = unchecked(new LocalPos((byte)inside.X, (byte)inside.Y));
+            var chunk = GetChunkAt(inside);
             return chunk.GetSymbol(local);
         }
 
