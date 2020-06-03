@@ -64,8 +64,8 @@ namespace TicTacTorus.Source.Persistence
 				player.IngameName = reader[3] as string;
 				//  player.Email = reader[4] as string;
 
-				player.Color = Color.FromArgb((int) reader[6]);
-				player.Symbol = (byte) reader[7];
+				// player.Color = Color.FromArgb((int) reader[6]);
+				// player.Symbol = (byte) reader[7];
 			}
 			_con.Close();
 			return player;
