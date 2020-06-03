@@ -14,7 +14,7 @@ namespace TicTacTorus.Source.Persistence
 {
 	public static class PersistenceStorage
 	{
-		private static  SQLiteConnection  _con = new SQLiteConnection("Data Source=test.dat");
+		private static  SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTactTorus.dat");
 		#region Save Methods
 
 		public static bool CreatePlayer(HumanPlayer createPlayer) //NUR notNull Variable
