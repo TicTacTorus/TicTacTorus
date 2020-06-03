@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TicTacTorus.Pages;
 using TicTacTorus.Source.Ingame;
 using TicTacTorus.Source.PlayerSpecificContent;
@@ -139,9 +140,9 @@ namespace TicTacTorus.Source.Persistence
             
 			command.CommandText = $"select count(*) from User where loginName = '"+id+"';";
 			var reader = command.ExecuteReader();
-			if ((int) reader[0] == 1)
+			if (Convert.ToInt32(command.ExecuteScalar()) > 0)
 			{
-				result = true;
+				return true;
 			}
 			_con.Close(); 
 			return result;
