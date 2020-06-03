@@ -208,7 +208,6 @@ namespace TicTacTorus.Source.Persistence
 			_con.Close();   
 		}
 		#endregion
-
 		#region Symbol
 
 		// Symbol, das hinter dem byte steht
