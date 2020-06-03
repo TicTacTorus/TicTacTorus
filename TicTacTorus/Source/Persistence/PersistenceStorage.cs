@@ -14,7 +14,7 @@ namespace TicTacTorus.Source.Persistence
 {
 	public static class PersistenceStorage
 	{
-		private static  SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTactTorus.dat");
+		private static  SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 		#region Save Methods
 
 		public static bool CreatePlayer(HumanPlayer createPlayer) //NUR notNull Variable
@@ -64,8 +64,8 @@ namespace TicTacTorus.Source.Persistence
 				player.IngameName = reader[3] as string;
 				//  player.Email = reader[4] as string;
 
-				player.Color = Color.FromArgb((int) reader[6]);
-				player.Symbol = (byte) reader[7];
+				// player.Color = Color.FromArgb((int) reader[6]);
+				// player.Symbol = (byte) reader[7];
 			}
 			_con.Close();
 			return player;
