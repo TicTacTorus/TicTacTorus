@@ -12,22 +12,22 @@ namespace TicTacTorus.Source.Generator
                 CreateLobbyDescription(owner), 5, true);
         }
         
-        public static ILobby CreateLobbyWithId(IPlayer owner)
+        public static Lobby CreateLobbyWithId(IPlayer owner)
         {
-            ILobby lobby = new Lobby(CreateLobbyName(owner), owner, CreateLobbyStatus(),
+            Lobby lobby = new Lobby(CreateLobbyName(owner), owner, CreateLobbyStatus(),
                 CreateLobbyDescription(owner), 5, true);
             lobby = AddId(lobby);
             return lobby;
         }
 
-        public static ILobby CreateRandomLobbyWithId()
+        public static Lobby Lobby()
         {
             IPlayer owner = new HumanPlayer(AnonymPlayerNameGenerator.GetString(), ColorGenerator.GetColor(),
                 ByteGenerator.GetByte());
             return CreateLobbyWithId(owner);
         }
 
-        private static ILobby AddId(ILobby l)
+        private static Lobby AddId(Lobby l)
         {
             var id = Base64.Random();
             if (Server.Instance.LobbyIdIsUnique(id.ToString()))

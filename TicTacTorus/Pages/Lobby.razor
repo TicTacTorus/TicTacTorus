@@ -13,10 +13,7 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 
-@{
-    // if angemeldet 
-    // else generiere Name/Player
-}
+
 <div class="my-5 lobbies-grid">
     <button class="btn-back" onclick="location.href ='/';">
         <svg class="bi bi-arrow-left" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -28,8 +25,19 @@
     {
         <h1 class="headers my-auto">@_lobby.Name</h1>
     }
-
 </div>
+
+@if(!IsConnected){
+    <div class="d-flex justify-content-center">
+        An Error occoured.<br/>
+        We could not build a connection to the server.<br/>
+        Please try reloading.
+    </div>
+    
+    // if angemeldet 
+    // else generiere Name/Player
+} else {
+    
 @if (_lobby != null)
 {
     <section contenteditable="true" class="text-center my-3">
@@ -138,13 +146,13 @@
         </div>
     </div>
 </div>
-
+}
 @code{
     [Parameter]
     public string IdString { get; set; }
     
     private ConnectionHubClient _client;
-    static ILobby _lobby;
+    static Source.LobbySpecificContent.Lobby _lobby;
     
     private string InviteLink { get; set; } = "tictactorus.de/game/";
     
@@ -213,11 +221,11 @@
         
         _client.Connection.On<string>("GetLobby", (lobby) =>
         {
-            _lobby = JsonConvert.DeserializeObject<Source.LobbySpecificContent.Lobby>(lobby);
+            _lobby = System.Text.Json.JsonSerializer.Deserialize<Source.LobbySpecificContent.Lobby>(lobby);
             StateHasChanged();
         });
 
-        _client.Connection.On<IPlayer, bool>("PlayerListChanged", (player, isAdded) =>
+        _client.Connection.On<string, bool>("PlayerListChanged", (player, isAdded) =>
         {
             /*if (isAdded)
             {
@@ -232,7 +240,7 @@
         
         #endregion
         
-        await _client.Connection.SendAsync("JoinLobby", IdString);
+        _client.Connection.SendAsync("JoinLobby", IdString);
         
     }
 

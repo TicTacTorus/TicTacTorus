@@ -9,6 +9,7 @@ using TicTacTorus.Source.LobbySpecificContent;
 using TicTacTorus.Source.Persistence;
 using TicTacTorus.Source.PlayerSpecificContent;
 using TicTacTorus.Source.Utility;
+using System.Text.Json;
 
 namespace TicTacTorus.Source.Hubs
 {
@@ -38,8 +39,8 @@ namespace TicTacTorus.Source.Hubs
         }*/
         public async Task JoinLobby(string lobbyId)
         {
-            var lobby = Server.Instance.GetLobbyById(lobbyId);
-            var jsLobby = JsonConvert.SerializeObject(lobby);
+            var lobby = (Lobby) Server.Instance.GetLobbyById(lobbyId);
+            var jsLobby = System.Text.Json.JsonSerializer.Serialize<Lobby>(lobby);
             await Clients.Caller.SendAsync("GetLobby", jsLobby);
             await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
         }
@@ -53,8 +54,7 @@ namespace TicTacTorus.Source.Hubs
 
         public async Task GetCurrentLobbies()
         {
-            var list = new LobbyList().Lobbies;
-            var lobbies = new List<ILobby>(list.Values);
+            var lobbies = new LobbyList().Lobbies;
             var lobbiesJson = JsonConvert.SerializeObject(lobbies);
             await Clients.Caller.SendAsync("ReceiveCurrentLobbies", lobbiesJson);
         }
@@ -83,12 +83,18 @@ namespace TicTacTorus.Source.Hubs
             }
             catch (SQLiteException e)
             {
-                await Clients.Caller.SendAsync("LoginFailed", "Login failed. Wrong userID or Password.");
+                await Clients.Caller.SendAsync("LoginFailed", "Login failed. Wrong userID or Password:\n"+e);
             }
 
             await Clients.Client(Context.ConnectionId)
                 .SendAsync("ReceiveConfirmation", playerFromDatabase);
         }
+
+        #endregion
+
+        #region User
+
+        
 
         #endregion
     }
