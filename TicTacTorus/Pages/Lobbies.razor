@@ -53,7 +53,14 @@
          */
         _client.Connection.On<string>("ReceiveCurrentLobbies", (list) =>
         {
-            _list.Lobbies = new List<ILobby>(JsonConvert.DeserializeObject<List<Source.LobbySpecificContent.Lobby>>(list));
+            try
+            {
+                _list.Lobbies = new List<ILobby>(JsonConvert.DeserializeObject<List<Source.LobbySpecificContent.Lobby>>(list));
+            }
+            catch (JsonException e)
+            {
+                Console.WriteLine("_______TSSSSS there is an error, again: "+e);
+            }
             StateHasChanged();
         });
     }

@@ -82,7 +82,7 @@ namespace TicTacTorus.Source.Hubs
             }
             catch (SQLiteException e)
             {
-                await Clients.Caller.SendAsync("LoginFailed", "Login failed. Wrong userID or Password.");
+                await Clients.Caller.SendAsync("LoginFailed", "Login failed. Wrong userID or Password: "+e);
             }
 
             await Clients.Client(Context.ConnectionId)
