@@ -73,20 +73,16 @@ namespace TicTacTorus.Source.Hubs
             IPlayer playerFromDatabase = null;
             try
             {
-                // playerFromDatabase IPersistanceStorage.GetPlayer(playerID, playerPW);
-                playerFromDatabase = PersistenceStorage.LoadPlayer(playerId, playerPw);
+                playerFromDatabase = PersistenceStorage.LoadPlayer(playerId);
                     
-                string playerJson = JsonConvert.SerializeObject(playerFromDatabase);
+                string playerJson = JsonConvert.SerializeObject((HumanPlayer)playerFromDatabase);
                 await Clients.Client(Context.ConnectionId)
-                    .SendAsync("ReceiveConfirmation", playerJson);
+                    .SendAsync("ReceiveLoginConfirmation", playerJson);
             }
             catch (SQLiteException e)
             {
                 await Clients.Caller.SendAsync("LoginFailed", "Login failed. Wrong userID or Password: "+e);
             }
-
-            await Clients.Client(Context.ConnectionId)
-                .SendAsync("ReceiveConfirmation", playerFromDatabase);
         }
 
         #endregion

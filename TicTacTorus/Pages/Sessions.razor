@@ -1,0 +1,69 @@
+﻿@page "/Session"
+@using Microsoft.AspNetCore.ProtectedBrowserStorage
+@using TicTacTorus.Source
+@using TicTacTorus.Source.Hubs
+@inject NavigationManager NavigationManager
+@inject ProtectedSessionStorage ProtectedSessionStore
+
+<div>
+    <!-- Game goes here -->
+</div>
+
+<div>
+    @if (_user != null)
+    {
+        <h2>WELCOME BACK, @_user.IngameName</h2>
+    }
+</div>
+
+    <p>Current count: <strong>@currentCount</strong></p>
+
+    <button @onclick="IncrementCount">Increment</button>
+
+
+
+@code
+{
+    private ConnectionHubClient _client;
+
+    private HumanPlayer _user;
+
+    protected int? currentCount;
+}
+
+@functions
+{
+    protected async Task OnInitializedAysnc()
+    {
+        _client = new ConnectionHubClient(NavigationManager);
+        
+        LoadStateAsync();
+        
+        StateHasChanged();
+    }
+    
+    private bool isConnected = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+    // When execution reaches this point, the first *interactive* render
+    // is complete. The component has an active connection to the browser.
+            isConnected = true;
+            await LoadStateAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadStateAsync()
+    {
+        _user = await ProtectedSessionStore.GetAsync<HumanPlayer>("LoginData");
+    }
+
+    private async Task IncrementCount()
+    {
+        currentCount++;
+        await ProtectedSessionStore.SetAsync("count", currentCount);
+    }
+}

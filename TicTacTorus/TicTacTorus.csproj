@@ -88,6 +88,12 @@
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
+      <Content Update="Pages\Sessions.razor">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      </Content>
+      <Content Update="Pages\TestLogin.razor">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      </Content>
     </ItemGroup>
 
     <ItemGroup>
@@ -100,6 +106,7 @@
 
     <ItemGroup>
       <PackageReference Include="Blazor.Extensions.Canvas" Version="1.1.0-preview1" />
+      <PackageReference Include="Microsoft.AspNetCore.ProtectedBrowserStorage" Version="0.1.0-alpha.19521.1" />
       <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="3.1.4" />
       <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
       <PackageReference Include="NUnit3TestAdapter" Version="3.17.0-beta.1" />
