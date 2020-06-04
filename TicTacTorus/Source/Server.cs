@@ -11,7 +11,7 @@ namespace TicTacTorus.Source
 {
     public sealed class Server
     {
-        private readonly IDictionary<string, Lobby> _lobbies;
+        private readonly IDictionary<string, ILobby> _lobbies;
         private readonly IDictionary<string, Game> _games;
 
         #region Instance
@@ -21,7 +21,7 @@ namespace TicTacTorus.Source
 
         private Server()
         {
-            _lobbies = new ConcurrentDictionary<string, Lobby>();
+            _lobbies = new ConcurrentDictionary<string, ILobby>();
             _games = new ConcurrentDictionary<string, Game>();
         }
         // Makes Singleton Thread-safe
@@ -37,7 +37,7 @@ namespace TicTacTorus.Source
             internal static readonly Server Instance = new Server();
         }
         
-        public IDictionary<string,Lobby> Lobbies
+        public IDictionary<string,ILobby> Lobbies
         {
             get { return _lobbies; }
         }
@@ -49,7 +49,7 @@ namespace TicTacTorus.Source
         #endregion
         #region Lobby
 
-        public bool AddLobby(Lobby lobby)
+        public bool AddLobby(ILobby lobby)
         {
             if (LobbyIdIsUnique(lobby.Id.ToString()))
             {
@@ -60,7 +60,7 @@ namespace TicTacTorus.Source
             return false;
         }
 
-        public Lobby GetLobbyById(string id)
+        public ILobby GetLobbyById(string id)
         {
             return _lobbies[id];
         }
@@ -70,7 +70,7 @@ namespace TicTacTorus.Source
             return !_lobbies.ContainsKey(id);
         }
 
-        public IDictionary<string, Lobby> GetPublicLobbies()
+        public IDictionary<string, ILobby> GetPublicLobbies()
         {
             return _lobbies.Where(kvp => kvp.Value.IsPrivate)
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
@@ -104,13 +104,13 @@ namespace TicTacTorus.Source
         #region ConvertLobbyToGame
 
         /// <summary>
-        /// Create and save a new Instance of Game based on Lobby.
+        /// Create and save a new Instance of Game based on ILobby.
         /// </summary>
-        /// <param name="lobby">An Lobby instance</param>
+        /// <param name="lobby">An ILobby instance</param>
         /// <returns>
         /// new Game(lobby), null if ID of lobby was not unique or lobby could not be removed from list
         /// </returns>
-        public Game CreateGameFromLobby(Lobby lobby)
+        public Game CreateGameFromLobby(ILobby lobby)
         {
             Game game = null;
             if (_games.ContainsKey(lobby.Id.ToString()) && _lobbies.Remove(lobby.Id.ToString()))

@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Newtonsoft.Json;
 using TicTacTorus.Source.PlayerSpecificContent;
 using TicTacTorus.Source.Utility;
 
 namespace TicTacTorus.Source.LobbySpecificContent
 {
-    public class Lobby
+    public class Lobby : ILobby
     {
         [Required]
         [StringLength(10, ErrorMessage = "Description is too long.")] 
@@ -47,7 +46,7 @@ namespace TicTacTorus.Source.LobbySpecificContent
         {
             Id = id;
         }
-
+        
         public bool AddPlayer(IPlayer player)
         {
             if (_players.Count < MaxPlayerCount)

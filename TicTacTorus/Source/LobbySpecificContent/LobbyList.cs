@@ -7,16 +7,16 @@ namespace TicTacTorus.Source.LobbySpecificContent
 {
     public class LobbyList
     {
-        public List<Lobby> Lobbies { get; set; }
+        public IDictionary<string, ILobby> Lobbies { get; protected set; }
 
         public LobbyList()
         {
             UpdateLobbies();
         }
 
-        private List<Lobby> FetchAllActiveLobbies()
+        private IDictionary<string, ILobby> FetchAllActiveLobbies()
         {
-            var lobbies = Server.Instance.GetPublicLobbies().Values.ToList();
+            var lobbies = Server.Instance.GetPublicLobbies();
 
             return lobbies;
         }

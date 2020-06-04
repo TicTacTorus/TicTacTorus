@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Newtonsoft.Json;
 
 namespace TicTacTorus.Source.Utility
 {
@@ -24,7 +23,6 @@ namespace TicTacTorus.Source.Utility
             init.CopyTo(Data, 0);
         }
         
-        [JsonConstructor]
         public Base64(string init)
         {
             //make sure length is divisible by 4, add zero padding

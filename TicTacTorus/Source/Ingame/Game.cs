@@ -31,7 +31,7 @@ namespace TicTacTorus.Source.Ingame
         #endregion
         #region Constructors
 
-        public Game(Lobby lobby)
+        public Game(ILobby lobby)
         {
             StartTime = DateTime.Now;
             _players = lobby.GetAllPlayers();
