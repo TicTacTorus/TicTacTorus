@@ -17,15 +17,15 @@ namespace TicTacTorus.Source.LobbySpecificContent
         public Base64 Id { get; set; }
         public bool IsPrivate { get; set; }
 
-        private IList<IPlayer> _players;
+        public List<IPlayer> Players { get; set; }
 
         public Lobby()
         {
-            _players = new List<IPlayer>();
+            Players = new List<IPlayer>();
         }
         public Lobby(string name,int maxPlayerCount, bool isPrivate)
         {
-            _players = new List<IPlayer>(maxPlayerCount);
+            Players = new List<IPlayer>(maxPlayerCount);
             MaxPlayerCount = maxPlayerCount;
             Name = name;
             IsPrivate = isPrivate;
@@ -39,7 +39,7 @@ namespace TicTacTorus.Source.LobbySpecificContent
         public Lobby(string name, IPlayer owner ,string status, string description, int maxPlayerCount, bool isPrivate) 
             : this(name, status, description, maxPlayerCount, isPrivate)
         {
-            _players.Add(owner);
+            Players.Add(owner);
         }
         public Lobby(Base64 id, string name, IPlayer owner ,string status, string description, int maxPlayerCount, bool isPrivate) 
             : this(name, owner, status, description, maxPlayerCount, isPrivate)
@@ -49,9 +49,9 @@ namespace TicTacTorus.Source.LobbySpecificContent
         
         public bool AddPlayer(IPlayer player)
         {
-            if (_players.Count < MaxPlayerCount)
+            if (Players.Count < MaxPlayerCount)
             {
-                _players.Add(player);
+                Players.Add(player);
                 return true;
             }
 
@@ -60,26 +60,26 @@ namespace TicTacTorus.Source.LobbySpecificContent
 
         public bool RemovePlayer(IPlayer player)
         {
-            return _players.Remove(player);
+            return Players.Remove(player);
         }
         public bool RemovePlayer(byte index)
         {
-            if (_players.Count >= index)
+            if (Players.Count >= index)
             {
                 return false;
             }
-            _players.RemoveAt(index);
+            Players.RemoveAt(index);
             return true;
         }
 
         public IPlayer GetPlayerAt(byte index)
         {
-            return _players[index];
+            return Players[index];
         }
 
         public IPlayer GetPlayerById(string playerID)
         {
-            foreach (var ePlayer in _players)
+            foreach (var ePlayer in Players)
             {
                 if (ePlayer.ID.Equals(playerID))
                 {
@@ -92,7 +92,7 @@ namespace TicTacTorus.Source.LobbySpecificContent
 
         public IList<IPlayer> GetAllPlayers()
         {
-            return _players;
+            return Players;
         }
     }
 
