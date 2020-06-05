@@ -5,6 +5,7 @@
 @using Newtonsoft.Json
 @using TicTacTorus.Source
 @using TicTacTorus.Source.Generator
+@using Microsoft.AspNetCore.Mvc.ModelBinding
 @inject ProtectedSessionStorage ProtectedSessionStore
 @inject NavigationManager NavigationManager
 
@@ -23,6 +24,10 @@
                             {
                                 <h4 class="text-center">Login</h4>
                                 <hr>
+                                @if (loginFailed)
+                                {
+                                    <h5>@_errorMsg</h5>
+                                }
                                 <input type="text" @bind-value="@_id"/>
                                 <input type="text" @bind-value="@_pw"/>
                                 <button @onclick="TryLogin" class="btn btn-primary" style="width: 100%">Sign In</button>
@@ -33,7 +38,6 @@
                             {
                                 <h4 class="text-center">Welcome back, @_user.ID</h4>
                             }
-                            
                         </div>
                     </div>
                 </div>
@@ -57,65 +61,54 @@ else
 
     private string _id;
     private string _pw;
+    private string _errorMsg;
     
     private HumanPlayer _user;
     
-    private bool isConnected = false;
+    private bool isConnected;
+    private bool loginFailed;
 }
 
 @functions
 {
-    protected async Task OnInitializedAysnc()
+    protected override void OnInitialized()
     {
         _client = new ConnectionHubClient(NavigationManager);
-        
-        LoadStateAsync();
-        
-        StateHasChanged();
-    }
-    
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
+        _client.Connection.On<string>("LoginSuccess", async (player) =>
         {
-        // When execution reaches this point, the first *interactive* render
-        // is complete. The component has an active connection to the browser.
-            
-            isConnected = true;
-            await LoadStateAsync();
-            StateHasChanged();
-        }
-        _client = new ConnectionHubClient(NavigationManager);
-        
-        _client.Connection.On<string>("ReceiveLoginConfirmation", async (player) =>
-        {
-            if (player != null)
+            try
             {
-                try
-                {
-                    _user = JsonConvert.DeserializeObject<HumanPlayer>(player);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Exception aufgetaucht in TestLogin: " + e);
-                    _user = PlayerFactory.CreateHumanPlayer();
-                }
+                _user = JsonConvert.DeserializeObject<HumanPlayer>(player);
             }
-            else
+            catch (Exception e)
             {
+                Console.WriteLine("Exception aufgetaucht in TestLogin: " + e);
                 _user = PlayerFactory.CreateHumanPlayer();
             }
 
             await ProtectedSessionStore.SetAsync("LoginData", _user);
             StateHasChanged();
         });
-
-        _client.Connection.On<string>("LoginFailed", async (message) =>
+        
+        _client.Connection.On<string>("LoginFailed",  (message) =>
         {
-            _user = PlayerFactory.CreateHumanPlayer();
-            await ProtectedSessionStore.SetAsync("LoginData", _user);
+            _errorMsg = message;
+            loginFailed = true;
+            StateHasChanged();
         });
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+    // When execution reaches this point, the first *interactive* render
+    // is complete. The component has an active connection to the browser.
+            isConnected = true;
+            await LoadStateAsync();
+            StateHasChanged();
+        }
     }
 
     private async Task LoadStateAsync()
@@ -127,7 +120,7 @@ else
     {
         if (_client != null)
         {
-              _client.Connection.SendAsync("ConfirmLogin", _id, _pw );
+            await _client.Connection.SendAsync("ConfirmLogin", _id, _pw );
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Threading.Tasks;
 using System.Xml.Schema;
@@ -6,9 +7,8 @@ using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using TicTacTorus.Source.Generator;
 using TicTacTorus.Source.LobbySpecificContent;
+using TicTacTorus.Source.LoginContent.Security;
 using TicTacTorus.Source.Persistence;
-using TicTacTorus.Source.PlayerSpecificContent;
-using TicTacTorus.Source.Utility;
 
 namespace TicTacTorus.Source.Hubs
 {
@@ -67,21 +67,26 @@ namespace TicTacTorus.Source.Hubs
         #endregion
         #region Login / Register
 
-        public async Task ConfirmLogin(string playerId, string playerPw)
+        public async Task ConfirmLogin(string id, string pw)
         {
-            // Check in Database
-            IPlayer playerFromDatabase = null;
+            //Check in Database
             try
             {
-                playerFromDatabase = PersistenceStorage.LoadPlayer(playerId);
-                    
-                string playerJson = JsonConvert.SerializeObject((HumanPlayer)playerFromDatabase);
-                await Clients.Client(Context.ConnectionId)
-                    .SendAsync("ReceiveLoginConfirmation", playerJson);
+                var (player, validation) = PersistenceStorage.LoadPlayer(id, pw);
+                if (validation)
+                {
+                    var playerJson = JsonConvert.SerializeObject(player);
+                    await Clients.Client(Context.ConnectionId)
+                        .SendAsync("LoginSuccess", playerJson);
+                }
+                else
+                {
+                    await Clients.Caller.SendAsync("LoginFailed", "Login failed. Wrong userID or Password! ");
+                }
             }
             catch (SQLiteException e)
             {
-                await Clients.Caller.SendAsync("LoginFailed", "Login failed. Wrong userID or Password: "+e);
+                await Clients.Caller.SendAsync("LoginFailed", "Database Connection Error: " + e);
             }
         }
 

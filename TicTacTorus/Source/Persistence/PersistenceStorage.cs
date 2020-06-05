@@ -73,33 +73,47 @@ namespace TicTacTorus.Source.Persistence
 			return player;
 		}
 
-		public static IPlayer LoadPlayer(string id, string pw)
+		public static Tuple<HumanPlayer, bool> LoadPlayer(string id, string pw)
 		{
-			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
-			HumanPlayer player = new HumanPlayer();
-			SaltedHash s = new SaltedHash(pw);
+			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			HumanPlayer player = null;
+			SaltedHash sh = null;
 
-			_con.Open();
-                                 
-			SQLiteCommand command = new SQLiteCommand(_con);
-            
-			command.CommandText = $"select * from User where loginName ='"+id+
-			                      "'and salt = '"+s.Salt+"'and hash ='"+s.Hash+"'";
+			con.Open();
+
+			var command = new SQLiteCommand(con)
+			{
+				CommandText = $"select * from User where loginName ='" + id + "'"
+			};
+
 			var reader = command.ExecuteReader();
+			
+			
 			while (reader.Read())
 			{
-				player.ID = reader[0] as string;
-				player.Salt =  reader[1] as byte[];
-				player.Hash = reader[2] as byte[];
-				player.IngameName = reader[3]as string;
-				//  player.Email = reader[4] as string;
+				player = new HumanPlayer
+				{
+					ID = reader[0] as string,
+					Salt = reader[1] as byte[],
+					Hash = reader[2] as byte[],
+					IngameName = reader[3] as string,
+					Color = Color.FromArgb((int) reader[6]),
+					Symbol = (byte) reader[7]
+				};
+				sh = new SaltedHash(player.Salt, player.Hash);
+				//player.Email = reader[4] as string;
 				//player.Pic = reader[5] as Image; //funktioniert nicht wegen image
-          
-				player.Color =Color.FromArgb((int) reader[6]);
-				player.Symbol = (byte) reader[7] ;
 			}
-			_con.Close(); 
-			return player;
+			
+			//Checks if Password is correct
+			if (player != null && sh.Verify(pw))
+			{
+				con.Close();
+				return Tuple.Create(player, true);
+			}
+			
+			con.Close();
+			return Tuple.Create(player, false);
 		}
 		
 
