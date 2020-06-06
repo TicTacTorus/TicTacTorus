@@ -14,6 +14,8 @@ namespace TicTacTorus.Source
         private readonly IDictionary<string, ILobby> _lobbies;
         private readonly IDictionary<string, Game> _games;
 
+        public ServerSettings Settings { get; }
+
         #region Instance
 
         // For being Thread-safe ("full lazy instantiation" - https://csharpindepth.com/articles/singleton)
