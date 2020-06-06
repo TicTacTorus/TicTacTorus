@@ -247,7 +247,7 @@ input {
     box-sizing: border-box;
 }
 
-.canvas {
+.canvas, .fill {
     position: absolute;
     top: 0;
     bottom: 0;

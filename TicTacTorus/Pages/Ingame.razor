@@ -12,7 +12,9 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime;
 
-<div class="canvas" onresize="stretch_first_canvas" @onwheel="MouseScrollHandler">
+<!--<div class="fill">&nbsp;</div>-->
+
+<div class="canvas" @onwheel="MouseScrollHandler">
     <BECanvas @ref="_canvasGame" Width="640" Height="480"></BECanvas>
 </div>
 
@@ -180,11 +182,7 @@
         if (firstRender)
         {
             await JSRuntime.InvokeVoidAsync("stretch_first_canvas");
-            var width = await JSRuntime.InvokeAsync<int>("client_width");
-            var height = await JSRuntime.InvokeAsync<int>("client_height");
-
-            _canvasGame.Width = width;
-            _canvasGame.Height = height;
+            await UpdateCanvasSize();
         }
         
         _contextGame = await _canvasGame.CreateCanvas2DAsync();
@@ -200,12 +198,23 @@
         }
     }
 
+    [JSInvokable]
+    public async Task UpdateCanvasSize()
+    {
+        var width = await JSRuntime.InvokeAsync<int>("client_width");
+        var height = await JSRuntime.InvokeAsync<int>("client_height");
+        _canvasGame.Width = width;
+        _canvasGame.Height = height;
+    }
+    
+    [JSInvokable]
     public static async Task RedrawGame()
     {
         _contextGame = await _canvasGame.CreateCanvas2DAsync();
         await _rendererGame.Draw((int)_canvasGame.Width, (int)_canvasGame.Height, _contextGame);
     }
     
+    [JSInvokable]
     public static async Task RedrawMap()
     {
         _contextMap = await _canvasMap.CreateCanvas2DAsync();
