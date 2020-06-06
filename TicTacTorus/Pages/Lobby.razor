@@ -57,7 +57,7 @@
                                 {
                                     <!--<tr id="player_table_row">
                                         <td><button onclick='MessageChatBox("@elem.ID got kicked")'>Kick</button></td>
-                                        <td>@elem.IngameName</td>
+                                        <td>@elem.InGameName</td>
                                         <td>@elem.Symbol</td>
                                     </tr>-->
                                     <tr id="player_table_row">
@@ -67,11 +67,11 @@
                                         }
                                         <td>
                                             @{
-                                                var classText = "color:" + ColorTranslator.ToHtml(@elem.Color) + ";" +
+                                                var classText = "color:" + ColorTranslator.ToHtml(@elem.PlrColor) + ";" +
                                                                 "\nfont-size: large;" +
                                                                 "\nfont-weight: bold;" +
                                                                 "\ntext-shadow: 1px 1px 0px black;";
-                                                <div style="@classText">@elem.IngameName</div>
+                                                <div style="@classText">@elem.InGameName</div>
                                             }
                                         </td>
                                         <td>@elem.Symbol</td>
@@ -177,7 +177,7 @@
     // remove them
         _client.Connection.SendAsync("RemovePlayerFromLobby", IdString, player);
     // message remaining players
-        SendSystemMessage(player.IngameName + " was removed by the Host");
+        SendSystemMessage(player.InGameName + " was removed by the Host");
     }
 
     private async void CopyLink()

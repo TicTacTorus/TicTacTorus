@@ -8,21 +8,21 @@ namespace TicTacTorus.Source
     public class HumanPlayer : IPlayer
     {
         public string ID { get; set; }
-        public string IngameName { get; set; }
-        public Color Color { get; set; }
+        public string InGameName { get; set; }
+        public Color PlrColor { get; set; }
         public byte Symbol { get; set; }
         public byte[] Hash { get; set; } // Besprechen
         public byte[] Salt { get; set; }// Besprechen
 
-        public HumanPlayer(string id, string ingameName, Color color, byte symbol)
+        public HumanPlayer(string id, string inGameName, Color plrColor, byte symbol)
         {
             ID = id;
-            IngameName = ingameName;
-            Color = color;
+            InGameName = inGameName;
+            PlrColor = plrColor;
             Symbol = symbol;
         }
-        public HumanPlayer(string id, string ingameName, Color color, byte symbol, string pwd):
-            this(id, ingameName, color, symbol)
+        public HumanPlayer(string id, string inGameName, Color plrColor, byte symbol, string pwd):
+            this(id, inGameName, plrColor, symbol)
         {
             SaltedHash s = new SaltedHash(pwd); // Besprechen
             Hash = s.Hash;// Besprechen

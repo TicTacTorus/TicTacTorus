@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using TicTacTorus.Pages;
 using TicTacTorus.Source.Ingame;
 using TicTacTorus.Source.PlayerSpecificContent;
 using TicTacTorus.Source.Utility;
 using System.Data.SQLite;
 using System.Drawing;
-using System.Net.Mime;
 using System.Reflection.Metadata;
+using System.Text;
 using TicTacTorus.Source.LoginContent.Security;
 
 namespace TicTacTorus.Source.Persistence
@@ -19,23 +20,39 @@ namespace TicTacTorus.Source.Persistence
 
 		public static bool CreatePlayer(HumanPlayer createPlayer) //NUR notNull Variable
 		{
-			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			SQLiteConnection _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			//neuer Player wird bei Registrierung der Datenbank hinzugefügt
 			if (createPlayer.ID != null ){
 				_con.Open();
                                  
 				SQLiteCommand command = new SQLiteCommand(_con);
-            
-				command.CommandText = $"insert into User (loginName,salt,hash,color,PlayerSymbol)values('"+ 
-				                      createPlayer.ID  +" ','" +createPlayer.Salt+" ','" +
-				                      createPlayer.Hash+" ','" +  
-				                      createPlayer.Color+" ','" +createPlayer.Symbol +"')";
+				command.CommandText = "Insert Into User (loginName, salt, hash, inGameName, color, PlayerSymbol)" +
+				                      "Values (@Id, @Salt, @Hash, @InGameName, @Color, @Symbol)";
+				var IDParam = new SQLiteParameter("@Id", DbType.String, createPlayer.ID.Length) {Value = createPlayer.ID};
+				var SaltParam = new SQLiteParameter("@Salt", DbType.Binary, SaltedHash.SaltBytes) {Value = createPlayer.Salt};
+				var HashParam = new SQLiteParameter("@Hash", DbType.Binary, SaltedHash.HashBytes) {Value = createPlayer.Hash};
+				var InGameNameParam = new SQLiteParameter("@InGameName", DbType.String, createPlayer.InGameName.Length) {Value = createPlayer.InGameName};
+				var ColorParam = new SQLiteParameter("@Color", DbType.Int32, 4)
+				{
+					Value = createPlayer.PlrColor.R << 16 | createPlayer.PlrColor.G << 8 |
+					        createPlayer.PlrColor.B | (0xFF - createPlayer.PlrColor.A) << 24
+				};
+				var SymbolParam = new SQLiteParameter("@Symbol", DbType.Byte, 1) {Value = createPlayer.Symbol};
+
+				command.Parameters.Add(IDParam);
+				command.Parameters.Add(SaltParam);
+				command.Parameters.Add(HashParam);
+				command.Parameters.Add(InGameNameParam);
+				command.Parameters.Add(ColorParam);
+				command.Parameters.Add(SymbolParam);
+				
+				command.Prepare();
 				command.ExecuteNonQuery();
              
 				_con.Close();
 				return true;
 			}
-
+			_con.Close();
 			return false;
 		}
 		
@@ -63,10 +80,10 @@ namespace TicTacTorus.Source.Persistence
 				player.ID = reader[0] as string;
 				//player.Salt =  reader[1] as byte[]; //remove
 				//player.Hash = reader[2] as byte[]; //remove
-				player.IngameName = reader[3] as string;
+				player.InGameName = reader[3] as string;
 				//  player.Email = reader[4] as string;
 
-				player.Color = Color.FromArgb(Convert.ToInt32(reader[6]));
+				player.PlrColor = Color.FromArgb(Convert.ToInt32(reader[6]));
 				// player.Symbol = (byte) reader[7];
 			}
 			_con.Close();
@@ -91,15 +108,15 @@ namespace TicTacTorus.Source.Persistence
 			
 			while (reader.Read())
 			{
-				player = new HumanPlayer
-				{
-					ID = reader[0] as string,
-					Salt = reader[1] as byte[],
-					Hash = reader[2] as byte[],
-					IngameName = reader[3] as string,
-					Color = Color.FromArgb((int) reader[6]),
-					Symbol = (byte) reader[7]
-				};
+				player = new HumanPlayer();
+
+				player.ID = reader[0] as string;
+				player.Salt = reader[1] as byte[];
+				player.Hash = reader[2] as byte[];
+				player.InGameName = reader[3] as string;
+				player.PlrColor = Color.FromArgb(Convert.ToInt32(reader[6]));
+				//player.Symbol = (byte) reader[7];
+				
 				sh = new SaltedHash(player.Salt, player.Hash);
 				//player.Email = reader[4] as string;
 				//player.Pic = reader[5] as Image; //funktioniert nicht wegen image
@@ -161,10 +178,10 @@ namespace TicTacTorus.Source.Persistence
 			if (Convert.ToInt32(command.ExecuteScalar()) > 0)
 			{
 				_con.Close(); 
-				return true;
+				return false;
 			}
 			_con.Close(); 
-			return false;
+			return true;
 		}
 
 		#endregion

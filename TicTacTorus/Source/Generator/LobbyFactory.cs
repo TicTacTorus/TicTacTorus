@@ -40,7 +40,7 @@ namespace TicTacTorus.Source.Generator
 
         private static string CreateLobbyName(IPlayer owner)
         {
-            return owner.IngameName + "'s Game";
+            return owner.InGameName + "'s Game";
         }
 
         private static string CreateLobbyStatus()
@@ -50,7 +50,7 @@ namespace TicTacTorus.Source.Generator
 
         private static string CreateLobbyDescription(IPlayer owner)
         {
-            return owner.IngameName + "'s Description";
+            return owner.InGameName + "'s Description";
         }
     }
 }

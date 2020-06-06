@@ -90,6 +90,36 @@ namespace TicTacTorus.Source.Hubs
             }
         }
 
+        public async Task ConfirmRegister(HumanPlayer user)
+        {
+            try
+            {
+                if (PersistenceStorage.CheckPlayerIdIsUnique(user.ID))
+                {
+                    //If ID is unique
+                    if (PersistenceStorage.CreatePlayer(user))
+                    {
+                        await Clients.Caller.SendAsync("RegisterSuccess", "You are successfully registered. You can now log-in");
+                    }
+                    else
+                    {
+                        await Clients.Caller.SendAsync("RegisterFailed",
+                            "Hmmm... Something went wrong. Please try again");
+                    }
+                }
+                else
+                {
+                    await Clients.Caller.SendAsync("RegisterFailed",
+                        "Username already taken. Please consider another one");
+                }
+            }
+            catch (Exception e)
+            {
+                await Clients.Caller.SendAsync("RegisterFailed",
+                    "An Database Error occurred with the following message: " + e);
+            }
+        }
+
         #endregion
     }
 }

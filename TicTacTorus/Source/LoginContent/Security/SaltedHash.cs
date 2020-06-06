@@ -6,7 +6,8 @@ namespace TicTacTorus.Source.LoginContent.Security
 {
     public class SaltedHash
     {
-        public const int SaltBytes = 64;
+        public static int SaltBytes = 64;
+        public static int HashBytes = 32;
 
         public byte[] Salt { get; }
         public byte[] Hash { get; }
