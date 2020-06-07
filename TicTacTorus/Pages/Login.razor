@@ -1,10 +1,14 @@
 ﻿@page "/login"
 @using TicTacTorus.Source
-@using System.ComponentModel.DataAnnotations
 @using System.Drawing
+@using Microsoft.AspNetCore.ProtectedBrowserStorage
 @using Microsoft.AspNetCore.SignalR.Client
+@using Newtonsoft.Json
+@using TicTacTorus.Source.Generator
 @using TicTacTorus.Source.Hubs
+@using TicTacTorus.Source.LoginContent.Validation
 @inject NavigationManager NavigationManager
+@inject ProtectedSessionStorage ProtectedSessionStore
 
 <div class="min-vw-100">
     <div class="my-5 lobbies-grid">
@@ -24,16 +28,19 @@
                     <div class="container">
                         <h4 class="text-center">Login</h4>
                         <hr>
-                        <EditForm Model="@_sign_in_player" OnValidSubmit="HandleTryLogin">
+                        @if (_showLoginMsg)
+                        {
+                            <small>@_loginMessage</small>
+                        }
+                        <EditForm Model="@_loginPlayer" OnValidSubmit="SendLoginRequest">
                             <div class="form-group">
                                 <label for="loginLoginName">Login name*</label>
-                                <InputText @bind-Value="_sign_in_player.LoginID" id="loginLoginName" class="form-control"  placeholder="Enter login name" required/>
+                                <InputText @bind-Value="_loginPlayer.Id" id="loginLoginName" class="form-control"  placeholder="Enter login name" required/>
                             </div>
                             <div class="form-group">
                                 <label for="loginPassword">Password*</label>
-                                <InputText type="password" @bind-Value="_sign_in_player.LoginPassword" class="form-control" id="loginPassword" placeholder="Enter Password" required/>
+                                <InputText type="password" @bind-Value="_loginPlayer.Password" class="form-control" id="loginPassword" placeholder="Enter Password" required/>
                             </div>
-                            <div id="messageOutput" bind-Value="@loginMessage"></div>
                             <button type="submit" class="btn btn-primary" style="width: 100%">Sign In</button>
                         </EditForm>
                         <p class="text-center"><a href="#" class="btn">Forgot login name or password?</a></p>
@@ -46,32 +53,30 @@
                     <div class="container">
                         <h4 class="text-center">Sign Up</h4>
                         <hr>
-                        <EditForm Model="@_register_player" OnValidSubmit="HandleValidSubmit">
+                        @if (_showRegisterMsg)
+                        {
+                            <small>@_registerMessage</small>
+                        }
+                        <EditForm Model="@_registerPlayer" OnValidSubmit="SendRegisterRequest">
                             <div class="form-group">
                                 <label for="registerLoginName">Login name*</label>
-                                <InputText id="registerLoginName" @bind-Value="_register_player.Identifier" 
+                                <InputText id="registerLoginName" @bind-Value="_registerPlayer.Id" 
                                            class="form-control" placeholder="Enter login name" required />
                             </div>
                             <div class="form-group">
-                                <label for="registerInGameName">In-Game name</label>
-                                <InputText id="registerInGameName" @bind-Value="_register_player.IngameName" 
+                                <label for="registerInGameName">In-Game name*</label>
+                                <InputText id="registerInGameName" @bind-Value="_registerPlayer.InGameName" 
                                            class="form-control" aria-describedby="inGameNameHelp" placeholder="Name In-Game"/>
                             </div>
                             <div class="form-group">
-                                <label for="registerEmail">Email address</label>
-                                    <InputText type="email" id="registerEmail" @bind-Value="_register_player.EMail" 
-                                               class="form-control" aria-describedby="emailHelp" placeholder="Enter email"/>
-                                    
-                                    <small id="emailHelp" class="form-text text-muted">Info: You cannot reset you password without an E-Mail!</small>
-                            </div>
-                            <div class="form-group">
                                 <label for="registerPassword">Password*</label>
-                                <InputText type="password" id="registerPassword" @bind-Value="_register_player.Password"
+                                <InputText type="password" id="registerPassword" @bind-Value="_registerPlayer.Password"
                                            class="form-control"  placeholder="Password" required/>
                             </div>
                             <div class="form-group">
                                 <label for="registerConfirmPassword">Confirm Password*</label>
-                                <input type="password" id="registerConfirmPassword" class="form-control" placeholder="Password" required>
+                                <InputText type="password" id="registerConfirmPassword" @bind-Value="_registerPlayer.ConfirmPassword"
+                                           class="form-control" placeholder="Password" required/>
                             </div>
                             <button type="submit" class="btn btn-primary" style="width: 100%">Sign Up</button>
                         </EditForm>
@@ -85,73 +90,88 @@
 @code
 {
     private ConnectionHubClient _client;
-    private string userInput;
-    private string loginMessage;
-
-    TemporaryLoginPlayer _sign_in_player = new TemporaryLoginPlayer();
+    private string _loginMessage;
+    private string _registerMessage;
+    private bool _showRegisterMsg, _showLoginMsg;
     
-    class TemporaryLoginPlayer
-    {
-        [Required]
-        [StringLength(16, ErrorMessage = "ID is too long (max 16 character).")]
-        public string LoginID { get; set; }
+    private HumanPlayer User { get; set; }
 
-        [Required]
-        [StringLength(100, ErrorMessage = "Password should contain at least {2} characters.", MinimumLength = 8)]
-        public string LoginPassword { get; set; }
-    }
-
-    private  TemporaryRegisterPlayer _register_player = new TemporaryRegisterPlayer();
-    /* For registerdata storage */    
-    class TemporaryRegisterPlayer
-    {
-        [Required]
-        [StringLength(16, ErrorMessage = "Identifier too long (16 character limit).")]
-        public string Identifier { get; set; }
-        
-        [Required]
-        public string Password { get; set; }
-
-        public string IngameName { get; set; }
-
-        public string EMail { get; set; }
-    }
+    private readonly UserLoginValidation _loginPlayer = new UserLoginValidation();
+    private readonly UserRegisterValidation _registerPlayer = new UserRegisterValidation();
 }
 
 @functions
 {
-    protected override void OnInitialized()
-    {
-        _client = new ConnectionHubClient(NavigationManager);
 
-        _client.Connection.On<HumanPlayer>("ReceiveConfirmation", (player) =>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
         {
-            if (player == null)
-            {
-                
-            }
-            StateHasChanged();
-        });
+            _client = new ConnectionHubClient(NavigationManager);
+
+            #region Register Listeners
         
-        _client.Connection.On<string>("LoginFailed", message =>
+            _client.Connection.On<string>("RegisterSuccess", (message) =>
+            {
+                _registerMessage = message;
+                _showRegisterMsg = true;
+                StateHasChanged();
+            });
+
+            _client.Connection.On<string>("RegisterFailed", (message) =>
+            {
+                _registerMessage = message;
+                _showRegisterMsg = true;
+                StateHasChanged();
+            });
+        
+            #endregion
+            #region Login Listeners
+        
+            _client.Connection.On<string>("LoginSuccess", async (player) =>
+            {
+                try
+                {
+                    User = JsonConvert.DeserializeObject<HumanPlayer>(player);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Exception aufgetaucht in TestLogin: " + e);
+                    User = PlayerFactory.CreateHumanPlayer();
+                }
+
+                await ProtectedSessionStore.SetAsync("LoginData", User);
+                NavigationManager.NavigateTo("/");
+            });
+        
+            _client.Connection.On<string>("LoginFailed",  (message) =>
+            {
+                _loginMessage = message;
+                _showLoginMsg = true;
+                StateHasChanged();
+            });
+        
+        #endregion
+        
+            //ProtectedSessionStore Calls need to be done in OnAfterRenderAsync!
+            User = await ProtectedSessionStore.GetAsync<HumanPlayer>("LoginData");
+        }
+    }
+
+    private async Task SendLoginRequest()
+    {
+        if (_client != null)
         {
-            loginMessage = message;
-            StateHasChanged();
-        });
+            await _client.Connection.SendAsync("ConfirmLogin", _loginPlayer.Id, _loginPlayer.Password );
+        }
     }
     
-    private void HandleValidSubmit()
+    private async Task SendRegisterRequest()
     {
-        Console.WriteLine("OnValidSubmit");
+        if(_registerPlayer.Password != _registerPlayer.ConfirmPassword || _registerPlayer.Id == null) return;
+        var user = new HumanPlayer(_registerPlayer.Id, _registerPlayer.InGameName, Color.Black, new byte(), _registerPlayer.Password);
+        await _client.Connection.SendAsync("ConfirmRegister", user);
     }
-
-    private void HandleTryLogin()
-    {
-        TryLogin();
-    }
-
-    Task TryLogin() =>
-        _client.Connection.SendAsync("ConfirmLogin", _sign_in_player.LoginID, _sign_in_player.LoginPassword );
 
     public bool IsConnected =>
         _client.Connection.State == HubConnectionState.Connected;

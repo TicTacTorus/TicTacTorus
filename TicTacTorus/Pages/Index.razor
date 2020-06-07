@@ -5,10 +5,20 @@
 @using TicTacTorus.Source
 @using Microsoft.AspNetCore.SignalR.Client
 @using TicTacTorus.Source.Hubs
+@using Microsoft.AspNetCore.ProtectedBrowserStorage
 @inject NavigationManager NavigationManager
+@inject ProtectedSessionStorage ProtectedSessionStore
 
 <div class="d-flex justify-content-center my-5">
     <h1 class="headers">TicTacTorus</h1>
+    @if (User.ID != null)
+    {
+        <button @onclick="DirectToAccount" class="btn-back float-right" data-toggle="tooltip" data-placement="bottom" title="Account">
+            <svg class="bi bi-person-fill" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+            </svg>
+        </button>
+    }
 </div>
 
 
@@ -72,19 +82,31 @@
     public string Error { get; set; }
     private ConnectionHubClient _client;
     private Base64 _id;
+    private HumanPlayer User { get; set; } = new HumanPlayer();
 }
 
 @functions
 {
-    protected override void OnInitialized()
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        _client = new ConnectionHubClient(NavigationManager);
-        
-        _client.Connection.On<string>("ReceiveLobbyId", (id) =>
+        if (firstRender)
         {
-            _id = new Base64(id);
-            NavigationManager.NavigateTo("/game/" + _id);
-        });
+            _client = new ConnectionHubClient(NavigationManager);
+        
+            _client.Connection.On<string>("ReceiveLobbyId", (id) =>
+            {
+                _id = new Base64(id);
+                NavigationManager.NavigateTo("/game/" + _id);
+            });
+        
+            User = await ProtectedSessionStore.GetAsync<HumanPlayer>("LoginData");
+        }
+    }
+    
+    private void DirectToAccount()
+    {
+        NavigationManager.NavigateTo("/user/" + User.ID);
     }
 
     private void SendNewLobbyRequest()

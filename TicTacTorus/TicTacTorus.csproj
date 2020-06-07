@@ -91,12 +91,6 @@
       <Content Update="Pages\Sessions.razor">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       </Content>
-      <Content Update="Pages\TestLogin.razor">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      </Content>
-      <Content Update="Pages\TestRegister.razor">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      </Content>
     </ItemGroup>
 
     <ItemGroup>

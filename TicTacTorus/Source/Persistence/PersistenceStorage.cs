@@ -168,7 +168,7 @@ namespace TicTacTorus.Source.Persistence
 		//Checks if id is already taken
 		public static bool CheckPlayerIdIsUnique(string id)
 		{
-			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			SQLiteConnection _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			_con.Open();
                                  
 			SQLiteCommand command = new SQLiteCommand(_con);
@@ -177,7 +177,7 @@ namespace TicTacTorus.Source.Persistence
 			
 			if (Convert.ToInt32(command.ExecuteScalar()) > 0)
 			{
-				_con.Close(); 
+				_con.Close();
 				return false;
 			}
 			_con.Close(); 
