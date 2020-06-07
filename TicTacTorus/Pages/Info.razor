@@ -1,7 +1,9 @@
 ﻿@page "/info"
 
 @using TicTacTorus.Source.Hubs
+@using TicTacTorus.Source
 @inject NavigationManager NavigationManager
+@inject ProtectedSessionStorage ProtectedSessionStore
 
 <div class="my-5 lobbies-grid">
     <button class="btn-back" onclick="location.href ='/';">
@@ -11,6 +13,14 @@
         </svg>
     </button>
     <h1 class="headers my-auto">TicTacTorus</h1>
+        @if (User.ID != null)
+        {
+            <button @onclick="DirectToAccount" class="btn-back float-right" data-toggle="tooltip" data-placement="bottom" title="Account">
+                <svg class="bi bi-person-fill" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                </svg>
+            </button>
+        }
 </div>
 
 <div class="container">
@@ -56,12 +66,28 @@
 @code
 {
     private ConnectionHubClient _client;
+    private HumanPlayer User { get; set; } = new HumanPlayer();
 }
 
 @functions
 {
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if ((User = await ProtectedSessionStore.GetAsync<HumanPlayer>("LoginData")) == null)
+        {
+            //TODO: User = new RandomPlayer(); Or Retrieve Random Player then
+        }
+        StateHasChanged();
+    }
+
     protected override void OnInitialized()
     {
         _client = new ConnectionHubClient(NavigationManager);
+    }
+    
+    private void DirectToAccount()
+    {
+        NavigationManager.NavigateTo("/user/" + User.ID);
     }
 }

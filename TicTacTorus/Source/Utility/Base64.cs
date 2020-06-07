@@ -11,11 +11,17 @@ namespace TicTacTorus.Source.Utility
         private const int StandardLength = 8;
         private const int BitsPerDigit = 6;
         public const string Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+        
+        [JsonProperty(Required = Required.Always)]
         public byte[] Data { get; }
 
         #endregion
         #region (Named) Constructors
-        
+
+        public Base64() : this(new byte[0])
+        {
+        }
+
         public Base64(byte[] init)
         {
             //make sure length is divisible by 3, add zero padding
@@ -24,7 +30,6 @@ namespace TicTacTorus.Source.Utility
             init.CopyTo(Data, 0);
         }
         
-        [JsonConstructor]
         public Base64(string init)
         {
             //make sure length is divisible by 4, add zero padding

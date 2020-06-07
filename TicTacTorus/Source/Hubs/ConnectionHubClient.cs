@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.Logging;
 
 namespace TicTacTorus.Source.Hubs
 {
@@ -16,6 +17,10 @@ namespace TicTacTorus.Source.Hubs
 		{
 			Connection = new HubConnectionBuilder()
 				.WithUrl(nav.ToAbsoluteUri("/connectionHub"))
+				.ConfigureLogging(logging => {
+					logging.SetMinimumLevel(LogLevel.Information);
+					logging.AddConsole();
+				})
 				.Build();
 			Connection.StartAsync();
 		}

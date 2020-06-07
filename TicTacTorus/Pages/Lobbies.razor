@@ -3,7 +3,10 @@
 @using TicTacTorus.Source.Hubs
 @using Microsoft.AspNetCore.SignalR.Client
 @using Newtonsoft.Json
+@using TicTacTorus.Source
+@using TicTacTorus.Source.Generator
 @inject NavigationManager NavigationManager
+@inject ProtectedSessionStorage ProtectedSessionStore
 
 <div class="my-5 lobbies-grid">
     <button class="btn-back" onclick="location.href ='/';">
@@ -13,6 +16,14 @@
         </svg>
     </button>
     <h1 class="headers my-auto">TicTacTorus</h1>
+    @if (User.ID != null)
+    {
+        <button @onclick="DirectToAccount" class="btn-back float-right" data-toggle="tooltip" data-placement="bottom" title="Account">
+            <svg class="bi bi-person-fill" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+            </svg>
+        </button>
+    }
 </div>
 
 <div class="d-flex justify-content-center m-1">
@@ -40,29 +51,44 @@
 {
     private ConnectionHubClient _client;
     private LobbyList _list = new LobbyList();
+    private HumanPlayer User { get; set; } = new HumanPlayer();
 }
 
 @functions{
-    protected override void OnInitialized()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        _client = new ConnectionHubClient(NavigationManager);
+        if (firstRender)
+        {
+            _client = new ConnectionHubClient(NavigationManager);
 
-        _client.Connection.SendAsync("GetCurrentLobbies");
-        /*
+            await _client.Connection.SendAsync("GetCurrentLobbies");
+    /*
          * Method receives, from the server, a List with all current Lobbies as a LobbyList Object
          */
-        _client.Connection.On<string>("ReceiveCurrentLobbies", (list) =>
-        {
-            try
+            _client.Connection.On<string>("ReceiveCurrentLobbies", (list) =>
             {
-                _list.Lobbies = new List<ILobby>(JsonConvert.DeserializeObject<List<Source.LobbySpecificContent.Lobby>>(list));
-            }
-            catch (JsonException e)
+                try
+                {
+                    _list.Lobbies = new List<ILobby>(JsonConvert.DeserializeObject<List<Source.LobbySpecificContent.Lobby>>(list));
+                }
+                catch (JsonException e)
+                {
+                    Console.WriteLine("_______TSSSSS there is an error, again: "+e);
+                }
+                StateHasChanged();
+            });
+            
+            if ((User = await ProtectedSessionStore.GetAsync<HumanPlayer>("LoginData")) == null)
             {
-                Console.WriteLine("_______TSSSSS there is an error, again: "+e);
+                User = PlayerFactory.CreateHumanPlayer();
             }
             StateHasChanged();
-        });
+        }
+    }
+    
+    private void DirectToAccount()
+    {
+        NavigationManager.NavigateTo("/user/" + User.ID);
     }
 
 }

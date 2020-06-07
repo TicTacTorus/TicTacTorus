@@ -9,16 +9,16 @@ using TicTacTorus.Source.Generator;
 using TicTacTorus.Source.LobbySpecificContent;
 using TicTacTorus.Source.LoginContent.Security;
 using TicTacTorus.Source.Persistence;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace TicTacTorus.Source.Hubs
 {
     public class ConnectionHubServer : Hub
     {
         #region Lobby
-        public async Task CreateLobby()
+        public async Task CreateLobby(HumanPlayer hp)
         {
             var server = Server.Instance;
-            var hp = PlayerFactory.CreateHumanPlayer();
             var lobby = LobbyFactory.CreateLobbyWithId(hp);
             server.AddLobby(lobby);
             await Clients.Caller.SendAsync("ReceiveLobbyId", lobby.Id.ToString());
@@ -39,7 +39,12 @@ namespace TicTacTorus.Source.Hubs
         public async Task JoinLobby(string lobbyId)
         {
             var lobby = Server.Instance.GetLobbyById(lobbyId);
-            var jsLobby = JsonConvert.SerializeObject(lobby);
+            var indented = Formatting.Indented;
+            var settings = new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.All
+            };
+            var jsLobby = JsonConvert.SerializeObject(lobby, indented, settings);
             await Clients.Caller.SendAsync("GetLobby", jsLobby);
             await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
         }
@@ -54,8 +59,7 @@ namespace TicTacTorus.Source.Hubs
         public async Task GetCurrentLobbies()
         {
             var list = new LobbyList().Lobbies;
-            var lobbiesJson = JsonConvert.SerializeObject(list);
-            await Clients.Caller.SendAsync("ReceiveCurrentLobbies", lobbiesJson);
+            await Clients.Caller.SendAsync("ReceiveCurrentLobbies", list);
         }
 
         #endregion

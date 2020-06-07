@@ -4,8 +4,8 @@
 @using TicTacTorus.Source.Utility
 @using TicTacTorus.Source
 @using Microsoft.AspNetCore.SignalR.Client
+@using TicTacTorus.Source.Generator
 @using TicTacTorus.Source.Hubs
-@using Microsoft.AspNetCore.ProtectedBrowserStorage
 @inject NavigationManager NavigationManager
 @inject ProtectedSessionStorage ProtectedSessionStore
 
@@ -99,8 +99,12 @@
                 _id = new Base64(id);
                 NavigationManager.NavigateTo("/game/" + _id);
             });
-        
-            User = await ProtectedSessionStore.GetAsync<HumanPlayer>("LoginData");
+            
+            if ((User = await ProtectedSessionStore.GetAsync<HumanPlayer>("LoginData")) == null)
+            {
+                User = PlayerFactory.CreateHumanPlayer();
+            }
+            StateHasChanged();
         }
     }
     
@@ -111,6 +115,6 @@
 
     private void SendNewLobbyRequest()
     {
-        _client.Connection.SendAsync("CreateLobby");
+        _client.Connection.SendAsync("CreateLobby", User);
     }
 }

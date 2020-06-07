@@ -8,9 +8,9 @@
 @using TicTacTorus.Source.Hubs
 @using TicTacTorus.Source.LobbySpecificContent
 @using TicTacTorus.Source.PlayerSpecificContent
-@using TicTacTorus.Source.Utility
-@using static TicTacTorus.Source.LobbySpecificContent.Lobby
+@using JsonSerializer = System.Text.Json.JsonSerializer
 @inject NavigationManager NavigationManager
+@inject ProtectedSessionStorage ProtectedSessionStorage
 @inject IJSRuntime JSRuntime
 
 @{
@@ -142,30 +142,19 @@
 @code{
     [Parameter]
     public string IdString { get; set; }
-    
+    private static HumanPlayer User { get; set; }
     private ConnectionHubClient _client;
-    static ILobby _lobby;
+    static Source.LobbySpecificContent.Lobby _lobby;
     
     private string InviteLink { get; set; } = "tictactorus.de/game/";
     
     private List<string> _messages = new List<string>();
     private string _messageInput;
+
+    public bool IsConnected;
 }
 
 @functions{
-    // For Mocking purpose
-    static void InitLobby()
-    {
-        HumanPlayer creator = new HumanPlayer("Tim", "NicerDicer", Color.Coral, 111);
-        _lobby = LobbyFactory.CreateLobbyNoId(creator);
-        InitPlayerList();
-    }
-    
-    static void InitPlayerList()
-    {
-    //_lobby.AddPlayer(new HumanPlayer("Eleven", "Caaarl", Color.DodgerBlue, 3));
-    //_lobby.AddPlayer(new HumanPlayer("Daniela", "Daisy", Color.Aquamarine, 120));
-    }
 
     private void CreateGame()
     {
@@ -194,31 +183,36 @@
         }
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        InitLobby();
-        
-        _client = new ConnectionHubClient(NavigationManager);
-
-        InviteLink += IdString;
-
-        #region Listener Methods
-        
-        _client.Connection.On<string, string>("ReceiveMessage", (user, message) =>
+        if (firstRender)
         {
-            var encodedMsg = $"{user}: {message}";
-            _messages.Add(encodedMsg);
-            StateHasChanged();
-        });
-        
-        _client.Connection.On<string>("GetLobby", (lobby) =>
-        {
-            _lobby = JsonConvert.DeserializeObject<Source.LobbySpecificContent.Lobby>(lobby);
-            StateHasChanged();
-        });
+            _client = new ConnectionHubClient(NavigationManager);
+            
 
-        _client.Connection.On<IPlayer, bool>("PlayerListChanged", (player, isAdded) =>
-        {
+            InviteLink += IdString;
+
+            #region Listener Methods
+        
+            _client.Connection.On<string, string>("ReceiveMessage", (user, message) =>
+            {
+                var encodedMsg = $"{user}: {message}";
+                _messages.Add(encodedMsg);
+                StateHasChanged();
+            });
+        
+            _client.Connection.On<string>("GetLobby", (lobby) =>
+            {
+                var settings = new JsonSerializerSettings()
+                {
+                    TypeNameHandling = TypeNameHandling.All
+                };
+                _lobby = JsonConvert.DeserializeObject<Source.LobbySpecificContent.Lobby>(lobby, settings);
+                StateHasChanged();
+            });
+
+            _client.Connection.On<IPlayer, bool>("PlayerListChanged", (player, isAdded) =>
+            {
             /*if (isAdded)
             {
                 _lobby.AddPlayer(player);
@@ -228,11 +222,19 @@
                 _lobby.RemovePlayer(player);
             }
             StateHasChanged();*/
-        });
+            });
         
-        #endregion
+            #endregion
         
-        await _client.Connection.SendAsync("JoinLobby", IdString);
+            if ((User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) == null)
+            {
+                User = PlayerFactory.CreateHumanPlayer();
+            }
+            
+            await _client.Connection.SendAsync("JoinLobby", IdString);
+            IsConnected = _client.Connection.State == HubConnectionState.Connected;
+            StateHasChanged();
+        }
         
     }
 
@@ -240,7 +242,7 @@
     {
         if (e.Key == "Enter")
         {
-            _client.Connection.SendAsync("SendMessage", IdString, "Tim", _messageInput);
+            _client.Connection.SendAsync("SendMessage", IdString, User.InGameName, _messageInput);
             _messageInput = "";
         }
     }
@@ -254,7 +256,4 @@
     {
         _hubConnection.SendAsync("ChangeLobbyStat", IdString, lobbyParam, changedValue);
     }*/
-
-    public bool IsConnected =>
-        _client.Connection.State == HubConnectionState.Connected;
 }
