@@ -229,8 +229,9 @@
             if ((User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) == null)
             {
                 User = PlayerFactory.CreateHumanPlayer();
+                await ProtectedSessionStorage.SetAsync("LoginData", User);
             }
-            
+
             await _client.Connection.SendAsync("JoinLobby", IdString);
             IsConnected = _client.Connection.State == HubConnectionState.Connected;
             StateHasChanged();

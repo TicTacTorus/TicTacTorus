@@ -9,7 +9,9 @@
 @using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk
 @using TicTacTorus.Source.Ingame.GridSpecificContent.Position
 @using System.Security.Principal
+@using TicTacTorus.Source
 @inject NavigationManager NavigationManager
+@inject ProtectedSessionStorage ProtectedSessionStorage
 @inject IJSRuntime JSRuntime;
 
 <!--<div class="fill">&nbsp;</div>-->
@@ -79,6 +81,8 @@
 
     private static GameRenderer _rendererGame = new GameRenderer(_grid);
     private static MapRenderer _rendererMap = new MapRenderer(null);
+    
+    private static HumanPlayer User { get; set; }
 
 }
 
@@ -135,7 +139,7 @@
     {
         if (e.Key == "Enter")
         {
-            _client.Connection.SendAsync("SendMessage", IdString, "Tim", _messageInput);
+            _client.Connection.SendAsync("SendMessage", IdString, User.InGameName, _messageInput);
             _messageInput = "";
         }
     }
@@ -168,7 +172,7 @@
         _rendererGame.Zoom(-Math.Sign(evnt.DeltaY));
         await RedrawGame();
     }
-    
+
     #endregion
     #region Canvas
     
@@ -178,6 +182,10 @@
         //resizing the window also needs to trigger a resize of the canvas.
         //moving the viewpoint of the game renderer stops new lines from rendering.
 
+        if (firstRender)
+        {
+            User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData");
+        }
         
         if (firstRender)
         {

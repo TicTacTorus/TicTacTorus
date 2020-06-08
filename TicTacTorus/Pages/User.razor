@@ -6,6 +6,8 @@
 @using TicTacTorus.Source.PlayerSpecificContent
 @using TicTacTorus.Source.Persistence
 @using System.Drawing
+@using TicTacTorus.Source
+@inject ProtectedSessionStorage ProtectedSessionStorage
 @inject NavigationManager NavigationManager
 
 <div class="my-5 lobbies-grid">
@@ -88,10 +90,20 @@
     private ConnectionHubClient _client;
     private string _color;
     IPlayer player;
+    private static HumanPlayer LoggedInUser { get; set; }
 }
 
 @functions
 {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _client = new ConnectionHubClient(NavigationManager);
+            LoggedInUser = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData");
+        }
+    }
+    
     private static string HexConverter(System.Drawing.Color c)
     {
         String rtn = String.Empty;
