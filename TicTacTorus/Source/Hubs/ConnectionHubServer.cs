@@ -126,5 +126,13 @@ namespace TicTacTorus.Source.Hubs
         }
 
         #endregion
+        #region User
+
+        public void ChangeIngameName(string id, string name)
+        {
+            PersistenceStorage.UpdateInGameName(id, name);
+        }
+
+        #endregion
     }
 }
