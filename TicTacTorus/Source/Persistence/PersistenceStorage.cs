@@ -56,7 +56,7 @@ namespace TicTacTorus.Source.Persistence
 			return false;
 		}
 		
-		public static void SavePlayerStats(IPlayerStats savePlayStats)
+		public static void SavePlayerStats(PlayerStats savePlayStats)
 		{
             
 		}
@@ -65,7 +65,7 @@ namespace TicTacTorus.Source.Persistence
 		#region Load Methods
 
 		//If other users want to look at your account site
-		public static IPlayer LoadPlayer(string id)
+		public static HumanPlayer LoadPlayer(string id)
 		{  
 			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			HumanPlayer player = new HumanPlayer();
@@ -134,7 +134,7 @@ namespace TicTacTorus.Source.Persistence
 		}
 		
 
-		public static IPlayerStats LoadPlayerStats(string loadPlayStats)//besprechen
+		public static PlayerStats LoadPlayerStats(string loadPlayStats)//besprechen
 		{
 			return null;
 		}
@@ -211,7 +211,7 @@ namespace TicTacTorus.Source.Persistence
 			command.ExecuteNonQuery();
 			_con.Close(); 
 		}
-        
+        /*   // not in use
 		public static void UpdateEmail(string id, string email)
 		{
 			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
@@ -223,7 +223,7 @@ namespace TicTacTorus.Source.Persistence
 			command.ExecuteNonQuery();
 			_con.Close(); 
 		}
-		
+		*/
 		public static void UpdateColor(string id, Color color)
 		{
 			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
@@ -248,12 +248,41 @@ namespace TicTacTorus.Source.Persistence
 			_con.Close();   
 		}
 		#endregion
+		#region Delete User
+		public static void DeleteUser(string id)
+		{
+			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			_con.Open();
+                                 
+			SQLiteCommand command = new SQLiteCommand(_con);
+            
+			command.CommandText = $"delete from User where loginName =" +id+"  ";
+			command.ExecuteNonQuery();
+			_con.Close();   
+
+			
+		}
+		
+		#endregion
 		#region Symbol
 
 		// Symbol, das hinter dem byte steht
 		public static Blob GetSymbol(byte id)
 		{
+			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			con.Open();
+			var command = new SQLiteCommand(con)
+			{
+				CommandText = $"select symbols from PlayerSymbols where PS ='" + id + "'"
+			};
+
+			var reader = command.ExecuteReader();
 			Blob blob = new Blob();
+			while (reader.Read())
+			{
+				blob = (Blob) reader[0] ;
+			}
+			con.Close();
 			return blob;
 		}
 
@@ -261,9 +290,96 @@ namespace TicTacTorus.Source.Persistence
 		public static List<Blob> GetSymbols()
 		{
 			List<Blob> blobs = new List<Blob>();
+			
+			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			con.Open();
+			var command = new SQLiteCommand(con)
+			{
+				CommandText = $"select symbols from PlayerSymbols"
+			};
+
+			var reader = command.ExecuteReader();
+		
+			while (reader.Read())
+			{
+				blobs.Add( (Blob) reader[0]) ;
+			}
+			con.Close();
 			return blobs;
 		}
-
+		public static void SaveSymbol(Blob symbol)
+		{
+			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			_con.Open();
+                                 
+			SQLiteCommand command = new SQLiteCommand(_con);
+            
+			command.CommandText = $"insert into PlayerSymbols(symbols) values ("+ symbol+") ";
+			command.ExecuteNonQuery();
+			_con.Close();   
+		}
+		public static void DeleteSymbol(byte id)
+		{
+			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			_con.Open();
+                                 
+			SQLiteCommand command = new SQLiteCommand(_con);
+            
+			command.CommandText = $"delete from PlayerSymbols where ps =" +id+"  ";
+			command.ExecuteNonQuery();
+			_con.Close();   
+		}
+		
 		#endregion
+		#region AnonymNames
+
+		public static string GetAnonymName(byte id)
+		{
+			string anonymName = "";
+			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			con.Open();
+			var command = new SQLiteCommand(con)
+			{
+				CommandText = $"select names from AnonymNames where AN ='" + id + "'"
+			};
+
+			var reader = command.ExecuteReader();
+			
+			while (reader.Read())
+			{
+				anonymName = (string) reader[0] ;
+			}
+			con.Close();
+			return anonymName;
+		}
+		public static void SaveAnonymName(string anonymName)
+		{
+			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			_con.Open();
+                                 
+			SQLiteCommand command = new SQLiteCommand(_con);
+            
+			command.CommandText = $"insert into AnonymNames(names) values ("+ anonymName+") ";
+			command.ExecuteNonQuery();
+			_con.Close();   
+
+			
+		}
+		public static void DeleteAnonymName(byte id)
+		{
+			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			_con.Open();
+                                 
+			SQLiteCommand command = new SQLiteCommand(_con);
+            
+			command.CommandText = $"delete from AnonymNames where AN =" +id+"  ";
+			command.ExecuteNonQuery();
+			_con.Close();   
+
+			
+		}
+		
+		#endregion
+		
 	}
 }
