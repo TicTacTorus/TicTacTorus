@@ -7,6 +7,7 @@
 @using TicTacTorus.Source.Persistence
 @using System.Drawing
 @using TicTacTorus.Source
+@using TicTacTorus.Source.LoginContent.Security
 @inject ProtectedSessionStorage ProtectedSessionStorage
 @inject NavigationManager NavigationManager
 
@@ -30,17 +31,19 @@
                             <h1>@userid</h1></b>
                     </div>
                     <!-- if logged in player == userid inputs enabled else disabled ### -->
-                    @if (userid.Equals(_player))
+                    @if (userid.Equals(_user))
                     {
                         <div><b>In-Game Name</b></div>
-                        <input type="text" placeholder=@LoggedInUser.InGameName/>
+                        <input type="text" @bind="_newName" @onkeyup="ChangePlayerName" placeholder=@_profile.InGameName/>
                         <div class="mt-2"><b>Password</b></div>
-                        <input type="password" placeholder="**********"/>
+                        <input type="password" @onkeyup="ChangePassword" @bind="pw1" placeholder="**********"/>
+                        <div class="mt-2"><b>Confirm Password</b></div>
+                        <input type="password" @onkeyup="ChangePassword" @bind="pw2" placeholder="**********"/>
                     }
                     else
                     {
                         <div><b>In-Game Name</b></div>
-                        <p>@PersistenceStorage.LoadPlayer(userid).InGameName</p>
+                        <p>@_profile.InGameName</p>
                     }
                     <hr class="mx-2">
                     <div class="box-only mt-2 p-1" @onclick="ChangeSymbol">
@@ -48,7 +51,7 @@
                     </div>
                     <div class="text-center my-3">
                         <b>Symbol Color</b>
-                        <input type="color" value="@_color"/>
+                        <input type="color" value="@HexConverter(_profile.PlrColor)"/>
                         <!-- ### -->
                     </div>
                 </div>
@@ -95,14 +98,25 @@
     [Parameter] 
     public string userid { get; set; }
     
-    private ConnectionHubClient _client;
-    private string _color;
-    private string _player;
+    private static ConnectionHubClient _client;
+    private string _user { get; set; }
     private static HumanPlayer LoggedInUser { get; set; }
+
+    private HumanPlayer _profile;
+    private static string _newName { get; set; }
+    private static string pw1 { get; set; }
+    private static string pw2 { get; set; }
+
 }
 
 @functions
 {
+    protected override async Task OnInitializedAsync()
+    {
+        _profile = PersistenceStorage.LoadPlayer(userid);
+        StateHasChanged();
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -111,18 +125,18 @@
 
             if ((LoggedInUser = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) != null)
             {
-                _player = LoggedInUser.ID;
-                _color = HexConverter(LoggedInUser.PlrColor);
+                _user = LoggedInUser.ID;
                 StateHasChanged();
             }
             else
             {
-                {
-                    _player = "";
-                    _color = "";
-                }
+                _user = "";
+                StateHasChanged();
             }
         }
+        
+        #region listener
+        #endregion
         
     }
     
@@ -149,14 +163,6 @@
             NavigationManager.NavigateTo("/?error=userDoesNotExist");
         }
     }
-    
-
-    //Picture Click
-    private static void ChangePicture()
-    {
-        // TODO Send message to server, add/update picture to database
-       
-    }
 
     private static void ChangeSymbol()
     {
@@ -168,8 +174,29 @@
         // TODO
     }
 
-    private static void ChangePlayerName()
+    private static void ChangePassword(KeyboardEventArgs e)
     {
-        // TODO
+        if (e.Key == "Enter")
+        {
+            if (pw1 != "" && pw2 != "")
+            {
+                if (pw1.Equals(pw2))
+                {
+                    SaltedHash s = new SaltedHash(pw1);
+                    PersistenceStorage.UpdateSaltHash(LoggedInUser.ID, s.Salt, s.Hash);
+                    pw1 = "";
+                    pw2 = "";
+                }
+            }
+        }
+    }
+
+    private static async Task ChangePlayerName(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await _client.Connection.SendAsync("ChangeIngameName", LoggedInUser.ID, _newName);
+            _newName = "";
+        }
     }
 }
