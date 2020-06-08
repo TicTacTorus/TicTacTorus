@@ -18,9 +18,7 @@ namespace TicTacTorus.Source.Hubs
         #region Lobby
         public async Task CreateLobby(HumanPlayer hp)
         {
-            var server = Server.Instance;
-            var lobby = LobbyFactory.CreateLobbyWithId(hp);
-            server.AddLobby(lobby);
+            var lobby = LobbyHandler.CreateLobby(hp);
             await Clients.Caller.SendAsync("ReceiveLobbyId", lobby.Id.ToString());
         }
         /* later
@@ -36,9 +34,11 @@ namespace TicTacTorus.Source.Hubs
             // signal everyone, that player is added (=true)
             await Clients.Group(lobbyId.ToString()).SendAsync("PlayerListChanged", player, true);    
         }*/
-        public async Task JoinLobby(string lobbyId)
+        public async Task JoinLobby(string lobbyId, string player)
         {
-            var lobby = Server.Instance.GetLobbyById(lobbyId);
+            var hPlayer = JsonConvert.DeserializeObject<HumanPlayer>(player);
+            var lobby = LobbyHandler.AddPlayerToLobby(lobbyId, hPlayer);
+            
             var indented = Formatting.Indented;
             var settings = new JsonSerializerSettings()
             {
@@ -46,6 +46,7 @@ namespace TicTacTorus.Source.Hubs
             };
             var jsLobby = JsonConvert.SerializeObject(lobby, indented, settings);
             await Clients.Caller.SendAsync("GetLobby", jsLobby);
+            await Clients.Group(lobbyId).SendAsync("LobbyChanged", jsLobby);
             await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
         }
 
