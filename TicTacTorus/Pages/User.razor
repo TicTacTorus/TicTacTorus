@@ -29,18 +29,26 @@
                         <b>
                             <h1>@userid</h1></b>
                     </div>
-                    <div><b>In-Game Name</b></div>
                     <!-- if logged in player == userid inputs enabled else disabled ### -->
-                    <input type="text" placeholder=@PersistenceStorage.LoadPlayer(userid).InGameName/>
-                    <div class="mt-2"><b>Password</b></div>
-                    <input type="password" placeholder="**********"/>
+                    @if (userid.Equals(_player))
+                    {
+                        <div><b>In-Game Name</b></div>
+                        <input type="text" placeholder=@LoggedInUser.InGameName/>
+                        <div class="mt-2"><b>Password</b></div>
+                        <input type="password" placeholder="**********"/>
+                    }
+                    else
+                    {
+                        <div><b>In-Game Name</b></div>
+                        <p>@PersistenceStorage.LoadPlayer(userid).InGameName</p>
+                    }
                     <hr class="mx-2">
                     <div class="box-only mt-2 p-1" @onclick="ChangeSymbol">
                         <img src="/Media/Images/circle.png" title="Change profile picture" alt="profile picture"/>
                     </div>
                     <div class="text-center my-3">
                         <b>Symbol Color</b>
-                        <input type="color" value="@HexConverter(PersistenceStorage.LoadPlayer(userid).PlrColor)"/>
+                        <input type="color" value="@_color"/>
                         <!-- ### -->
                     </div>
                 </div>
@@ -89,7 +97,7 @@
     
     private ConnectionHubClient _client;
     private string _color;
-    IPlayer player;
+    private string _player;
     private static HumanPlayer LoggedInUser { get; set; }
 }
 
@@ -100,8 +108,22 @@
         if (firstRender)
         {
             _client = new ConnectionHubClient(NavigationManager);
-            LoggedInUser = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData");
+
+            if ((LoggedInUser = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) != null)
+            {
+                _player = LoggedInUser.ID;
+                _color = HexConverter(LoggedInUser.PlrColor);
+                StateHasChanged();
+            }
+            else
+            {
+                {
+                    _player = "";
+                    _color = "";
+                }
+            }
         }
+        
     }
     
     private static string HexConverter(System.Drawing.Color c)
@@ -119,7 +141,7 @@
         return rtn;
     }
     
-    protected override async void OnParametersSet()
+    protected override void OnParametersSet()
     {
     //TODO send request to server
         if (PersistenceStorage.CheckPlayerIdIsUnique(userid))
@@ -128,19 +150,6 @@
         }
     }
     
-    protected override void OnInitialized()
-    {
-        _client = new ConnectionHubClient(NavigationManager);
-        
-        /*
-         * Method receives a new Player Object with the changed values and updates the site
-         */
-        //TODO: Email change can not be made with the IPlayer Interface! Maybe other Method?
-        _client.Connection.On<IPlayer>("ChangeUserInfo", (user) =>
-        {
-            
-        });
-    }
 
     //Picture Click
     private static void ChangePicture()
@@ -156,7 +165,7 @@
 
     private static void ChangeColor()
     {
-        // TODO
+        PersistenceStorage.UpdateColor();
     }
 
     private static void ChangePlayerName()
