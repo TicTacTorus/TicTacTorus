@@ -13,10 +13,6 @@
 @inject ProtectedSessionStorage ProtectedSessionStorage
 @inject IJSRuntime JSRuntime
 
-@{
-    // if angemeldet 
-    // else generiere Name/Player
-}
 <div class="my-5 lobbies-grid">
     <button class="btn-back" onclick="location.href ='/';">
         <svg class="bi bi-arrow-left" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -211,7 +207,7 @@
                 StateHasChanged();
             });
 
-            _client.Connection.On<IPlayer, bool>("PlayerListChanged", (player, isAdded) =>
+            _client.Connection.On<string, bool>("PlayerListChanged", (player, isAdded) =>
             {
             /*if (isAdded)
             {
@@ -223,16 +219,26 @@
             }
             StateHasChanged();*/
             });
+            _client.Connection.On<string>("LobbyChanged", (lobby) =>
+            {
+                var settings = new JsonSerializerSettings()
+                {
+                    TypeNameHandling = TypeNameHandling.All
+                };
+                _lobby = JsonConvert.DeserializeObject<Source.LobbySpecificContent.Lobby>(lobby, settings);
+                StateHasChanged();
+            });
         
             #endregion
-        
+
             if ((User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) == null)
             {
                 User = PlayerFactory.CreateHumanPlayer();
                 await ProtectedSessionStorage.SetAsync("LoginData", User);
             }
 
-            await _client.Connection.SendAsync("JoinLobby", IdString);
+            string jsonUser = JsonConvert.SerializeObject(User);
+            await _client.Connection.SendAsync("JoinLobby", IdString, jsonUser);
             IsConnected = _client.Connection.State == HubConnectionState.Connected;
             StateHasChanged();
         }
