@@ -203,9 +203,21 @@ namespace TicTacTorus.Source.Persistence
 			_con.Open();
                                  
 			SQLiteCommand command = new SQLiteCommand(_con);
-            
-			command.CommandText = $"update  User Set salt ='"+ newSalt+"', hash ='"+ newHash+"' where loginName = '"+
-			                      id+"'";
+
+			command.CommandText = "Update User " +
+			                      "SET salt = @Salt, " +
+			                      "hash = @Hash " +
+			                      "WHERE loginName = @Id";
+			
+			var IDParam = new SQLiteParameter("@Id", DbType.String, id.Length) {Value = id};                      
+			var SaltParam = new SQLiteParameter("@Salt", DbType.Binary, SaltedHash.SaltBytes) {Value = newSalt};
+			var HashParam = new SQLiteParameter("@Hash", DbType.Binary, SaltedHash.HashBytes) {Value = newHash};
+			
+			command.Parameters.Add(IDParam);
+			command.Parameters.Add(SaltParam);
+			command.Parameters.Add(HashParam);
+			
+			command.Prepare();
 			command.ExecuteNonQuery();
 			_con.Close(); 
 		}

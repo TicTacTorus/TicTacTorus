@@ -64,7 +64,7 @@
                         }
                         else
                         {
-                            <input type="color" disabled @bind="_profileColor"/>
+                            <input type="color" @bind="_profileColor" disabled/>
                         }
                         <!-- ### -->
                     </div>
@@ -134,10 +134,9 @@ else if (errorMessage != null)
 
     private HumanPlayer _profile;
     private string _profileIngameName { get; set; }
-    private string _profileColor { get; set; }
+    private static string _profileColor { get; set; }
     
     private static string _newName { get; set; }
-    private static string _newColor { get; set; }
     private static string pw1 { get; set; }
     private static string pw2 { get; set; }
 
@@ -237,7 +236,7 @@ else if (errorMessage != null)
 
     private static void ChangeColor()
     {
-        PersistenceStorage.UpdateColor(LoggedInUser.ID, ColorTranslator.FromHtml(_newColor));
+        PersistenceStorage.UpdateColor(LoggedInUser.ID, ColorTranslator.FromHtml(_profileColor));
     }
 
     private static void ChangePassword(KeyboardEventArgs e)
