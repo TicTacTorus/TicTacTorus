@@ -100,9 +100,9 @@ namespace TicTacTorus.Source.Hubs
                 await Clients.Caller.SendAsync("LoginFailed", "Database Connection Error: " + e);
             }
         }
-
-        public async Task ConfirmRegister(HumanPlayer user)
+        public async Task ConfirmRegister(string u)
         {
+            HumanPlayer user = JsonConvert.DeserializeObject<HumanPlayer>(u);
             try
             {
                 if (PersistenceStorage.CheckPlayerIdIsUnique(user.ID))
@@ -129,6 +129,40 @@ namespace TicTacTorus.Source.Hubs
                 await Clients.Caller.SendAsync("RegisterFailed",
                     "An Database Error occurred with the following message: " + e);
             }
+        }
+
+        public async Task GetPlayerStats(string userId, string playerId)
+        {
+            try
+            {
+                var player = PersistenceStorage.LoadPlayer(playerId);
+                var playerStats = PersistenceStorage.GetPlayerStat(player);
+                if (userId == null || userId != playerId)
+                {
+                    // filter some information
+                    player.Hash = null;
+                    player.Salt = null;
+                    player.playerStats = null;
+                
+                    var jsonPlayer = JsonConvert.SerializeObject(player);
+                    var jsonStats = JsonConvert.SerializeObject(playerStats);
+
+                    await Clients.Caller.SendAsync("ReceiveStatsNoAuthorisation", jsonPlayer,playerStats);
+                }
+                else
+                {
+                    var jsonPlayer = JsonConvert.SerializeObject(player);
+                    var jsonStats = JsonConvert.SerializeObject(playerStats);
+
+                    await Clients.Caller.SendAsync("ReceiveStatsAsOwner", jsonPlayer, jsonStats);
+                }
+            }
+            catch
+            {
+                await Clients.Caller.SendAsync("Error", "An Error occurred. Please try again later.");
+                return;
+            }
+            
         }
 
         #endregion

@@ -6,6 +6,7 @@
 @using TicTacTorus.Source.PlayerSpecificContent
 @using TicTacTorus.Source.Persistence
 @using System.Drawing
+@using Newtonsoft.Json
 @using TicTacTorus.Source
 @using TicTacTorus.Source.LoginContent.Security
 @inject ProtectedSessionStorage ProtectedSessionStorage
@@ -21,6 +22,8 @@
     <h1 class="headers my-auto">TicTacTorus</h1>
 </div>
 
+@if(hasLoaded)
+{
 <div class="d-flex justify-content-center">
     <div class="row">
         <div class="col-sm-8 col-md-5 col-lg-4 mx-auto m-2">
@@ -42,8 +45,11 @@
                     }
                     else
                     {
-                        <div><b>In-Game Name</b></div>
-                        <p>@_profile.InGameName</p>
+                        @if (_profile != null)
+                        {
+                            <div><b>In-Game Name</b></div>
+                            <p> @_profile.InGameName</p>
+                        }
                     }
                     <hr class="mx-2">
                     <div class="box-only mt-2 p-1" @onclick="ChangeSymbol">
@@ -91,7 +97,23 @@
         </div>
     </div>
 </div>
-
+}
+else if (errorMessage != null)
+{
+    <div class="d-flex justify-content-center">
+        <div class="row">
+            <div class="col-sm-8 col-md-5 col-lg-4 mx-auto m-2">
+                <div class="box w-100">
+                    <div class="text-center mx-4">
+                        <div class="my-1">
+                            @errorMessage
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @code
 {
@@ -107,15 +129,12 @@
     private static string pw1 { get; set; }
     private static string pw2 { get; set; }
 
+    private bool hasLoaded = false;
+    private string errorMessage = null;
 }
 
 @functions
 {
-    protected override async Task OnInitializedAsync()
-    {
-        _profile = PersistenceStorage.LoadPlayer(userid);
-        StateHasChanged();
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -133,11 +152,38 @@
                 _user = "";
                 StateHasChanged();
             }
+
+            if (LoggedInUser != null) await _client.Connection.SendAsync("GetPlayerStats", LoggedInUser.ID, userid);
         }
         
         #region listener
-        #endregion
+
+        _client.Connection.On<string, string>("ReceiveStatsNoAuthorisation", (player, stats) =>
+        {
+            // TODO anpassen
+            _profile = JsonConvert.DeserializeObject<HumanPlayer>(player);
+            _profile.playerStats = JsonConvert.DeserializeObject<PlayerStats>(stats);
+            hasLoaded = true;
+            StateHasChanged();
+        });
         
+        _client.Connection.On<string, string>("ReceiveStatsAsOwner", (player, stats) =>
+        {
+            // TODO anpassen
+            _profile = JsonConvert.DeserializeObject<HumanPlayer>(player);
+            _profile.playerStats = JsonConvert.DeserializeObject<PlayerStats>(stats);
+            hasLoaded = true;
+            StateHasChanged();
+        });
+
+        _client.Connection.On<string>("Error", (message) =>
+        {
+            errorMessage = message;
+            StateHasChanged();
+        });
+
+    #endregion
+
     }
     
     private static string HexConverter(System.Drawing.Color c)
@@ -150,6 +196,7 @@
         catch (Exception ex)
         {
             //doing nothing
+            Console.Write(ex);
         }
 
         return rtn;

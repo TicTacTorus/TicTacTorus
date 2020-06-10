@@ -132,12 +132,6 @@ namespace TicTacTorus.Source.Persistence
 			con.Close();
 			return Tuple.Create(player, false);
 		}
-		
-
-		public static PlayerStats LoadPlayerStats(string loadPlayStats)//besprechen
-		{
-			return null;
-		}
 
 		#endregion
 		#region Verify Methods

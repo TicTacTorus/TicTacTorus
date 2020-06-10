@@ -169,7 +169,7 @@
     {
         if(_registerPlayer.Password != _registerPlayer.ConfirmPassword || _registerPlayer.Id == null) return;
         var user = new HumanPlayer(_registerPlayer.Id, _registerPlayer.InGameName, Color.Black, new byte(), _registerPlayer.Password);
-        await _client.Connection.SendAsync("ConfirmRegister", user);
+        await _client.Connection.SendAsync("ConfirmRegister", JsonConvert.SerializeObject(user));
     }
 
     public bool IsConnected =>
