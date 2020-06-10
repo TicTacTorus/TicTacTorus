@@ -270,7 +270,7 @@ namespace TicTacTorus.Source.Persistence
 			command.ExecuteNonQuery();
 			_con.Close();   
 
-			
+			DeletePlayerStat(id);
 		}
 		
 		#endregion
@@ -526,16 +526,16 @@ namespace TicTacTorus.Source.Persistence
 
 			
 		}
-		public static void DeletePlayerStat(HumanPlayer player)
+		public static void DeletePlayerStat(string name)
 		{
 			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			_con.Open();
                                  
 			SQLiteCommand command = new SQLiteCommand(_con);
             
-			command.CommandText = $"delete from Chains where PlayerName = '" +player.ID+" ' ";
+			command.CommandText = $"delete from Chains where PlayerName = '" +name+" ' ";
 			command.ExecuteNonQuery();
-			command.CommandText = $"delete from PlayerStatistic where PlayerName = '" +player.ID+" ' ";
+			command.CommandText = $"delete from PlayerStatistic where PlayerName = '" +name+" ' ";
 			command.ExecuteNonQuery();
 			_con.Close();   
 
