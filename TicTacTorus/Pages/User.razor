@@ -57,7 +57,7 @@
                     </div>
                     <div class="text-center my-3">
                         <b>Symbol Color</b>
-                        <input type="color" value="@HexConverter(_profile.PlrColor)"/>
+                        <input type="color" @bind="_newColor"/>
                         <!-- ### -->
                     </div>
                 </div>
@@ -74,12 +74,12 @@
                         <div class="col box-only p-2 m-1">
                             <h5 class="text-center mt-2">Games played</h5>
                             <hr>
-                            <h5><b>173</b></h5>
+                            <h5><b>@_profile.playerStats.PlayedGames</b></h5>
                         </div>
                         <div class="col box-only p-2 m-1">
                             <h5 class="text-center mt-2">Wins</h5>
                             <hr>
-                            <h5><b>40</b></h5>
+                            <h5><b>@_profile.playerStats.WonGames</b></h5>
                         </div>
                         <div class="col box-only p-2 m-1">
                             <h5 class="text-center mt-2">Symbols placed</h5>
@@ -126,6 +126,7 @@ else if (errorMessage != null)
 
     private HumanPlayer _profile;
     private static string _newName { get; set; }
+    private static string _newColor { get; set; }
     private static string pw1 { get; set; }
     private static string pw2 { get; set; }
 
@@ -135,7 +136,6 @@ else if (errorMessage != null)
 
 @functions
 {
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -218,7 +218,7 @@ else if (errorMessage != null)
 
     private static void ChangeColor()
     {
-        // TODO
+        PersistenceStorage.UpdateColor(LoggedInUser.ID, ColorTranslator.FromHtml(_newColor));
     }
 
     private static void ChangePassword(KeyboardEventArgs e)
