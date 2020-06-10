@@ -32,14 +32,7 @@ namespace TicTacTorus.Source
             Salt = s.Salt;// Besprechen
         }
       //playerstats insert
-        public HumanPlayer(string id, string inGameName, Color plrColor, byte symbol, string pwd,PlayerStats playerstats):
-            this(id, inGameName, plrColor, symbol)
-        {
-            this.playerStats = playerStats;
-            SaltedHash s = new SaltedHash(pwd); // Besprechen
-            Hash = s.Hash;// Besprechen
-            Salt = s.Salt;// Besprechen
-        }
+    
         
         public HumanPlayer(string ingameName, Color color, byte symbol):
             this(null, ingameName, color, symbol) { }
