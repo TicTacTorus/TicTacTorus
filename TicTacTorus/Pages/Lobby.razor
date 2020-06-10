@@ -14,7 +14,7 @@
 @inject IJSRuntime JSRuntime
 
 <div class="my-5 lobbies-grid">
-    <button class="btn-back" onclick="location.href ='/';">
+    <button class="btn-back" @onclick="LeaveLobby">
         <svg class="bi bi-arrow-left" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path fill-rule="evenodd" d="M5.854 4.646a.5.5 0 010 .708L3.207 8l2.647 2.646a.5.5 0 01-.708.708l-3-3a.5.5 0 010-.708l3-3a.5.5 0 01.708 0z" clip-rule="evenodd"/>
             <path fill-rule="evenodd" d="M2.5 8a.5.5 0 01.5-.5h10.5a.5.5 0 010 1H3a.5.5 0 01-.5-.5z" clip-rule="evenodd"/>
@@ -51,13 +51,8 @@
                             {
                                 @foreach (var elem in _lobby.GetAllPlayers())
                                 {
-                                    <!--<tr id="player_table_row">
-                                        <td><button onclick='MessageChatBox("@elem.ID got kicked")'>Kick</button></td>
-                                        <td>@elem.InGameName</td>
-                                        <td>@elem.Symbol</td>
-                                    </tr>-->
                                     <tr id="player_table_row">
-                                        @if (@elem != _lobby.GetPlayerAt(0))
+                                        @if (@elem != _lobby.GetPlayerAt(0) && User.ID == (_lobby.GetPlayerAt(0).ID ))
                                         {
                                             <td><button @onclick="@(() => RemovePlayerFromLobby(@elem))">Kick</button></td>
                                         }
@@ -152,10 +147,20 @@
 
 @functions{
 
+    #region Non-Lobby-Actions
     private void CreateGame()
     {
         NavigationManager.NavigateTo("/ingame/" + IdString);
+        _client.Connection.SendAsync("StartGame");
     }
+
+    private void LeaveLobby()
+    {
+        NavigationManager.NavigateTo("/");
+        string jsonPlayer = JsonConvert.SerializeObject(User);
+        _client.Connection.SendAsync("RemovePlayerFromLobby", jsonPlayer);
+    }
+    #endregion
 
     void RemovePlayerFromLobby(IPlayer player)
     {
@@ -207,18 +212,6 @@
                 StateHasChanged();
             });
 
-            _client.Connection.On<string, bool>("PlayerListChanged", (player, isAdded) =>
-            {
-            /*if (isAdded)
-            {
-                _lobby.AddPlayer(player);
-            }
-            else
-            {
-                _lobby.RemovePlayer(player);
-            }
-            StateHasChanged();*/
-            });
             _client.Connection.On<string>("LobbyChanged", (lobby) =>
             {
                 var settings = new JsonSerializerSettings()
@@ -244,7 +237,8 @@
         }
         
     }
-
+    
+    #region SendMethods
     void SendChatMessage(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
@@ -253,14 +247,9 @@
             _messageInput = "";
         }
     }
-
     void SendSystemMessage(string message)
     {
         _client.Connection.SendAsync("SendMessage", IdString, "Game", message);
     }
-    /*
-    void SendChangedLobbyParameter(string lobbyParam, string changedValue)
-    {
-        _hubConnection.SendAsync("ChangeLobbyStat", IdString, lobbyParam, changedValue);
-    }*/
+    #endregion
 }

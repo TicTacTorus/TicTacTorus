@@ -1,4 +1,5 @@
-﻿using TicTacTorus.Source.Generator;
+﻿using System;
+using TicTacTorus.Source.Generator;
 using TicTacTorus.Source.PlayerSpecificContent;
 
 namespace TicTacTorus.Source.LobbySpecificContent
@@ -19,6 +20,13 @@ namespace TicTacTorus.Source.LobbySpecificContent
             lobby.Players.Add(player);
             
             return lobby;
+        }
+
+        public static Tuple<bool, ILobby> RemovePlayerFromLobby(string lobbyId, IPlayer player)
+        {
+            ILobby lobby = Server.Instance.GetLobbyById(lobbyId);
+
+            return Tuple.Create(lobby.RemovePlayer(player), lobby );
         }
         
         

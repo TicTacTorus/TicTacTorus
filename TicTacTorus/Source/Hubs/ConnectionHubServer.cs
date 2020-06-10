@@ -9,6 +9,7 @@ using TicTacTorus.Source.Generator;
 using TicTacTorus.Source.LobbySpecificContent;
 using TicTacTorus.Source.LoginContent.Security;
 using TicTacTorus.Source.Persistence;
+using TicTacTorus.Source.PlayerSpecificContent;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace TicTacTorus.Source.Hubs
@@ -21,24 +22,29 @@ namespace TicTacTorus.Source.Hubs
             var lobby = LobbyHandler.CreateLobby(hp);
             await Clients.Caller.SendAsync("ReceiveLobbyId", lobby.Id.ToString());
         }
-        /* later
-        public async Task RemovePlayerFromLobby(string lobbyId, IPlayer player)
+        
+        public async Task RemovePlayerFromLobby(string lobbyId, string player)
         {
-            Server.Instance.GetLobbyById(lobbyId).RemovePlayer(player);
-            // signal everyone, that player is removed (=false)
-            await Clients.Group(lobbyId.ToString()).SendAsync("PlayerListChanged", player, false);    
+            IPlayer p = JsonConvert.DeserializeObject<IPlayer>(player);
+            var (isRemoved, lobby) = LobbyHandler.RemovePlayerFromLobby(lobbyId, p);
+
+            if (isRemoved)
+            {
+                await Clients.Group(lobbyId).SendAsync("ReceiveMessage", p.InGameName, "I left the Lobby");
+                
+                await Clients.Group(lobbyId).SendAsync("LobbyChanged", JsonConvert.SerializeObject(lobby));
+            }
+            else
+            {
+                await Clients.Group(lobbyId).SendAsync("ReceiveMessage", "Game", "There was something wrong. "+p.InGameName+" couldn't be removed");
+            }
         }
-        public async Task AddPlayerToLobby(string lobbyId, IPlayer player)
-        {
-            Server.Instance.GetLobbyById(lobbyId).AddPlayer(player);
-            // signal everyone, that player is added (=true)
-            await Clients.Group(lobbyId.ToString()).SendAsync("PlayerListChanged", player, true);    
-        }*/
+        
         public async Task JoinLobby(string lobbyId, string player)
         {
             var hPlayer = JsonConvert.DeserializeObject<HumanPlayer>(player);
             var lobby = LobbyHandler.AddPlayerToLobby(lobbyId, hPlayer);
-            
+
             var indented = Formatting.Indented;
             var settings = new JsonSerializerSettings()
             {
