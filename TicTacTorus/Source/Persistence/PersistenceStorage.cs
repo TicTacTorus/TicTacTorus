@@ -372,8 +372,10 @@ namespace TicTacTorus.Source.Persistence
 		#region PlayerStat
 		public static PlayerStats GetPlayerStat(HumanPlayer player)
 		{
-			PlayerStats playerstat = null;
+			PlayerStats playerstat =null;
 			
+			
+		
 			var _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			_con.Open();
 			SQLiteCommand command = new SQLiteCommand(_con);
@@ -381,13 +383,15 @@ namespace TicTacTorus.Source.Persistence
 			command.CommandText = $"select  p.PlayerName,p.playedGames,p.WonGames,c.Length,c.Value from PlayerStatistic p,Chains c " +
 			                      $"where c.PlayerName = '"+ player.ID+"' and c.PlayerName=p.PlayerName";
 			var reader = command.ExecuteReader();
-
-			playerstat.PlayedGames = (int) reader[1];
-			playerstat.PlayedGames = (int) reader[2];
-				
+			var pg =0;
+			var wg = 0;
+			int[] ch = null;
 			while (reader.Read())
-			{
-				playerstat.Chains[((int) reader[3]) - 1] = (int)reader[4];
+			{ pg= (int) reader[1];
+				 wg = (int) reader[2];
+				
+				ch[((int) reader[3]) - 1] = (int)reader[4];	
+				playerstat = new PlayerStats(pg,wg,ch);
 			}
 			
 			_con.Close();
@@ -421,19 +425,21 @@ namespace TicTacTorus.Source.Persistence
 			else
 			{
 				//Playerstat exists with loginName
-				PlayerStats existPlayerStats= null;
+				PlayerStats existPlayerStats;
 				command.CommandText = $"select  p.PlayerName,p.playedGames,p.WonGames,c.Length,c.Value from PlayerStatistic p,Chains c " +
 				                      $"where c.PlayerName = '"+ player.ID+"' and c.PlayerName=p.PlayerName'";
 				 reader = command.ExecuteReader();
-
-				 existPlayerStats.PlayedGames = (int) reader[1];
-				 existPlayerStats.PlayedGames = (int) reader[2];
-				
+                 var pg  =0;
+	             var wg =0;    
+	              int[] ch = null;
 				 while (reader.Read())
 				 {
-					 existPlayerStats.Chains[((int) reader[3]) - 1] = (int)reader[4];
+					pg = (int) reader[1];
+					wg = (int) reader[2];
+					ch[((int) reader[3]) - 1] = (int)reader[4];
+					
 				 }
-
+				 existPlayerStats = new PlayerStats(pg,wg,ch);
 				 existPlayerStats.PlayedGames += playStNewDif.PlayedGames;
 				 existPlayerStats.WonGames += playStNewDif.WonGames;
 				 command.CommandText = $"update PlayerStatistic Set playedGames = "+existPlayerStats.PlayedGames+",WonGames= "+existPlayerStats.WonGames+" where PlayerName = '"+player.ID+"'";
