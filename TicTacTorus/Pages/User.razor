@@ -48,7 +48,7 @@
                         @if (_profile != null)
                         {
                             <div><b>In-Game Name</b></div>
-                            <p> @_profile.InGameName</p>
+                            <p> @_profileIngameName</p>
                         }
                     }
                     <hr class="mx-2">
@@ -57,8 +57,15 @@
                     </div>
                     <div class="text-center my-3">
                         <b>Symbol Color</b>
-                        <input type="color" @bind="_newColor"/>
-                        <button class="btn btn-end-custom" @onclick="@ChangeColor">Change Color</button>
+                        @if (userid.Equals(_user))
+                        {
+                            <input type="color" @bind="_profileColor"/>
+                            <button class="btn btn-end-custom" @onclick="@ChangeColor">Change Color</button>
+                        }
+                        else
+                        {
+                            <input type="color" disabled @bind="_profileColor"/>
+                        }
                         <!-- ### -->
                     </div>
                 </div>
@@ -75,12 +82,12 @@
                         <div class="col box-only p-2 m-1">
                             <h5 class="text-center mt-2">Games played</h5>
                             <hr>
-                            <h5><b>@_profile.playerStats.PlayedGames</b></h5>
+                            <h5><b><!--@_profile.playerStats.PlayedGames --></b></h5>
                         </div>
                         <div class="col box-only p-2 m-1">
                             <h5 class="text-center mt-2">Wins</h5>
                             <hr>
-                            <h5><b>@_profile.playerStats.WonGames</b></h5>
+                            <h5><b><!--@_profile.playerStats.WonGames--></b></h5>
                         </div>
                         <div class="col box-only p-2 m-1">
                             <h5 class="text-center mt-2">Symbols placed</h5>
@@ -126,17 +133,28 @@ else if (errorMessage != null)
     private static HumanPlayer LoggedInUser { get; set; }
 
     private HumanPlayer _profile;
+    private string _profileIngameName { get; set; }
+    private string _profileColor { get; set; }
+    
     private static string _newName { get; set; }
     private static string _newColor { get; set; }
     private static string pw1 { get; set; }
     private static string pw2 { get; set; }
 
-    private bool hasLoaded = false;
+    private bool hasLoaded = true;
     private string errorMessage = null;
 }
 
 @functions
 {
+    protected override async Task OnInitializedAsync()
+    {
+        _profile = PersistenceStorage.LoadPlayer(userid);
+        _profileIngameName = _profile.InGameName;
+        _profileColor = HexConverter(_profile.PlrColor);
+        StateHasChanged();
+    }
+    
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
