@@ -380,6 +380,134 @@ namespace TicTacTorus.Source.Persistence
 		}
 		
 		#endregion
+		#region PlayerStat
+		public static PlayerStats GetPlayerStat(HumanPlayer player)
+		{
+			PlayerStats playerstat = null;
+			
+			var _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			_con.Open();
+			SQLiteCommand command = new SQLiteCommand(_con);
 		
+			command.CommandText = $"select  p.PlayerName,p.playedGames,p.WonGames,c.Length,c.Value from PlayerStatistic p,Chains c " +
+			                      $"where c.PlayerName = '"+ player.ID+"' and c.PlayerName=p.PlayerName'";
+			var reader = command.ExecuteReader();
+
+			playerstat.PlayedGames = (int) reader[1];
+			playerstat.PlayedGames = (int) reader[2];
+				
+			while (reader.Read())
+			{
+				playerstat.Chains[((int) reader[3]) - 1] = (int)reader[4];
+			}
+			
+			_con.Close();
+			return playerstat;
+		}
+		public static void SavePlayerStat(HumanPlayer player,PlayerStats playStNewDif)
+		{
+			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			_con.Open();
+                                 
+			SQLiteCommand command = new SQLiteCommand(_con);
+            
+			
+			
+			command.CommandText = $"select count(*) from PlayerStatistic where PlayerName = '"+ player.ID+ "';  ";
+			
+			var reader = command.ExecuteReader();
+			if ((int) reader[0] == 0)
+			{
+				//Playerstat doesen't exist with the loginName
+				command.CommandText = $"INSERT into PlayerStatistic (PlayerName, playedGames, WonGames) VALUES ('"+player.ID+"', "+playStNewDif.PlayedGames+","+playStNewDif.WonGames+"); ";
+				command.ExecuteNonQuery();
+               
+				for ( var iter =1;iter<= playStNewDif.Chains.Length;iter++)
+				{
+					command.CommandText = $"INSERT INTO Chains(PlayerName, Length, Value) VALUES ('"+player.ID +"',"+iter+","+playStNewDif.Chains[iter-1]+")";
+					command.ExecuteNonQuery();
+				}
+
+			}
+			else
+			{
+				//Playerstat exists with loginName
+				PlayerStats existPlayerStats= null;
+				command.CommandText = $"select  p.PlayerName,p.playedGames,p.WonGames,c.Length,c.Value from PlayerStatistic p,Chains c " +
+				                      $"where c.PlayerName = '"+ player.ID+"' and c.PlayerName=p.PlayerName'";
+				 reader = command.ExecuteReader();
+
+				 existPlayerStats.PlayedGames = (int) reader[1];
+				 existPlayerStats.PlayedGames = (int) reader[2];
+				
+				 while (reader.Read())
+				 {
+					 existPlayerStats.Chains[((int) reader[3]) - 1] = (int)reader[4];
+				 }
+
+				 existPlayerStats.PlayedGames += playStNewDif.PlayedGames;
+				 existPlayerStats.WonGames += playStNewDif.WonGames;
+				 command.CommandText = $"update PlayerStatistic Set playedGames = "+existPlayerStats.PlayedGames+",WonGames= "+existPlayerStats.WonGames+" where PlayerName = '"+player.ID+"'";
+				 command.ExecuteNonQuery();
+				
+				 //unterscheiden ob playStNewDif.Chains.Length länger als exist
+				 //Also ob neue Werte dazu kommen
+				 if (existPlayerStats.Chains.Length < playStNewDif.Chains.Length)
+				 {
+					 for (var iter = 0; iter < existPlayerStats.Chains.Length; iter++)
+					 {
+						 var iter2 = iter + 1;
+						 existPlayerStats.Chains[iter] += playStNewDif.Chains[iter];
+						 command.CommandText = $"update Chains Set Value = "+existPlayerStats.Chains[iter] +" where PlayerName ='"+ player.ID+"' and Length = "+iter2 +"";
+						 
+						 command.ExecuteNonQuery();
+
+					 }
+
+					 for (var iter = existPlayerStats.Chains.Length; iter < playStNewDif.Chains.Length; iter++)
+					 {
+						 var iter2 = iter + 1;
+						 command.CommandText = $"insert into Chains (PlayerName,Length,Value) values('"+player.ID+"',"+iter2+","+playStNewDif.Chains[iter]+") ";
+						 command.ExecuteNonQuery();
+					 }
+					 
+				 }
+				 else
+				 {
+					 for (var iter = 0; iter < playStNewDif.Chains.Length; iter++)
+					 {
+						 var iter2 = iter + 1;
+						 existPlayerStats.Chains[iter] += playStNewDif.Chains[iter];
+						 command.CommandText = $"update Chains Set Value = "+existPlayerStats.Chains[iter] +" where PlayerName ='"+ player.ID+"' and Length = "+iter2 +"";
+						 
+						 command.ExecuteNonQuery();
+
+					 }
+				 }
+				
+			}
+			
+		   
+			
+			_con.Close();   
+
+			
+		}
+		public static void DeletePlayerStat(HumanPlayer player)
+		{
+			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			_con.Open();
+                                 
+			SQLiteCommand command = new SQLiteCommand(_con);
+            
+			command.CommandText = $"delete from Chains where PlayerName = '" +player.ID+" ' ";
+			command.ExecuteNonQuery();
+			command.CommandText = $"delete from PlayerStatistic where PlayerName = '" +player.ID+" ' ";
+			command.ExecuteNonQuery();
+			_con.Close();   
+
+			
+		}
+		#endregion 
 	}
 }

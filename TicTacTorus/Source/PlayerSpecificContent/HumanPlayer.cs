@@ -22,6 +22,7 @@ namespace TicTacTorus.Source
             InGameName = inGameName;
             PlrColor = plrColor;
             Symbol = symbol;
+            playerStats = null;
         }
         public HumanPlayer(string id, string inGameName, Color plrColor, byte symbol, string pwd):
             this(id, inGameName, plrColor, symbol)
