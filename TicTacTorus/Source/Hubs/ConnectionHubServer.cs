@@ -60,6 +60,61 @@ namespace TicTacTorus.Source.Hubs
         {
             return Groups.RemoveFromGroupAsync(Context.ConnectionId, lobbyId);
         }
+
+        public async Task ChangeLobbyDescription(string lobbyId, string descr)
+        {
+            var lobby = Server.Instance.GetLobbyById(lobbyId);
+
+            if (lobby.Description != descr)
+            {
+                lobby.Description = descr;
+                await Clients.Group(lobbyId).SendAsync("DescriptionChanged", lobby.Description );
+            }
+        }
+        public async Task ChangeLobbyStatus(string lobbyId, string stat)
+        {
+            var lobby = Server.Instance.GetLobbyById(lobbyId);
+
+            if (lobby.Status != stat)
+            {
+                lobby.Status = stat;
+                await Clients.Group(lobbyId).SendAsync("StatusChanged", lobby.Status);
+            }
+        }
+        
+        public async Task ChangeLobbyName(string lobbyId, string title)
+        {
+            var lobby = Server.Instance.GetLobbyById(lobbyId);
+
+            if (lobby.Name != title)
+            {
+                lobby.Name = title;
+                await Clients.Group(lobbyId).SendAsync("TitleChanged", lobby.Name);
+            }
+        }
+
+        public async Task ChangeLobbyPlayerCount(string lobbyId, int maxCount)
+        {
+            var lobby = Server.Instance.GetLobbyById(lobbyId);
+            if (lobby.Players.Count > maxCount) // ? needed?
+            {
+                // not possible -> send message
+                Clients.Caller.SendAsync("ReceiveMessage", "System",
+                    "Can not reduce count of players. There are currently too many player in this Lobby.");
+            }
+            else
+            {
+                lobby.MaxPlayerCount = maxCount;
+                Clients.Group(lobbyId).SendAsync("MaxPlayersChanged", maxCount);
+            }
+        }
+
+        public async Task ChangeLobbyVisibility(string lobbyId, bool isPrivate)
+        {
+            Server.Instance.GetLobbyById(lobbyId).IsPrivate = isPrivate;
+            // maybe send refresh to LobbyHandler (and every person on lobbylist-site)?
+        }
+        
         #endregion
         #region Lobbies
 

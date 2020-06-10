@@ -31,104 +31,130 @@
     <section contenteditable="true" class="text-center my-3">
         <p>@_lobby.Description</p>
     </section>
-}
-<div class="d-flex justify-content-center">
-    
-    <div class="row">
-        <div class="col-sm-9 col-md-7 col-lg-4 mx-auto my-1">
-            <!-- Players Box -->
-            <div class="box box-lobby w-100">
-                <div class="box-content">
-                    <b><h3 class="text-center">Players (@if (_lobby != null)
-                                                        {
-                                                            var playerCount = _lobby.GetAllPlayers().Count;
-                                                            <inline>@playerCount/20)</inline>
-                                                        }</h3></b>
-                    <hr>
-                    <div>
-                        <table id="player_table_in_lobby">
-                            @if (_lobby != null)
-                            {
-                                @foreach (var elem in _lobby.GetAllPlayers())
+    <div class="d-flex justify-content-center">
+
+        <div class="row">
+            <div class="col-sm-9 col-md-7 col-lg-4 mx-auto my-1">
+                <!-- Players Box -->
+                <div class="box box-lobby w-100">
+                    <div class="box-content">
+                        <b>
+                            <h3 class="text-center">Players (
+                                @if (_lobby != null)
                                 {
-                                    <tr id="player_table_row">
-                                        @if (@elem != _lobby.GetPlayerAt(0) && User.ID == (_lobby.GetPlayerAt(0).ID ))
-                                        {
-                                            <td><button @onclick="@(() => RemovePlayerFromLobby(@elem))">Kick</button></td>
-                                        }
-                                        <td>
-                                            @{
-                                                var classText = "color:" + ColorTranslator.ToHtml(@elem.PlrColor) + ";" +
-                                                                "\nfont-size: large;" +
-                                                                "\nfont-weight: bold;" +
-                                                                "\ntext-shadow: 1px 1px 0px black;";
-                                                <div style="@classText">@elem.InGameName</div>
-                                            }
-                                        </td>
-                                        <td>@elem.Symbol</td>
-                                    </tr>
+                                    var playerCount = _lobby.GetAllPlayers().Count;
+                                    <inline>@playerCount/20)</inline>
                                 }
-                            }
-                        </table>
-                        <!-- Content goes here -->
+                            </h3></b>
+                        <hr>
+                        <div>
+                            <table id="player_table_in_lobby">
+                                @if (_lobby != null)
+                                {
+                                    @foreach (var elem in _lobby.GetAllPlayers())
+                                    {
+                                        <tr id="player_table_row">
+                                            @if (@elem != _lobby.GetPlayerAt(0) && User.ID == (_lobby.GetPlayerAt(0).ID))
+                                            {
+                                                <td><button @onclick="@(() => RemovePlayerFromLobby(@elem))">Kick</button></td>
+                                            }
+                                            <td>
+                                                @{
+                                                    var classText = "color:" + ColorTranslator.ToHtml(@elem.PlrColor) + ";" +
+                                                                    "\nfont-size: large;" +
+                                                                    "\nfont-weight: bold;" +
+                                                                    "\ntext-shadow: 1px 1px 0px black;";
+                                                    <div style="@classText">@elem.InGameName</div>
+                                                }
+                                            </td>
+                                            <td>@elem.Symbol</td>
+                                        </tr>
+                                    }
+                                }
+                            </table>
+                            <!-- Content goes here -->
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-sm-9 col-md-7 col-lg-4 mx-auto my-1">
-            <!-- Chat Box -->
-            <div class="box box-lobby w-100">
-                <div class="box-content">
-                    <b><h3 class="text-center">Chat</h3></b>
-                    <hr>
-                    <textarea id="messagesList" readonly>@foreach (var message in _messages)
-                                                         {
-                                                             @message<br>
-                                                         }
+            <div class="col-sm-9 col-md-7 col-lg-4 mx-auto my-1">
+                <!-- Chat Box -->
+                <div class="box box-lobby w-100">
+                    <div class="box-content">
+                        <b>
+                            <h3 class="text-center">Chat</h3></b>
+                        <hr>
+                        <textarea id="messagesList" readonly>@foreach (var message in _messages)
+                                                             {
+                                                                 @message<br>
+                                                             }
                     </textarea>
-                    <input @bind="_messageInput" @onkeyup="SendChatMessage" disabled="@(!IsConnected)" class="w-100 align-bottom"/>
+                        <input @bind="_messageInput" @onkeyup="SendChatMessage" disabled="@(!IsConnected)" class="w-100 align-bottom"/>
+                    </div>
+                </div>
+                <div class="below-chat col">
+                    <h5 class="text-center my-2">Share this link to invite others</h5>
+                    <div class="box text-center p-2 mb-2 w-100" data-toggle="tooltip" data-placement="right" @onclick="CopyLink" title="Click to copy link">
+                        @InviteLink
+                    </div>
+                    <button class="btn btn-primary-custom p-2" @onclick="CreateGame">
+                        <svg class="bi bi-play-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z"/>
+                        </svg>
+                        Play
+                    </button>
                 </div>
             </div>
-            <div class="below-chat col">
-                <h5 class="text-center my-2">Share this link to invite others</h5>
-                <div class="box text-center p-2 mb-2 w-100" data-toggle="tooltip" data-placement="right" @onclick="CopyLink" title="Click to copy link">
-                    @InviteLink
-                </div>
-                <button class="btn btn-primary-custom p-2" @onclick="CreateGame">
-                    <svg class="bi bi-play-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 010 1.393z"/>
-                    </svg>
-                    Play
-                </button>
-            </div>
-        </div>
 
-        <div class="col-sm-9 col-md-7 col-lg-4 mx-auto my-1">
-            <!-- Settings Box -->
-            <div class="box box-lobby w-100">
-                <div class="box-content">
-                    <b><h3 class="text-center">Settings</h3></b>
-                    <hr>
-                    <div>
-                        <table>
-                            <tr>
-                                <!--<EditForm Model="@_lobby">
-                                    <label>Description</label>
-                                    <InputText id="host_description" type="text" @bind-value="_lobby.Description"
-                                               name="host_description" size="64" class="w-100 align-bottom"/>
-                                </EditForm>-->
-                            </tr>
-                            <tr>
-                                
-                            </tr>
-                        </table>
+            <div class="col-sm-9 col-md-7 col-lg-4 mx-auto my-1">
+                <!-- Settings Box -->
+                <div class="box box-lobby w-100">
+                    <div class="box-content">
+                        <b>
+                            <h3 class="text-center">Settings</h3></b>
+                        <hr>
+                        <div>
+                            <table>
+                                @if (User.ID == _lobby?.GetPlayerAt(0).ID)
+                                {
+                                    <tr>
+                                        <h3>Change Lobby Information</h3></tr>
+                                    <tr>
+                                        <div class="mt-2"><b>Titles</b></div>
+                                        <input type="text" @onkeyup="ChangeTitle" @bind="_newTitle" placeholder="@_lobby?.Name"/>
+                                    </tr>
+                                    <tr>
+                                        <div class="mt-2"><b>Description</b></div>
+                                        <input type="text" @onkeyup="ChangeDescription" @bind="_newDescription" placeholder="@_lobby?.Description"/>
+                                    </tr>
+                                    <tr>
+                                        <div class="mt-2"><b>Status</b></div>
+                                        <input type="text" @onkeyup="ChangeStatus" @bind="_newStatus" placeholder="@_lobby?.Status"/>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="mt-2"><b>Maximum Players</b></div>
+                                            <input type="number" @oninput="ChangeMaxPlayers" @bind="_newPlayerCount" placeholder="@_lobby?.MaxPlayerCount"/>
+                                        </td>
+                                        <td>
+                                            <select @onchange="ChangeVisibility" bind="@_newPrivate">
+                                                <option value="true">Private Lobby</option>
+                                                <option value="false">Public Lobby</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <hr>
+                                }
+
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+}
 
 @code{
     [Parameter]
@@ -143,10 +169,23 @@
     private string _messageInput;
 
     public bool IsConnected;
+    
+    #region ForChanges
+    
+    #pragma warning disable 649
+    private string _newDescription;
+    private string _newStatus;
+    private string _newTitle;
+    private string _newPlayerCount;
+    private bool _newPrivate;
+    #pragma warning restore 649
+
+    #endregion
+
 }
 
-@functions{
-
+@functions 
+{
     #region Non-Lobby-Actions
     private void CreateGame()
     {
@@ -161,12 +200,51 @@
         _client.Connection.SendAsync("RemovePlayerFromLobby", jsonPlayer);
     }
     #endregion
+    #region LobbyStatChanges
 
+    void ChangeDescription(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            _client.Connection.SendAsync("ChangeLobbyDescription", IdString, _newDescription);
+        }
+    }
+    
+    void ChangeStatus(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            _client.Connection.SendAsync("ChangeLobbyStatus", IdString, _newStatus);
+        }
+    }
+    
+    private void ChangeTitle(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            _client.Connection.SendAsync("ChangeLobbyName", IdString, _newTitle);
+        }
+    }
+        
+    private void ChangeMaxPlayers()
+    {
+        // TODO aufruf der funktion (durch welches event?)
+        _client.Connection.SendAsync("ChangeLobbyPlayerCount", IdString, _newPlayerCount);
+    }
+
+    private void ChangeVisibility()
+    {
+        // TODO: setzt immer auf privat (false?) --> prüfen
+        _client.Connection.SendAsync("ChangeLobbyVisibility", IdString, _newPrivate);
+    }
+    
+    #endregion
+    
     void RemovePlayerFromLobby(IPlayer player)
     {
-    // remove them
+        // remove them
         _client.Connection.SendAsync("RemovePlayerFromLobby", IdString, player);
-    // message remaining players
+        // message remaining players
         SendSystemMessage(player.InGameName + " was removed by the Host");
     }
 
@@ -221,6 +299,29 @@
                 _lobby = JsonConvert.DeserializeObject<Source.LobbySpecificContent.Lobby>(lobby, settings);
                 StateHasChanged();
             });
+
+            _client.Connection.On<string>("TitleChanged", (title) =>
+            {
+                _lobby.Name = title;
+            });
+
+            _client.Connection.On<string>("DescriptionChanged", (description) =>
+            {
+                _lobby.Description = description;
+                StateHasChanged();
+            });
+            
+            _client.Connection.On<string>("StatusChanged", (status) =>
+            {
+                _lobby.Status = status;
+                StateHasChanged();
+            });
+
+            _client.Connection.On<int>("MaxPlayersChanged", (mp) =>
+            {
+                _lobby.MaxPlayerCount = mp;
+                StateHasChanged();
+            });
         
             #endregion
 
@@ -252,4 +353,6 @@
         _client.Connection.SendAsync("SendMessage", IdString, "Game", message);
     }
     #endregion
+
+    
 }
