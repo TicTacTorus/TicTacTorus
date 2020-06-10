@@ -9,14 +9,17 @@
 @using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk
 @using TicTacTorus.Source.Ingame.GridSpecificContent.Position
 @using System.Security.Principal
+@using Microsoft.Extensions.FileSystemGlobbing.Internal.PathSegments
 @using TicTacTorus.Source
+@using System.Security.Cryptography.Xml
+@using System.Runtime.InteropServices.WindowsRuntime
 @inject NavigationManager NavigationManager
 @inject ProtectedSessionStorage ProtectedSessionStorage
 @inject IJSRuntime JSRuntime;
 
 <!--<div class="fill">&nbsp;</div>-->
 
-<div class="canvas" @onwheel="MouseScrollHandler">
+<div class="canvas" @onwheel="MouseScrollHandler" @onmousemove="MouseMoveHandler" @onmousedown="MouseDownHandler" @onmouseup="MouseUpHandler">
     <BECanvas @ref="_canvasGame" Width="640" Height="480"></BECanvas>
 </div>
 
@@ -65,6 +68,14 @@
     private string _navOne = "nav-link active";
     private string _navTwo = "nav-link";
     private bool _navClicked;
+
+    private bool _mouseDown = false;
+    private double _mouseDistance = 0;
+    private double _mouseStartX = 0;
+    private double _mouseStartY = 0;
+    private double _mousePrevX = 0;
+    private double _mousePrevY = 0;
+    private const double MaxClickDistance = 10;
     
     private List<string> _messages = new List<string>();
     private string _messageInput;
@@ -157,20 +168,76 @@
     public bool IsConnected =>
         _client.Connection.State == HubConnectionState.Connected;
 
-    public async void MouseScrollHandler(WheelEventArgs evnt)
+    private async void MouseScrollHandler(WheelEventArgs evnt)
     {
         if (Math.Abs(evnt.DeltaY) < 0.0001)
         {
             return;
         }
-
-        var width = await JSRuntime.InvokeAsync<double>("client_width");
-        var height = await JSRuntime.InvokeAsync<double>("client_height");
-        var dx = evnt.ClientX - width/2;
-        var dy = evnt.ClientY - height/2;
         
-        _rendererGame.Zoom(-Math.Sign(evnt.DeltaY));
+        _rendererGame.Zoom(-Math.Sign(evnt.DeltaY), evnt.ClientX, evnt.ClientY);
         await RedrawGame();
+    }
+
+    private async void MouseMoveHandler(MouseEventArgs evnt)
+    {
+        if (!_mouseDown)
+        {
+            return;
+        }
+        var dx = _mousePrevX - evnt.ClientX;
+        var dy = _mousePrevY - evnt.ClientY;
+        var dragged = Math.Sqrt(dx * dx + dy * dy);
+        _mouseDistance += dragged;
+
+        if (_mouseDistance > MaxClickDistance)
+        {
+            _rendererGame.MoveZoomedViewpoint(dx, dy);
+            await RedrawGame();
+        }
+            
+        _mousePrevX = evnt.ClientX;
+        _mousePrevY = evnt.ClientY;
+    }
+
+    private async void MouseDownHandler(MouseEventArgs evnt)
+    {
+        _mouseStartX = _mousePrevX = evnt.ClientX;
+        _mouseStartY = _mousePrevY = evnt.ClientY;
+        _mouseDistance = 0;
+        _mouseDown = true;
+    }
+
+    private async void MouseUpHandler(MouseEventArgs evnt)
+    {
+        if (_mouseDistance <= MaxClickDistance)
+        {
+            var width = await JSRuntime.InvokeAsync<int>("client_width");
+            var height = await JSRuntime.InvokeAsync<int>("client_height");
+            
+            var pos = _rendererGame.GetCursorPosition(evnt.ClientX, evnt.ClientY, width, height);
+            Console.WriteLine($"Click Detected at {pos}!");
+
+            //todo add some _real_ functionality: Add symbol, notify server.
+            //just as a demonstration: a quick through-cycle of 20 players (+1 for no owner).
+            var owner = _grid.GetSymbol(pos);
+            switch (owner)
+            {
+                case 19:
+                    owner = BasicChunk.NoOwner;
+                    break;
+                case BasicChunk.NoOwner:
+                    owner = 0;
+                    break;
+                default:
+                    ++owner; break;
+            }
+
+            _grid.SetSymbol(pos, owner, true);
+            await RedrawGame();
+        }
+        
+        _mouseDown = false;
     }
 
     #endregion
@@ -238,7 +305,15 @@
         var grid = new Grid(width, height);
         var rnd = new Random();
         var posGen = new PositionGenerator(rnd);
-        grid.SetSymbol(new GlobalPos(0, 0), 0);
+        for (var y = 0; y < grid.Height; ++y)
+        {
+            grid.SetSymbol(new GlobalPos(0, y), 0);
+        }
+        for (var x = 0; x < grid.Width; ++x)
+        {
+            grid.SetSymbol(new GlobalPos(x, 0), 0);
+        }
+
         for (var i = 0; i < items; ++i)
         {
             var pos = posGen.GetGlobalPos(width, height);
@@ -247,11 +322,6 @@
         return grid;
     }
 
-    void CanvasResizeHandler()
-    {
-        Console.WriteLine("Resize, bitches!");
-    }
-    
     #endregion
     
 }

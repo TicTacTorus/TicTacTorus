@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Net.Mime;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 //using System.Windows;
 using Blazor.Extensions;
@@ -83,7 +84,7 @@ namespace TicTacTorus.Source.Canvas
             }
             
             var gridPos = new GlobalPos();
-            for (gridPos.Y = (int)left; gridPos.Y < right; ++gridPos.Y)
+            for (gridPos.Y = (int)top; gridPos.Y < bottom; ++gridPos.Y)
             {
                 var drawY = GetTileDrawY(gridPos.Y, height);
                 for (gridPos.X = (int)left; gridPos.X < right; ++gridPos.X)
@@ -103,19 +104,52 @@ namespace TicTacTorus.Source.Canvas
             {
                 return;
             }
-            
-            
-            
-            Console.WriteLine("GameRenderer::DrawSymbol(canvas, " + x + ", " + y + ", " + width + ", " + height + ", 0x" + owner.ToString("x2") + ")");
-            var border = 0.1;
-            int x1 = (int)(x + width  * border), y1 = (int) (y + height * border);
-            int w1 = (int) (width * (1 - 2 * border)), h1 = (int) (height * (1 - 2 * border));
 
-            //await canvas.SetFillStyleAsync("black");
-            //await canvas.FillRectAsync(x1, y1, w1, h1);
+            if (owner >= _symbols.Length)
+            {
+                DrawDataSymbol(canvas, x, y, width, height, owner);
+                return;
+            }
             
-            await DrawLine(canvas, x1, y1, x1+w1, y1+h1);
-            await DrawLine(canvas, x1, y1+h1, x1+w1, y1);
+            //todo: inform how to draw bitmaps, then draw _symbols[owner] here.
+ 
+        }
+
+        private async Task DrawDataSymbol(Canvas2DContext canvas, int x, int y, int width, int height, byte owner)
+        {
+            //implemented before the bitmap drawing, but we can keep it in there, if for some reason there is no image.
+            if (owner == BasicChunk.NoOwner)
+            {
+                return;
+            }
+            
+            //circles and radial lines to easily distinguish the different values of the grid.
+            const int radialLines = 5;
+            const double border = 0.1;
+            const double alpha = 1.0 / radialLines;
+            var cx = x + width / 2;
+            var cy = y + height / 2;
+            var lineLength = (Math.Min(width, height) * (1-border))/2;
+
+            var lines = (owner) % radialLines;
+            var circles = ((owner) / radialLines);
+
+            for (var i = 0; i < lines+1; ++i)
+            {
+                var angle = 2 * Math.PI * alpha * i;
+                var dx = (int)(Math.Sin(angle) * lineLength);
+                var dy = (int)(-Math.Cos(angle) * lineLength);
+                await DrawLine(canvas, cx, cy, cx + dx, cy + dy);
+            }
+
+            if ((circles & 0x01) != 0)
+            {
+                await DrawPolyhedron(canvas, cx, cy, (int)lineLength/2, 20);
+            }
+            if ((circles & 0x02) != 0)
+            {
+                await DrawPolyhedron(canvas, cx, cy, (int)lineLength, 20);
+            }
         }
 
         private async Task DrawLine(Canvas2DContext canvas, int x1, int y1, int x2, int y2)
@@ -123,6 +157,20 @@ namespace TicTacTorus.Source.Canvas
             //Console.WriteLine("GameRenderer::DrawLine(canvas, " + x1 + ", " + y1 + ", " + x2 + ", " + y2 + ")");
             await canvas.MoveToAsync(x1, y1);
             await canvas.LineToAsync(x2, y2);
+        }
+
+        private async Task DrawPolyhedron(Canvas2DContext canvas, int x, int y, int r, int corners)
+        {
+            double PosX(double angle) => x + Math.Sin(angle) * r;
+            double PosY(double angle) => y - Math.Cos(angle) * r;
+
+            await canvas.MoveToAsync(PosX(0), PosY(0));
+            for (var i = 1; i < corners; ++i)
+            {
+                var angle = i * Math.PI * 2 / corners;
+                await canvas.LineToAsync(PosX(angle), PosY(angle));
+            }
+            await canvas.ClosePathAsync();
         }
 
         #endregion
@@ -142,7 +190,7 @@ namespace TicTacTorus.Source.Canvas
 
         public void MoveZoomedViewpoint(double dx, double dy)
         {
-            MoveViewpoint(dx * (1/_zoom), dy * (1/_zoom));
+            MoveViewpoint(dx * (1/SymbolSize), dy * (1/SymbolSize));
         }
         
         public void MoveViewpoint(double dx, double dy)
@@ -169,7 +217,7 @@ namespace TicTacTorus.Source.Canvas
         
         public void ZoomIn(int steps = 1, double fixPointX = 0, double fixPointY = 0)
         {
-            var oldZoom = _zoom;
+            //var oldZoom = _zoom;
             for (var i = 0; i < steps; ++i)
             {
                 _zoom *= ZoomFactor;
@@ -180,12 +228,12 @@ namespace TicTacTorus.Source.Canvas
                 }
             }
 
-            AdjustViewpoint(oldZoom, fixPointX, fixPointY);
+            //AdjustViewpoint(oldZoom, fixPointX, fixPointY);
         }
 
         public void ZoomOut(int steps = 1, double fixPointX = 0, double fixPointY = 0)
         {
-            var oldZoom = _zoom;
+            //var oldZoom = _zoom;
             for (var i = 0; i < steps; ++i)
             {
                 _zoom /= ZoomFactor;
@@ -196,7 +244,7 @@ namespace TicTacTorus.Source.Canvas
                 }
             }
 
-            AdjustViewpoint(oldZoom, fixPointX, fixPointY);
+            //AdjustViewpoint(oldZoom, fixPointX, fixPointY);
         }
 
         private void AdjustViewpoint(double oldZoom, double fixPointX, double fixPointY)
@@ -214,6 +262,24 @@ namespace TicTacTorus.Source.Canvas
             _viewY += (destY - _viewY) * (1 - 1 / change);
         }
 
+        public GlobalPos GetCursorPosition(double x, double y, double width, double height)
+        {
+            var trueX = _viewX + (x - width / 2) / SymbolSize;
+            var trueY = _viewY + (y - height / 2) / SymbolSize;
+
+            //int is rounding towards zero, so I have to add a distinguishing padding into the negative numbers
+            if (trueX < 0)
+            {
+                --trueX;
+            }
+            if (trueY < 0)
+            {
+                --trueY;
+            }
+
+            return new GlobalPos((int)trueX, (int)trueY);
+        }
+        
         #endregion
     }
 }

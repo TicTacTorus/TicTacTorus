@@ -121,15 +121,18 @@ using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk.Iterator;
 
         public bool SetSymbol(GlobalPos pos, byte owner, bool overwrite = false)
         {
-            var local = unchecked(new LocalPos((byte)pos.X, (byte)pos.Y));
-            var chunk = GetChunkAt(pos);
+            //automatic wraparound for easier usage.
+            var inside = new GlobalPos(PositiveMod(pos.X, Width), PositiveMod(pos.Y, Height));
+            
+            var local = unchecked(new LocalPos((byte)inside.X, (byte)inside.Y));
+            var chunk = GetChunkAt(inside);
             var result = chunk.SetSymbol(local, owner, overwrite);
             if (_autoReplace)
             {
                 var replacement = chunk.CreateReplacement();
                 if (replacement != null)
                 {
-                    SetChunkAt(pos, replacement);
+                    SetChunkAt(inside, replacement);
                 }
             }
             return result;

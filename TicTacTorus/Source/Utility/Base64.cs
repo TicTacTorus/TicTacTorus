@@ -78,7 +78,7 @@ namespace TicTacTorus.Source.Utility
         #endregion
         #region Operators
 
-        static public bool operator ==(Base64 left, Base64 right)
+        public static bool operator ==(Base64 left, Base64 right)
         {
             var leftNull = object.ReferenceEquals(left, null);
             var rightNull = object.ReferenceEquals(right, null);
@@ -96,7 +96,7 @@ namespace TicTacTorus.Source.Utility
             return left.Data.SequenceEqual(right.Data);
         }
         
-        static public bool operator !=(Base64 left, Base64 right)
+        public static bool operator !=(Base64 left, Base64 right)
         {
             return !(left == right);
         }
