@@ -50,14 +50,14 @@ namespace TicTacTorus.Source.Persistence
 				command.ExecuteNonQuery();
              
 				//Player Statistic
-			/*
+			
 				int[] ch = {0};
 				
 				
 				PlayerStats playerStats = new PlayerStats(0,0,ch);
 				createPlayer.playerStats = playerStats;
-				SavePlayerStat(createPlayer,playerStats);
-*/
+				PersistenceStorage.SavePlayerStat(createPlayer,playerStats);
+
 				_con.Close();
 				return true;
 			}
@@ -418,28 +418,38 @@ namespace TicTacTorus.Source.Persistence
 			_con.Close();
 			return playerstat;
 		}
-		public static void SavePlayerStat(HumanPlayer player,PlayerStats playStNewDif)
+
+		public static void SavePlayerStat(HumanPlayer player, PlayerStats playStNewDif)
 		{
-			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			SQLiteConnection _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			_con.Open();
-                                 
-			SQLiteCommand command = new SQLiteCommand(_con);
-            
-			
-			
-			command.CommandText = $"select count(*) from PlayerStatistic where PlayerName = '"+ player.ID+ "';  ";
-			
+
+
+
+			SQLiteCommand command = new SQLiteCommand(_con);//for ExecuteReader
+			SQLiteCommand command2 = new SQLiteCommand(_con);//foor ExecuteNonQuery
+			command.CommandText = $"select count(*) from PlayerStatistic where PlayerName = '" + player.ID + "'  ";
+
 			var reader = command.ExecuteReader();
-			if ((int) reader[0] == 0)
+			
+			
+			while (reader.Read())
+				
+			{var test = reader[0] is int ? (int) reader[0] : 0;
+			
+				
+			if (test == 0)
 			{
 				//Playerstat doesen't exist with the loginName
-				command.CommandText = $"INSERT into PlayerStatistic (PlayerName, playedGames, WonGames) VALUES ('"+player.ID+"', "+playStNewDif.PlayedGames+","+playStNewDif.WonGames+"); ";
-				command.ExecuteNonQuery();
-               
-				for ( var iter =1;iter<= playStNewDif.Chains.Length;iter++)
+				command2.CommandText = $"INSERT into PlayerStatistic (PlayerName, playedGames, WonGames) VALUES ('"+player.ID+"',"+playStNewDif.PlayedGames+","+playStNewDif.WonGames+")";
+				
+				command2.ExecuteNonQuery();
+
+				for (var iter = 1; iter <= playStNewDif.Chains.Length; iter++)
 				{
-					command.CommandText = $"INSERT INTO Chains(PlayerName, Length, Value) VALUES ('"+player.ID +"',"+iter+","+playStNewDif.Chains[iter-1]+")";
-					command.ExecuteNonQuery();
+					command2.CommandText = $"INSERT INTO Chains(PlayerName, Length, Value) VALUES ('" + player.ID +
+					                      "'," + iter + "," + playStNewDif.Chains[iter - 1] + ")";
+					command2.ExecuteNonQuery();
 				}
 
 			}
@@ -447,65 +457,72 @@ namespace TicTacTorus.Source.Persistence
 			{
 				//Playerstat exists with loginName
 				PlayerStats existPlayerStats;
-				command.CommandText = $"select  p.PlayerName,p.playedGames,p.WonGames,c.Length,c.Value from PlayerStatistic p,Chains c " +
-				                      $"where c.PlayerName = '"+ player.ID+"' and c.PlayerName=p.PlayerName'";
-				 reader = command.ExecuteReader();
-                 var pg  =0;
-	             var wg =0;    
-	              int[] ch = null;
-				 while (reader.Read())
-				 {
+				command.CommandText =
+					$"select  p.PlayerName,p.playedGames,p.WonGames,c.Length,c.Value from PlayerStatistic p,Chains c " +
+					$"where c.PlayerName = '" + player.ID + "' and c.PlayerName=p.PlayerName'";
+				reader = command.ExecuteReader();
+				var pg = 0;
+				var wg = 0;
+				int[] ch = null;
+				while (reader.Read())
+				{
 					pg = (int) reader[1];
 					wg = (int) reader[2];
-					ch[((int) reader[3]) - 1] = (int)reader[4];
-					
-				 }
-				 existPlayerStats = new PlayerStats(pg,wg,ch);
-				 existPlayerStats.PlayedGames += playStNewDif.PlayedGames;
-				 existPlayerStats.WonGames += playStNewDif.WonGames;
-				 command.CommandText = $"update PlayerStatistic Set playedGames = "+existPlayerStats.PlayedGames+",WonGames= "+existPlayerStats.WonGames+" where PlayerName = '"+player.ID+"'";
-				 command.ExecuteNonQuery();
-				
-				 //unterscheiden ob playStNewDif.Chains.Length länger als exist
-				 //Also ob neue Werte dazu kommen
-				 if (existPlayerStats.Chains.Length < playStNewDif.Chains.Length)
-				 {
-					 for (var iter = 0; iter < existPlayerStats.Chains.Length; iter++)
-					 {
-						 var iter2 = iter + 1;
-						 existPlayerStats.Chains[iter] += playStNewDif.Chains[iter];
-						 command.CommandText = $"update Chains Set Value = "+existPlayerStats.Chains[iter] +" where PlayerName ='"+ player.ID+"' and Length = "+iter2 +"";
-						 
-						 command.ExecuteNonQuery();
+					ch[((int) reader[3]) - 1] = (int) reader[4];
 
-					 }
+				}
 
-					 for (var iter = existPlayerStats.Chains.Length; iter < playStNewDif.Chains.Length; iter++)
-					 {
-						 var iter2 = iter + 1;
-						 command.CommandText = $"insert into Chains (PlayerName,Length,Value) values('"+player.ID+"',"+iter2+","+playStNewDif.Chains[iter]+") ";
-						 command.ExecuteNonQuery();
-					 }
-					 
-				 }
-				 else
-				 {
-					 for (var iter = 0; iter < playStNewDif.Chains.Length; iter++)
-					 {
-						 var iter2 = iter + 1;
-						 existPlayerStats.Chains[iter] += playStNewDif.Chains[iter];
-						 command.CommandText = $"update Chains Set Value = "+existPlayerStats.Chains[iter] +" where PlayerName ='"+ player.ID+"' and Length = "+iter2 +"";
-						 
-						 command.ExecuteNonQuery();
+				existPlayerStats = new PlayerStats(pg, wg, ch);
+				existPlayerStats.PlayedGames += playStNewDif.PlayedGames;
+				existPlayerStats.WonGames += playStNewDif.WonGames;
+				command2.CommandText = $"update PlayerStatistic Set playedGames = " + existPlayerStats.PlayedGames +
+				                      ",WonGames= " + existPlayerStats.WonGames + " where PlayerName = '" + player.ID +
+				                      "'";
+				command2.ExecuteNonQuery();
 
-					 }
-				 }
-				
+				//unterscheiden ob playStNewDif.Chains.Length länger als exist
+				//Also ob neue Werte dazu kommen
+				if (existPlayerStats.Chains.Length < playStNewDif.Chains.Length)
+				{
+					for (var iter = 0; iter < existPlayerStats.Chains.Length; iter++)
+					{
+						var iter2 = iter + 1;
+						existPlayerStats.Chains[iter] += playStNewDif.Chains[iter];
+						command2.CommandText = $"update Chains Set Value = " + existPlayerStats.Chains[iter] +
+						                      " where PlayerName ='" + player.ID + "' and Length = " + iter2 + "";
+
+						command2.ExecuteNonQuery();
+
+					}
+
+					for (var iter = existPlayerStats.Chains.Length; iter < playStNewDif.Chains.Length; iter++)
+					{
+						var iter2 = iter + 1;
+						command2.CommandText = $"insert into Chains (PlayerName,Length,Value) values('" + player.ID +
+						                      "'," + iter2 + "," + playStNewDif.Chains[iter] + ") ";
+						command2.ExecuteNonQuery();
+					}
+
+				}
+				else
+				{
+					for (var iter = 0; iter < playStNewDif.Chains.Length; iter++)
+					{
+						var iter2 = iter + 1;
+						existPlayerStats.Chains[iter] += playStNewDif.Chains[iter];
+						command2.CommandText = $"update Chains Set Value = " + existPlayerStats.Chains[iter] +
+						                      " where PlayerName ='" + player.ID + "' and Length = " + iter2 + "";
+
+						command2.ExecuteNonQuery();
+
+					}
+				}
+
 			}
-			
-		   
-			
-			_con.Close();   
+
+		}
+
+		_con.Close();   
 
 			
 		}
