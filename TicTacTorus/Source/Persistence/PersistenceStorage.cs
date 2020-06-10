@@ -50,14 +50,14 @@ namespace TicTacTorus.Source.Persistence
 				command.ExecuteNonQuery();
              
 				//Player Statistic
-			
+			/*
 				int[] ch = {0};
 				
 				
 				PlayerStats playerStats = new PlayerStats(0,0,ch);
 				createPlayer.playerStats = playerStats;
 				SavePlayerStat(createPlayer,playerStats);
-
+*/
 				_con.Close();
 				return true;
 			}
