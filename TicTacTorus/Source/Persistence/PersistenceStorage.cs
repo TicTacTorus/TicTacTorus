@@ -55,12 +55,7 @@ namespace TicTacTorus.Source.Persistence
 			_con.Close();
 			return false;
 		}
-		
-		public static void SavePlayerStats(PlayerStats savePlayStats)
-		{
-            
-		}
-	    
+
 		#endregion
 		#region Load Methods
 
@@ -384,7 +379,7 @@ namespace TicTacTorus.Source.Persistence
 			SQLiteCommand command = new SQLiteCommand(_con);
 		
 			command.CommandText = $"select  p.PlayerName,p.playedGames,p.WonGames,c.Length,c.Value from PlayerStatistic p,Chains c " +
-			                      $"where c.PlayerName = '"+ player.ID+"' and c.PlayerName=p.PlayerName'";
+			                      $"where c.PlayerName = '"+ player.ID+"' and c.PlayerName=p.PlayerName";
 			var reader = command.ExecuteReader();
 
 			playerstat.PlayedGames = (int) reader[1];
