@@ -1,11 +1,14 @@
 ﻿using System.Drawing;
 using Microsoft.AspNetCore.SignalR.Client;
+using TicTacTorus.Source.Ingame.Move;
 using TicTacTorus.Source.Persistence;
 
 namespace TicTacTorus.Source.PlayerSpecificContent
 {
     public interface IPlayer
     {
+        #region Fields
+
         public string ID { get; set; }
         public string SessionID { get; set; }
         public string InGameName { get; set; }
@@ -15,5 +18,11 @@ namespace TicTacTorus.Source.PlayerSpecificContent
         public byte[] Hash { get; set; }
         public PlayerStats playerStats { get; set; }// Besprechen?
         
+        #endregion
+        #region Methods
+
+        IMove ChooseMove();
+
+        #endregion
     }
 }

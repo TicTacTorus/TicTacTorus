@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using TicTacTorus.Source.Ingame.Move;
 using TicTacTorus.Source.LoginContent.Security;
 using TicTacTorus.Source.Persistence;
 
@@ -14,7 +15,7 @@ namespace TicTacTorus.Source.PlayerSpecificContent
         public byte[] Hash { get; set; } 
         public byte[] Salt { get; set; }
         public PlayerStats playerStats { get; set; }//Besprechen
-
+        
         public HumanPlayer(string id, string inGameName, Color plrColor, byte symbol)
         {
             ID = id;
@@ -40,5 +41,11 @@ namespace TicTacTorus.Source.PlayerSpecificContent
         {
             ID = null;
         }
+        
+        public IMove ChooseMove()
+        {
+            throw new System.NotImplementedException();
+        }
+
     }
 }
