@@ -1,4 +1,6 @@
-﻿namespace TicTacTorus.Source.Generator
+﻿using TicTacTorus.Source.PlayerSpecificContent;
+
+namespace TicTacTorus.Source.Generator
 {
     public class PlayerFactory
     {

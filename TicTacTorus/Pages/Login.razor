@@ -6,6 +6,7 @@
 @using TicTacTorus.Source.Generator
 @using TicTacTorus.Source.Hubs
 @using TicTacTorus.Source.LoginContent.Validation
+@using TicTacTorus.Source.PlayerSpecificContent
 @inject NavigationManager NavigationManager
 @inject ProtectedSessionStorage ProtectedSessionStore
 
@@ -132,6 +133,7 @@
                 try
                 {
                     User = JsonConvert.DeserializeObject<HumanPlayer>(player);
+                    await SendSessionIdRequest(User.ID);
                 }
                 catch (Exception e)
                 {
@@ -170,6 +172,11 @@
         if(_registerPlayer.Password != _registerPlayer.ConfirmPassword || _registerPlayer.Id == null) return;
         var user = new HumanPlayer(_registerPlayer.Id, _registerPlayer.InGameName, Color.Black, new byte(), _registerPlayer.Password);
         await _client.Connection.SendAsync("ConfirmRegister", JsonConvert.SerializeObject(user));
+    }
+
+    private async Task SendSessionIdRequest(string userId)
+    {
+        await _client.Connection.SendAsync("GetSessionId", userId);
     }
 
     public bool IsConnected =>

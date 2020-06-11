@@ -220,6 +220,18 @@ namespace TicTacTorus.Source.Hubs
             
         }
 
+        //Gets called everytime a user connects to a hub (I know performance is not good >.<)
+        public async Task GetSessionID(string userId)
+        {
+            await Clients.Caller.SendAsync("ReceiveSessionID", Server.Instance.GetSessionId(userId));
+        }
+
+        //Gets called everytime a user lefts a hub (I know is also bad :| )
+        public void RemoveSessionID(string userId)
+        {
+            Server.Instance.RemoveSessionId(userId);
+        }
+
         #endregion
         #region User
 

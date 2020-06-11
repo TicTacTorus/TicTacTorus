@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Sockets;
 using TicTacTorus.Source.Ingame;
 using TicTacTorus.Source.LobbySpecificContent;
+using TicTacTorus.Source.PlayerSpecificContent;
 using Base64 = TicTacTorus.Source.Utility.Base64;
 
 namespace TicTacTorus.Source
@@ -13,6 +14,7 @@ namespace TicTacTorus.Source
     {
         private readonly IDictionary<string, ILobby> _lobbies;
         private readonly IDictionary<string, Game> _games;
+        private readonly IDictionary<string, string> _sessionIDs;
 
         public ServerSettings Settings { get; }
 
@@ -25,6 +27,7 @@ namespace TicTacTorus.Source
         {
             _lobbies = new ConcurrentDictionary<string, ILobby>();
             _games = new ConcurrentDictionary<string, Game>();
+            _sessionIDs = new ConcurrentDictionary<string, string>();
         }
         // Makes Singleton Thread-safe
         private class Nested
@@ -122,6 +125,32 @@ namespace TicTacTorus.Source
             }
 
             return game;
+        }
+
+        #endregion
+
+        #region SessionID
+
+        //Creates new Session ID and returns it only if ID is not already taken
+        public string GetSessionId(string userId)
+        {
+            string sId;
+            if (_sessionIDs.ContainsKey(userId))
+            {
+                return _sessionIDs[userId];
+            }
+
+            while (!_sessionIDs.Values.Contains(sId = Base64.Random(16).ToString()))
+            {
+                _sessionIDs.Add(userId, sId);
+                break;
+            }
+            return _sessionIDs[userId];
+        }
+
+        public void RemoveSessionId(string userId)
+        {
+            _sessionIDs.Remove(userId);
         }
 
         #endregion

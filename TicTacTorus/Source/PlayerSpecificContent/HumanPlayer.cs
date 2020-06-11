@@ -1,14 +1,13 @@
 ﻿using System.Drawing;
-using Microsoft.AspNetCore.SignalR.Client;
 using TicTacTorus.Source.LoginContent.Security;
 using TicTacTorus.Source.Persistence;
-using TicTacTorus.Source.PlayerSpecificContent;
 
-namespace TicTacTorus.Source
+namespace TicTacTorus.Source.PlayerSpecificContent
 {
     public class HumanPlayer : IPlayer
     {
         public string ID { get; set; }
+        public string SessionID { get; set; }
         public string InGameName { get; set; }
         public Color PlrColor { get; set; }
         public byte Symbol { get; set; }

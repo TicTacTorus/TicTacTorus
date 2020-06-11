@@ -7,11 +7,12 @@ namespace TicTacTorus.Source.PlayerSpecificContent
     public interface IPlayer
     {
         public string ID { get; set; }
+        public string SessionID { get; set; }
         public string InGameName { get; set; }
         public Color PlrColor { get; set; }
         public byte Symbol { get; set; }
         public byte[] Salt { get; set; } 
-        public byte[] Hash { get; set; } 
+        public byte[] Hash { get; set; }
         public PlayerStats playerStats { get; set; }// Besprechen?
         
     }
