@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
-using Microsoft.AspNetCore.SignalR.Client;
+using TicTacTorus.Source.Hubs;
+using TicTacTorus.Source.Ingame.GridSpecificContent.Grid;
 using TicTacTorus.Source.Ingame.Move;
 using TicTacTorus.Source.Persistence;
 
@@ -21,7 +22,7 @@ namespace TicTacTorus.Source.PlayerSpecificContent
         #endregion
         #region Methods
 
-        IMove ChooseMove();
+        IMove ChooseMove(ConnectionHubServer server, IGrid grid, int moveSeconds);
 
         #endregion
     }

@@ -1,4 +1,6 @@
 ﻿using System.Drawing;
+using TicTacTorus.Source.Hubs;
+using TicTacTorus.Source.Ingame.GridSpecificContent.Grid;
 using TicTacTorus.Source.Ingame.Move;
 using TicTacTorus.Source.LoginContent.Security;
 using TicTacTorus.Source.Persistence;
@@ -42,7 +44,7 @@ namespace TicTacTorus.Source.PlayerSpecificContent
             ID = null;
         }
         
-        public IMove ChooseMove()
+        public IMove ChooseMove(ConnectionHubServer server, IGrid grid, int moveSeconds)
         {
             throw new System.NotImplementedException();
         }
