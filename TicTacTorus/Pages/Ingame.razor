@@ -13,6 +13,7 @@
 @using TicTacTorus.Source
 @using System.Security.Cryptography.Xml
 @using System.Runtime.InteropServices.WindowsRuntime
+@using Newtonsoft.Json
 @using TicTacTorus.Source.PlayerSpecificContent
 @inject NavigationManager NavigationManager
 @inject ProtectedSessionStorage ProtectedSessionStorage
@@ -96,6 +97,8 @@
     
     private static HumanPlayer User { get; set; }
 
+    public bool IsConnected;
+
 }
 
 @functions
@@ -137,11 +140,17 @@
             StateHasChanged();
         });
         
-        //TODO Methods for the Clients In Game Logic 
-        
         #endregion
         
-        await _client.Connection.SendAsync("JoinLobby", IdString);
+        if ((User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) == null)
+        {
+            User = PlayerFactory.CreateHumanPlayer();
+            await ProtectedSessionStorage.SetAsync("LoginData", User);
+        }
+
+        var jsonUser = JsonConvert.SerializeObject(User);
+        await _client.Connection.SendAsync("JoinLobby", IdString, jsonUser);
+        IsConnected = _client.Connection.State == HubConnectionState.Connected;
     }
     
     #endregion
@@ -166,8 +175,8 @@
         _hubConnection.SendAsync("ChangeLobbyStat", IdString, lobbyParam, changedValue);
     }*/
 
-    public bool IsConnected =>
-        _client.Connection.State == HubConnectionState.Connected;
+    
+        
 
     private async void MouseScrollHandler(WheelEventArgs evnt)
     {
