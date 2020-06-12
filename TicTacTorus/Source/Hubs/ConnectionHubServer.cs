@@ -46,13 +46,18 @@ namespace TicTacTorus.Source.Hubs
             var lobby = LobbyHandler.AddPlayerToLobby(lobbyId, hPlayer);
 
             var indented = Formatting.Indented;
-            var settings = new JsonSerializerSettings()
+            var settings = new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.All
             };
             var jsLobby = JsonConvert.SerializeObject(lobby, indented, settings);
             await Clients.Caller.SendAsync("GetLobby", jsLobby);
             await Clients.Group(lobbyId).SendAsync("LobbyChanged", jsLobby);
+            await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
+        }
+
+        public async Task JoinGame(string lobbyId)
+        {
             await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
         }
 
@@ -114,7 +119,7 @@ namespace TicTacTorus.Source.Hubs
             Server.Instance.GetLobbyById(lobbyId).IsPrivate = isPrivate;
             // maybe send refresh to LobbyHandler (and every person on lobbylist-site)?
         }
-        
+
         #endregion
         #region Lobbies
 
@@ -238,6 +243,21 @@ namespace TicTacTorus.Source.Hubs
         public void ChangeIngameName(string id, string name)
         {
             PersistenceStorage.UpdateInGameName(id, name);
+        }
+
+        #endregion
+
+        #region Game
+
+        public async Task StartGame(string jsLobby)
+        {
+            var settings = new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.All
+            };
+            var lobby = JsonConvert.DeserializeObject<Lobby>(jsLobby, settings);
+            //TODO Returns Game to Clients? (Jack need your confirmation. Check pls last commit if that's ok what I have done)
+            //await Clients.Caller.SendAsync("", Server.Instance.CreateGameFromLobby(lobby));
         }
 
         #endregion

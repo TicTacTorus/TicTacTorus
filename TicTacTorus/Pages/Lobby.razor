@@ -190,7 +190,13 @@
     private void CreateGame()
     {
         NavigationManager.NavigateTo("/ingame/" + IdString);
-        _client.Connection.SendAsync("StartGame");
+        var indented = Formatting.Indented;
+        var settings = new JsonSerializerSettings()
+        {
+            TypeNameHandling = TypeNameHandling.All
+        };
+        var jsLobby = JsonConvert.SerializeObject(_lobby, indented, settings);
+        _client.Connection.SendAsync("StartGame", jsLobby);
     }
 
     private void LeaveLobby()
