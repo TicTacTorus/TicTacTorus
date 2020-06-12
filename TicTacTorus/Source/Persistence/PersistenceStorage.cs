@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using TicTacTorus.Pages;
-using TicTacTorus.Source.Ingame;
 using TicTacTorus.Source.PlayerSpecificContent;
-using TicTacTorus.Source.Utility;
 using System.Data.SQLite;
 using System.Drawing;
 using System.Reflection.Metadata;
-using System.Text;
 using TicTacTorus.Source.LoginContent.Security;
 
 namespace TicTacTorus.Source.Persistence

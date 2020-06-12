@@ -18,6 +18,6 @@ namespace TicTacTorus.Source.LobbySpecificContent
         public bool RemovePlayer(IPlayer player);
         public bool RemovePlayer(byte index);
         public IPlayer GetPlayerAt(byte index);
-        public IList<IPlayer> GetAllPlayers();
+        public List<IPlayer> GetAllPlayers();
     }
 }

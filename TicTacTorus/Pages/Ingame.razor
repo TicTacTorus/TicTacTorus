@@ -14,7 +14,10 @@
 @using System.Security.Cryptography.Xml
 @using System.Runtime.InteropServices.WindowsRuntime
 @using Newtonsoft.Json
+@using TicTacTorus.Source.Ingame
 @using TicTacTorus.Source.PlayerSpecificContent
+@using System.Drawing
+@using TicTacTorus.Source.ServerHandler
 @inject NavigationManager NavigationManager
 @inject ProtectedSessionStorage ProtectedSessionStorage
 @inject IJSRuntime JSRuntime;
@@ -33,7 +36,8 @@
         </div>-->
         <BECanvas @ref="_canvasMap" Width="100" Height="100"></BECanvas>
     </div>
-                
+@if(IsConnected)
+{
     <div class=" box box-map">
         <div class="box-game">
             <ul class="nav nav-tabs">
@@ -42,6 +46,22 @@
                 </li>
                 <li class="nav-item">
                     <a class="@_navTwo" @onclick="NavClick">Players</a>
+                    @if (_game != null)
+                    {
+                        @foreach (var player in _game.players)
+                        {
+                            <table>
+                                @{
+                                    var classText = "color:" + ColorTranslator.ToHtml(@player.PlrColor) + ";" +
+                                                    "\nfont-size: large;" +
+                                                    "\nfont-weight: bold;" +
+                                                    "\ntext-shadow: 1px 1px 0px black;";
+
+                                    <div style="@classText">@player.InGameName</div>
+                                }
+                            </table>
+                        }
+                    }
                 </li>
             </ul>
             <div class="tab-content p-1">
@@ -59,6 +79,7 @@
             </div>
         </div>
     </div>
+    }
 </div>
 
 
@@ -83,7 +104,7 @@
     private string _messageInput;
     
     [Parameter] public string IdString { get; set; }
-    
+    private LobbyGame _game = null;
     
     //canvas stuff
     private static Canvas2DContext _contextGame, _contextMap;
@@ -97,7 +118,7 @@
     
     private static HumanPlayer User { get; set; }
 
-    public bool IsConnected;
+    public bool IsConnected = false;
 
 }
 
@@ -261,10 +282,43 @@
         //resizing the window also needs to trigger a resize of the canvas.
         //moving the viewpoint of the game renderer stops new lines from rendering.
 
+        #region ClientServerHandling
         if (firstRender)
         {
-            User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData");
+            _client = new ConnectionHubClient(NavigationManager);
+
+            if ((User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) == null)
+            {
+                // Fehlermeldung an User
+                NavigationManager.NavigateTo("/?error=IdLost");
+            }
+
+            _client.Connection.On<string>("ReceiveGameInformation", (jsGame) =>
+            {
+                var settings = new JsonSerializerSettings()
+                {
+                    TypeNameHandling = TypeNameHandling.All
+                };
+                _game = JsonConvert.DeserializeObject<LobbyGame>(jsGame, settings);
+                IsConnected = true;
+                // maybe init stuff from game
+                StateHasChanged();
+            });
+            
+            _client.Connection.On<string>("ConnectToGameFailed", (errormessage)  =>
+            {
+                NavigationManager.NavigateTo("/?error="+errormessage);  
+            });
+
+            //await _client.Connection.SendAsync("InitGameId", IdString, User.SessionID);
+            var settings = new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.All
+            };
+            var jsonUser = JsonConvert.SerializeObject(User, settings);
+            await _client.Connection.SendAsync("ConnectToGame", IdString, jsonUser);
         }
+        #endregion
         
         if (firstRender)
         {

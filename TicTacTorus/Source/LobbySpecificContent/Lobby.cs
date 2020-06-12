@@ -7,6 +7,8 @@ namespace TicTacTorus.Source.LobbySpecificContent
 {
     public class Lobby : ILobby
     {
+        #region Data
+
         [Required]
         [StringLength(10, ErrorMessage = "Description is too long.")] 
         public string Name { get; set; }
@@ -18,6 +20,9 @@ namespace TicTacTorus.Source.LobbySpecificContent
         public bool IsPrivate { get; set; }
 
         public List<IPlayer> Players { get; set; }
+
+        #endregion
+        #region Constructors
 
         public Lobby()
         {
@@ -46,7 +51,9 @@ namespace TicTacTorus.Source.LobbySpecificContent
         {
             Id = id;
         }
-        
+
+        #endregion
+        #region AccessMethods
         public bool AddPlayer(IPlayer player)
         {
             if (Players.Count < MaxPlayerCount)
@@ -90,10 +97,12 @@ namespace TicTacTorus.Source.LobbySpecificContent
             return null;
         }
 
-        public IList<IPlayer> GetAllPlayers()
+        public List<IPlayer> GetAllPlayers()
         {
             return Players;
         }
+        
+        #endregion
     }
 
     

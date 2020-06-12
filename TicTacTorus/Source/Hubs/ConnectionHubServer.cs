@@ -11,6 +11,7 @@ using TicTacTorus.Source.LoginContent.Security;
 using TicTacTorus.Source.Persistence;
 using TicTacTorus.Source.PlayerSpecificContent;
 using JsonSerializer = System.Text.Json.JsonSerializer;
+using TicTacTorus.Source.ServerHandler;
 
 namespace TicTacTorus.Source.Hubs
 {
@@ -23,9 +24,26 @@ namespace TicTacTorus.Source.Hubs
             await Clients.Caller.SendAsync("ReceiveLobbyId", lobby.Id.ToString());
         }
         
+        public async Task JoinLobby(string lobbyId, string player)
+        {
+            var hPlayer = JsonConvert.DeserializeObject<HumanPlayer>(player);
+            hPlayer.SessionID = Context.ConnectionId;
+            var lobby = LobbyHandler.AddPlayerToLobby(lobbyId, hPlayer);
+
+            var indented = Formatting.Indented;
+            var settings = new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.All
+            };
+            var jsLobby = JsonConvert.SerializeObject(lobby, indented, settings);
+            await Clients.Caller.SendAsync("GetLobby", jsLobby, Context.ConnectionId);
+            await Clients.Group(lobbyId).SendAsync("LobbyChanged", jsLobby);
+            await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
+        }
+        
         public async Task RemovePlayerFromLobby(string lobbyId, string player)
         {
-            IPlayer p = JsonConvert.DeserializeObject<IPlayer>(player);
+            var p = JsonConvert.DeserializeObject<IPlayer>(player);
             var (isRemoved, lobby) = LobbyHandler.RemovePlayerFromLobby(lobbyId, p);
 
             if (isRemoved)
@@ -40,21 +58,7 @@ namespace TicTacTorus.Source.Hubs
             }
         }
         
-        public async Task JoinLobby(string lobbyId, string player)
-        {
-            var hPlayer = JsonConvert.DeserializeObject<HumanPlayer>(player);
-            var lobby = LobbyHandler.AddPlayerToLobby(lobbyId, hPlayer);
-
-            var indented = Formatting.Indented;
-            var settings = new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.All
-            };
-            var jsLobby = JsonConvert.SerializeObject(lobby, indented, settings);
-            await Clients.Caller.SendAsync("GetLobby", jsLobby);
-            await Clients.Group(lobbyId).SendAsync("LobbyChanged", jsLobby);
-            await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
-        }
+        
 
         public async Task JoinGame(string lobbyId)
         {
@@ -65,6 +69,9 @@ namespace TicTacTorus.Source.Hubs
         {
             return Groups.RemoveFromGroupAsync(Context.ConnectionId, lobbyId);
         }
+
+        #endregion
+        #region LobbyContentChange
 
         public async Task ChangeLobbyDescription(string lobbyId, string descr)
         {
@@ -121,15 +128,46 @@ namespace TicTacTorus.Source.Hubs
         }
 
         #endregion
-        #region Lobbies
-
-        public async Task GetCurrentLobbies()
+        
+        #region LobbyToGame
+        
+        public async Task StartGame(string lobbyId)
         {
-            var list = new LobbyList().Lobbies;
-            await Clients.Caller.SendAsync("ReceiveCurrentLobbies", list);
+            GameHandler.CreateGame(lobbyId);
+            await Clients.Group(lobbyId).SendAsync("ChangeToGame", true);
+            //TODO Returns Game to Clients? (Jack need your confirmation. Check pls last commit if that's ok what I have done)
+            //await Clients.Caller.SendAsync("", Server.Instance.CreateGameFromLobby(lobby));
         }
 
+        public async Task ConnectToGame(string gameId, string jsPlayer)
+        {
+            var settings = new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.All
+            };
+            var player = JsonConvert.DeserializeObject<HumanPlayer>(jsPlayer, settings);
+
+            var response = GameHandler.AddPlayerToGame(gameId, player);
+            if (response.Item2)
+            {
+                var jsGame = JsonConvert.SerializeObject(response.Item1, Formatting.Indented, settings);
+                await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
+                //await Clients.Group(gameId).SendAsync("ReceiveGameInformation", jsGame);
+                await Clients.Caller.SendAsync("ReceiveGameInformation", jsGame);
+            }
+            else
+            {
+                await Clients.Caller.SendAsync("ConnectToGameFailed", "game_has_started");
+            }
+        }
+        
         #endregion
+        #region Game
+
+        
+
+        #endregion
+        
         #region Chat
         public async Task SendMessage(string lobbyId, string user, string message)
         {
@@ -225,6 +263,7 @@ namespace TicTacTorus.Source.Hubs
             
         }
 
+        /*
         //Gets called everytime a user connects to a hub (I know performance is not good >.<)
         public async Task GetSessionID(string userId)
         {
@@ -235,7 +274,7 @@ namespace TicTacTorus.Source.Hubs
         public void RemoveSessionID(string userId)
         {
             Server.Instance.RemoveSessionId(userId);
-        }
+        }*/
 
         #endregion
         #region User
@@ -246,18 +285,12 @@ namespace TicTacTorus.Source.Hubs
         }
 
         #endregion
+        #region Lobbies
 
-        #region Game
-
-        public async Task StartGame(string jsLobby)
+        public async Task GetCurrentLobbies()
         {
-            var settings = new JsonSerializerSettings()
-            {
-                TypeNameHandling = TypeNameHandling.All
-            };
-            var lobby = JsonConvert.DeserializeObject<Lobby>(jsLobby, settings);
-            //TODO Returns Game to Clients? (Jack need your confirmation. Check pls last commit if that's ok what I have done)
-            //await Clients.Caller.SendAsync("", Server.Instance.CreateGameFromLobby(lobby));
+            var list = new LobbyList().Lobbies;
+            await Clients.Caller.SendAsync("ReceiveCurrentLobbies", list);
         }
 
         #endregion

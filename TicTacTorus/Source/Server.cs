@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using TicTacTorus.Source.Ingame;
 using TicTacTorus.Source.LobbySpecificContent;
 using TicTacTorus.Source.PlayerSpecificContent;
+using TicTacTorus.Source.ServerHandler;
 using Base64 = TicTacTorus.Source.Utility.Base64;
 
 namespace TicTacTorus.Source
@@ -14,7 +15,13 @@ namespace TicTacTorus.Source
     {
         private readonly IDictionary<string, ILobby> _lobbies;
         private readonly IDictionary<string, Game> _games;
-        private readonly IDictionary<string, string> _sessionIDs;
+
+        private readonly IDictionary<string, LobbyGame> _lobbygames;    /// <summary>
+                                                                        /// If it works, then games in this server-list
+                                                                        /// are unneccesary, as games are contained in LobbyGame
+                                                                        /// </summary>
+        
+        //private readonly IDictionary<string, string> _sessionIDs;
 
         public ServerSettings Settings { get; }
 
@@ -27,7 +34,8 @@ namespace TicTacTorus.Source
         {
             _lobbies = new ConcurrentDictionary<string, ILobby>();
             _games = new ConcurrentDictionary<string, Game>();
-            _sessionIDs = new ConcurrentDictionary<string, string>();
+            _lobbygames = new ConcurrentDictionary<string, LobbyGame>();
+            //_sessionIDs = new ConcurrentDictionary<string, string>();
         }
         // Makes Singleton Thread-safe
         private class Nested
@@ -106,6 +114,31 @@ namespace TicTacTorus.Source
         }
 
         #endregion
+
+        #region LobbyGame
+
+        public LobbyGame CreateLobbyGameFromLobby(string lobbyId)
+        {
+            var lobby = GetLobbyById(lobbyId);
+            if (_games.ContainsKey(lobbyId) || !_lobbies.Remove(lobbyId)) return null;
+            // Delete Player list first
+            lobby.Players = new List<IPlayer>();
+                
+            var game = new Game(lobby);
+            _games.Add(game.ID.ToString(), game);
+            
+            var lgame = new LobbyGame(game);
+            _lobbygames.Add(lgame.ID, lgame);
+
+            return lgame;
+        }
+
+        public LobbyGame GetLobbyGameById(string id)
+        {
+            return _lobbygames[id];
+        }
+
+        #endregion
         #region ConvertLobbyToGame
 
         /// <summary>
@@ -118,7 +151,7 @@ namespace TicTacTorus.Source
         public Game CreateGameFromLobby(ILobby lobby)
         {
             Game game = null;
-            if (_games.ContainsKey(lobby.Id.ToString()) && _lobbies.Remove(lobby.Id.ToString()))
+            if (!_games.ContainsKey(lobby.Id.ToString()) && _lobbies.Remove(lobby.Id.ToString()))
             {
                 game = new Game(lobby);
                 _games.Add(game.ID.ToString(), game);
@@ -126,9 +159,22 @@ namespace TicTacTorus.Source
 
             return game;
         }
+        
+        public Game CreateGameFromLobby(string lobbyId)
+        {
+            var lobby = GetLobbyById(lobbyId);
+            if (_games.ContainsKey(lobbyId) || !_lobbies.Remove(lobbyId)) return null;
+            // Delete Player list first
+            lobby.Players = new List<IPlayer>();
+                
+            var game = new Game(lobby);
+            _games.Add(game.ID.ToString(), game);
+
+            return game;
+        }
 
         #endregion
-
+/*
         #region SessionID
 
         //Creates new Session ID and returns it only if ID is not already taken
@@ -154,6 +200,6 @@ namespace TicTacTorus.Source
         }
 
         #endregion
-        
+        */
     }
 }

@@ -7,6 +7,7 @@ using TicTacTorus.Source.Ingame.Move;
 using TicTacTorus.Source.Ingame.Referee;
 using TicTacTorus.Source.LobbySpecificContent;
 using TicTacTorus.Source.PlayerSpecificContent;
+using TicTacTorus.Source.ServerHandler;
 using TicTacTorus.Source.Utility;
 
 namespace TicTacTorus.Source.Ingame
@@ -19,7 +20,8 @@ namespace TicTacTorus.Source.Ingame
         public DateTime StartTime { get; }
         public int MoveSeconds { get; }
 
-        private IList<IPlayer> _players = new List<IPlayer>();
+        private List<IPlayer> _players = new List<IPlayer>();
+        private bool _hasStarted = false;
         public Permutation PlayerOrder { get; }
         private byte _activePlayerIndex;
 
@@ -35,6 +37,7 @@ namespace TicTacTorus.Source.Ingame
         {
             StartTime = DateTime.Now;
             _players = lobby.GetAllPlayers();
+            ID = lobby.Id;
             
             //todo give us sensible config values from the lobby
             _grid = new Grid(50, 50);
@@ -92,6 +95,28 @@ namespace TicTacTorus.Source.Ingame
                 _activePlayerIndex = 0;
             }
             return result;
+        }
+        
+        #endregion
+        #region FieldChangeMethods
+
+        public bool AddPlayer(IPlayer player)
+        {
+            if (_hasStarted) return false;
+            _players.Add(player);
+            return true;
+
+        }
+
+        public List<IPlayer> GetPlayerList()
+        {
+            return _players;
+        }
+
+        public void StartGame()
+        {
+            _hasStarted = true;
+            // Do some more init things probably
         }
         
         #endregion

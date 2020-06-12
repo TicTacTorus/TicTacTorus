@@ -133,20 +133,21 @@
                                         <input type="text" @onkeyup="ChangeStatus" @bind="_newStatus" placeholder="@_lobby?.Status"/>
                                     </tr>
                                     <tr>
-                                        <td>
-                                            <div class="mt-2"><b>Maximum Players</b></div>
-                                            <input type="number" @oninput="ChangeMaxPlayers" @bind="_newPlayerCount" placeholder="@_lobby?.MaxPlayerCount"/>
-                                        </td>
-                                        <td>
-                                            <select @onchange="ChangeVisibility" bind="@_newPrivate">
-                                                <option value="true">Private Lobby</option>
-                                                <option value="false">Public Lobby</option>
-                                            </select>
-                                        </td>
+                            <!--
+                            <td>
+                                <div class="mt-2"><b>Maximum Players</b></div>
+                                <input type="number" @oninput="ChangeMaxPlayers" @bind="_newPlayerCount" placeholder="@_lobby?.MaxPlayerCount"/>
+                            </td>
+                            <td>
+                                <select @onchange="ChangeVisibility" bind="@_newPrivate">
+                                    <option value="true">Private Lobby</option>
+                                    <option value="false">Public Lobby</option>
+                                </select>
+                            </td>
+                            -->
                                     </tr>
                                     <hr>
                                 }
-
                             </table>
                         </div>
                     </div>
@@ -189,14 +190,7 @@
     #region Non-Lobby-Actions
     private void CreateGame()
     {
-        NavigationManager.NavigateTo("/ingame/" + IdString);
-        var indented = Formatting.Indented;
-        var settings = new JsonSerializerSettings()
-        {
-            TypeNameHandling = TypeNameHandling.All
-        };
-        var jsLobby = JsonConvert.SerializeObject(_lobby, indented, settings);
-        _client.Connection.SendAsync("StartGame", jsLobby);
+        _client.Connection.SendAsync("StartGame", IdString);
     }
 
     private void LeaveLobby()
@@ -249,7 +243,7 @@
     void RemovePlayerFromLobby(IPlayer player)
     {
         // remove them
-        _client.Connection.SendAsync("RemovePlayerFromLobby", IdString, player);
+        _client.Connection.SendAsync("RemovePlayerFromLobby", IdString, player.SessionID);
         // message remaining players
         SendSystemMessage(player.InGameName + " was removed by the Host");
     }
@@ -267,7 +261,7 @@
             NavigationManager.NavigateTo("/?error=lobbyNotFound");
         }
     }
-
+    #region StartAndEnd
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -286,7 +280,7 @@
                 StateHasChanged();
             });
         
-            _client.Connection.On<string>("GetLobby", (lobby) =>
+            _client.Connection.On<string, string>("GetLobby", async (lobby, sessionID) =>
             {
                 var settings = new JsonSerializerSettings()
                 {
@@ -294,6 +288,9 @@
                 };
                 _lobby = JsonConvert.DeserializeObject<Source.LobbySpecificContent.Lobby>(lobby, settings);
                 StateHasChanged();
+                
+                User.SessionID = sessionID;
+                await ProtectedSessionStorage.SetAsync("LoginData", User);
             });
 
             _client.Connection.On<string>("LobbyChanged", (lobby) =>
@@ -328,6 +325,11 @@
                 _lobby.MaxPlayerCount = mp;
                 StateHasChanged();
             });
+            
+            _client.Connection.On<bool>("ChangeToGame", (t) =>
+            {
+                NavigationManager.NavigateTo("/ingame/"+IdString);
+            });
         
             #endregion
 
@@ -336,15 +338,20 @@
                 User = PlayerFactory.CreateHumanPlayer();
                 await ProtectedSessionStorage.SetAsync("LoginData", User);
             }
-
-            string jsonUser = JsonConvert.SerializeObject(User);
+            var settings = new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.All
+            };
+            string jsonUser = JsonConvert.SerializeObject(User, settings);
             await _client.Connection.SendAsync("JoinLobby", IdString, jsonUser);
             IsConnected = _client.Connection.State == HubConnectionState.Connected;
             StateHasChanged();
         }
         
     }
+
     
+    #endregion
     #region SendMethods
     void SendChatMessage(KeyboardEventArgs e)
     {
