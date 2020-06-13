@@ -74,6 +74,13 @@ namespace TicTacTorus.Source.Hubs
             return Groups.RemoveFromGroupAsync(Context.ConnectionId, lobbyId);
         }
 
+        public override Task OnConnectedAsync()
+        {
+            string name = Context.User.Identity.Name;
+            Groups.AddToGroupAsync(Context.ConnectionId, name);
+            return base.OnConnectedAsync();
+        }
+
         #endregion
         #region LobbyContentChange
 

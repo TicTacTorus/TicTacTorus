@@ -163,6 +163,24 @@
                 StateHasChanged();
             });
             
+            
+            _client.Connection.On<string>("ReceivePlayerMove", (moveObj) =>
+            {
+                //ReceivedMove = moveObj;
+                StateHasChanged();
+            });
+            _client.Connection.On<string>("ExecuteWinSequ", (winnerName) =>
+            {
+                //Winner = winnerName;
+                StateHasChanged();
+            });
+
+            _client.Connection.On("ActivatePlayer", () =>
+            {
+                
+            });
+
+
             #endregion
         
             if ((User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) == null)
@@ -388,6 +406,14 @@
         return grid;
     }
 
+    #endregion
+    #region Functions
+
+    private void MakeMove(/*MoveObject*/)
+    {
+        _client.Connection.SendAsync("MakeMove");
+    }
+    
     #endregion
     
 }

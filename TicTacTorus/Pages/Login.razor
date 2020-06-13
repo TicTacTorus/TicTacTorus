@@ -153,28 +153,8 @@
             });
         
         #endregion
-            
-            #region Client Listeners
-            
-            _client.Connection.On<string>("ReceivePlayerMove", (moveObj) =>
-            {
-                ReceivedMove = moveObj;
-                StateHasChanged();
-            });
-            _client.Connection.On<string>("ExecuteWinSequ", (winnerName) =>
-            {
-                Winner = winnerName;
-                StateHasChanged();
-            });
-            
-            _client.Connection.On<string>("MakeMove", (MoveObject) =>
-            {
-                MakeMove = MoveObject;
-            });
-            
-            #endregion
-        
-            //ProtectedSessionStore Calls need to be done in OnAfterRenderAsync!
+
+    //ProtectedSessionStore Calls need to be done in OnAfterRenderAsync!
             User = await ProtectedSessionStore.GetAsync<HumanPlayer>("LoginData");
         }
     }
