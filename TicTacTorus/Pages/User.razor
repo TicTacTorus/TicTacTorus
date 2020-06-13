@@ -1,13 +1,10 @@
 ﻿@page "/user/{userid}"
-
-@using System.Diagnostics
 @using Microsoft.AspNetCore.SignalR.Client
 @using TicTacTorus.Source.Hubs
 @using TicTacTorus.Source.PlayerSpecificContent
 @using TicTacTorus.Source.Persistence
 @using System.Drawing
 @using Newtonsoft.Json
-@using TicTacTorus.Source
 @using TicTacTorus.Source.LoginContent.Security
 @inject ProtectedSessionStorage ProtectedSessionStorage
 @inject NavigationManager NavigationManager
@@ -138,6 +135,7 @@ else if (_errorMessage != null)
     private PlayerStats _stats;
     private static int _gamesWon;
     private static int _gamesPlayed;
+    private static List<int> _chains;
 
     private static string _newName;
     private static string _pw1;
@@ -155,9 +153,6 @@ else if (_errorMessage != null)
         {
             _client = new ConnectionHubClient(NavigationManager);
 
-            await _client.Connection.SendAsync("GetPlayer", Userid);
-            await _client.Connection.SendAsync("GetStats", Userid);
-
             if ((_loggedInUser = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) != null)
             {
                 _user = _loggedInUser.ID;
@@ -168,10 +163,12 @@ else if (_errorMessage != null)
                 _user = "";
                 StateHasChanged();
             }
-
-            if (_loggedInUser != null) await _client.Connection.SendAsync("GetPlayerStats", _loggedInUser.ID, Userid);
+            
             StateHasChanged();
         }
+        
+        await _client.Connection.SendAsync("GetPlayer", Userid);
+        await _client.Connection.SendAsync("GetStats", Userid);
         
         #region listener
         
@@ -205,6 +202,7 @@ else if (_errorMessage != null)
             _stats = JsonConvert.DeserializeObject<PlayerStats>(stats);
             _gamesPlayed = _stats.PlayedGames;
             _gamesWon = _stats.WonGames;
+            _chains = _stats.Chains;
             StateHasChanged();
         });
 
