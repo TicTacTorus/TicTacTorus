@@ -47,10 +47,10 @@ namespace TicTacTorus.Source.Persistence
              
 				//Player Statistic
 			
-				int[] ch = {0};
+				List<int> ch = new List<int>();
 				
 				
-				PlayerStats playerStats = new PlayerStats(0,0,ch);
+				PlayerStats playerStats = new PlayerStats(0,0, ch);
 				createPlayer.playerStats = playerStats;
 				PersistenceStorage.SavePlayerStat(createPlayer,playerStats);
 
@@ -387,28 +387,29 @@ namespace TicTacTorus.Source.Persistence
 		
 		#endregion
 		#region PlayerStat
-		public static PlayerStats GetPlayerStat(HumanPlayer player)
+		public static PlayerStats GetPlayerStat(string id)
 		{
-			PlayerStats playerstat =null;
+			PlayerStats playerstat = new PlayerStats();
 			
-			
-		
 			var _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			_con.Open();
 			SQLiteCommand command = new SQLiteCommand(_con);
 		
 			command.CommandText = $"select  p.PlayerName,p.playedGames,p.WonGames,c.Length,c.Value from PlayerStatistic p,Chains c " +
-			                      $"where c.PlayerName = '"+ player.ID+"' and c.PlayerName=p.PlayerName";
+			                      $"where c.PlayerName = '"+ id +"' and c.PlayerName=p.PlayerName";
+			
 			var reader = command.ExecuteReader();
-			var pg =0;
-			var wg = 0;
-			int[] ch = null;
+			
+			int pg;
+			int wg;
+			List<int> ch = new List<int>();
 			while (reader.Read())
-			{ pg= (int) reader[1];
-				 wg = (int) reader[2];
+			{ 
+				pg= (int) reader[1];
+				wg = (int) reader[2];
+				ch.Add((int)reader[4]);
 				
-				ch[((int) reader[3]) - 1] = (int)reader[4];	
-				playerstat = new PlayerStats(pg,wg,ch);
+				playerstat = new PlayerStats(pg,wg, ch);
 			}
 			
 			_con.Close();
@@ -419,9 +420,7 @@ namespace TicTacTorus.Source.Persistence
 		{
 			SQLiteConnection _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			_con.Open();
-
-
-
+			
 			SQLiteCommand command = new SQLiteCommand(_con);//for ExecuteReader
 			SQLiteCommand command2 = new SQLiteCommand(_con);//foor ExecuteNonQuery
 			command.CommandText = $"select count(*) from PlayerStatistic where PlayerName = '" + player.ID + "'  ";
@@ -441,7 +440,7 @@ namespace TicTacTorus.Source.Persistence
 				
 				command2.ExecuteNonQuery();
 
-				for (var iter = 1; iter <= playStNewDif.Chains.Length; iter++)
+				for (var iter = 1; iter <= playStNewDif.Chains.Count; iter++)
 				{
 					command2.CommandText = $"INSERT INTO Chains(PlayerName, Length, Value) VALUES ('" + player.ID +
 					                      "'," + iter + "," + playStNewDif.Chains[iter - 1] + ")";
@@ -459,7 +458,7 @@ namespace TicTacTorus.Source.Persistence
 				reader = command.ExecuteReader();
 				var pg = 0;
 				var wg = 0;
-				int[] ch = null;
+				List<int> ch = new List<int>();
 				while (reader.Read())
 				{
 					pg = (int) reader[1];
@@ -478,9 +477,9 @@ namespace TicTacTorus.Source.Persistence
 
 				//unterscheiden ob playStNewDif.Chains.Length länger als exist
 				//Also ob neue Werte dazu kommen
-				if (existPlayerStats.Chains.Length < playStNewDif.Chains.Length)
+				if (existPlayerStats.Chains.Count < playStNewDif.Chains.Count)
 				{
-					for (var iter = 0; iter < existPlayerStats.Chains.Length; iter++)
+					for (var iter = 0; iter < existPlayerStats.Chains.Count; iter++)
 					{
 						var iter2 = iter + 1;
 						existPlayerStats.Chains[iter] += playStNewDif.Chains[iter];
@@ -491,7 +490,7 @@ namespace TicTacTorus.Source.Persistence
 
 					}
 
-					for (var iter = existPlayerStats.Chains.Length; iter < playStNewDif.Chains.Length; iter++)
+					for (var iter = existPlayerStats.Chains.Count; iter < playStNewDif.Chains.Count; iter++)
 					{
 						var iter2 = iter + 1;
 						command2.CommandText = $"insert into Chains (PlayerName,Length,Value) values('" + player.ID +
@@ -502,7 +501,7 @@ namespace TicTacTorus.Source.Persistence
 				}
 				else
 				{
-					for (var iter = 0; iter < playStNewDif.Chains.Length; iter++)
+					for (var iter = 0; iter < playStNewDif.Chains.Count; iter++)
 					{
 						var iter2 = iter + 1;
 						existPlayerStats.Chains[iter] += playStNewDif.Chains[iter];
