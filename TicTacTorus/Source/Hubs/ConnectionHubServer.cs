@@ -6,6 +6,7 @@ using System.Xml.Schema;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using TicTacTorus.Source.Generator;
+using TicTacTorus.Source.Ingame.Move;
 using TicTacTorus.Source.LobbySpecificContent;
 using TicTacTorus.Source.LoginContent.Security;
 using TicTacTorus.Source.Persistence;
@@ -141,7 +142,7 @@ namespace TicTacTorus.Source.Hubs
         
         public async Task StartGame(string lobbyId)
         {
-            GameHandler.CreateGame(lobbyId);
+            GameHandler.CreateGame(lobbyId, Clients);
             await Clients.Group(lobbyId).SendAsync("ChangeToGame", true);
             //TODO Returns Game to Clients? (Jack need your confirmation. Check pls last commit if that's ok what I have done)
             //await Clients.Caller.SendAsync("", Server.Instance.CreateGameFromLobby(lobby));
@@ -172,7 +173,9 @@ namespace TicTacTorus.Source.Hubs
         #endregion
         #region Game
 
-        
+        public void ReceivePlayerMove(IMove move)
+        {
+        }
 
         #endregion
         #region Chat

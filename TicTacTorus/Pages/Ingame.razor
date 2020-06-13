@@ -110,6 +110,7 @@
     private static Canvas2DContext _contextGame, _contextMap;
     protected static BECanvasComponent _canvasGame, _canvasMap;
 
+    //local copy of the grid, this gets updated and displayed
     private static Grid _grid = GenerateTempMockGrid();
     private static GlobalPos _lastChange = new GlobalPos(0, 0);
 
@@ -169,7 +170,7 @@
                 //ReceivedMove = moveObj;
                 StateHasChanged();
             });
-            _client.Connection.On<string>("ExecuteWinSequ", (winnerName) =>
+            _client.Connection.On<string>("AnnounceWinner", (winnerName) =>
             {
                 //Winner = winnerName;
                 StateHasChanged();
@@ -177,7 +178,7 @@
 
             _client.Connection.On("ActivatePlayer", () =>
             {
-                
+                //activate control buttons / allow making a move
             });
 
 

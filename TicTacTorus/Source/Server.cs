@@ -3,6 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using Microsoft.AspNetCore.SignalR;
+using TicTacTorus.Source.Hubs;
 using TicTacTorus.Source.Ingame;
 using TicTacTorus.Source.LobbySpecificContent;
 using TicTacTorus.Source.PlayerSpecificContent;
@@ -24,7 +26,7 @@ namespace TicTacTorus.Source
         //private readonly IDictionary<string, string> _sessionIDs;
 
         public ServerSettings Settings { get; }
-
+        
         #region Instance
 
         // For being Thread-safe ("full lazy instantiation" - https://csharpindepth.com/articles/singleton)
@@ -117,14 +119,14 @@ namespace TicTacTorus.Source
 
         #region LobbyGame
 
-        public LobbyGame CreateLobbyGameFromLobby(string lobbyId)
+        public LobbyGame CreateLobbyGameFromLobby(string lobbyId, IHubCallerClients clients)
         {
             var lobby = GetLobbyById(lobbyId);
             if (_games.ContainsKey(lobbyId) || !_lobbies.Remove(lobbyId)) return null;
             // Delete Player list first
             lobby.Players = new List<IPlayer>();
                 
-            var game = new Game(lobby);
+            var game = new Game(lobby, clients);
             _games.Add(game.ID.ToString(), game);
             
             var lgame = new LobbyGame(game);
@@ -148,26 +150,26 @@ namespace TicTacTorus.Source
         /// <returns>
         /// new Game(lobby), null if ID of lobby was not unique or lobby could not be removed from list
         /// </returns>
-        public Game CreateGameFromLobby(ILobby lobby)
+        public Game CreateGameFromLobby(ILobby lobby, IHubCallerClients clients)
         {
             Game game = null;
             if (!_games.ContainsKey(lobby.Id.ToString()) && _lobbies.Remove(lobby.Id.ToString()))
             {
-                game = new Game(lobby);
+                game = new Game(lobby, clients);
                 _games.Add(game.ID.ToString(), game);
             }
 
             return game;
         }
         
-        public Game CreateGameFromLobby(string lobbyId)
+        public Game CreateGameFromLobby(string lobbyId, IHubCallerClients clients)
         {
             var lobby = GetLobbyById(lobbyId);
             if (_games.ContainsKey(lobbyId) || !_lobbies.Remove(lobbyId)) return null;
             // Delete Player list first
             lobby.Players = new List<IPlayer>();
                 
-            var game = new Game(lobby);
+            var game = new Game(lobby, clients);
             _games.Add(game.ID.ToString(), game);
 
             return game;

@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using Microsoft.AspNetCore.SignalR;
 using TicTacTorus.Source.Hubs;
 using TicTacTorus.Source.Ingame.GridSpecificContent.Grid;
 using TicTacTorus.Source.Ingame.Move;
@@ -44,8 +45,13 @@ namespace TicTacTorus.Source.PlayerSpecificContent
             ID = null;
         }
         
-        public IMove ChooseMove(ConnectionHubServer server, IGrid grid, int moveSeconds)
+        public IMove ChooseMove(IClientProxy connection, IGrid grid, int moveSeconds)
         {
+            connection.SendAsync("ActivatePlayer");
+
+            //todo: wait, receive
+            
+            
             throw new System.NotImplementedException();
         }
 
