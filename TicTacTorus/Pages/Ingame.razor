@@ -36,49 +36,48 @@
         </div>-->
         <BECanvas @ref="_canvasMap" Width="100" Height="100"></BECanvas>
     </div>
-@if(IsConnected)
-{
-    <div class=" box box-map">
-        <div class="box-game">
-            <ul class="nav nav-tabs">
-                <li class="nav-item">
-                    <a class="@_navOne" @onclick="NavClick">Chat</a>
-                </li>
-                <li class="nav-item">
-                    <a class="@_navTwo" @onclick="NavClick">Players</a>
-                    @if (_game != null)
-                    {
-                        @foreach (var player in _game.players)
-                        {
-                            <table>
-                                @{
-                                    var classText = "color:" + ColorTranslator.ToHtml(@player.PlrColor) + ";" +
-                                                    "\nfont-size: large;" +
-                                                    "\nfont-weight: bold;" +
-                                                    "\ntext-shadow: 1px 1px 0px black;";
-
-                                    <div style="@classText">@player.InGameName</div>
-                                }
-                            </table>
-                        }
-                    }
-                </li>
-            </ul>
-            <div class="tab-content p-1">
-                <div role="tabpanel" class="@_navContentOne" id="chat-content">
-                    <textarea id="messagesListIngame" readonly>@foreach (var message in _messages)
-                                                               {
-                                                                   @message<br>
-                                                               } 
+    @if(IsConnected)
+    {
+        <div class=" box box-map">
+            <div class="box-game">
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a class="@_navOne" @onclick="NavClick">Chat</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="@_navTwo" @onclick="NavClick">Players</a>
+                    </li>
+                </ul>
+                <div class="tab-content p-1">
+                    <div role="tabpanel" class="@_navContentOne" id="chat-content">
+                        <textarea id="messagesListIngame" readonly>@foreach (var message in _messages)
+                                                                   {
+                                                                       @message<br>
+                                                                   } 
                         </textarea> 
-                    <input @bind="_messageInput" @onkeyup="SendChatMessage" disabled="@(!IsConnected)" class="w-100 align-bottom"/>
-                </div>
-                <div role="tabpanel" class="@_navContentTwo" id="player-content">
-                    Player Content
+                        <input @bind="_messageInput" @onkeyup="SendChatMessage" disabled="@(!IsConnected)" class="w-100 align-bottom"/>
+                    </div>
+                    <div role="tabpanel" class="@_navContentTwo" id="player-content">
+                        @if (_game != null)
+                        {
+                            @foreach (var player in _game.players)
+                            {
+                                <table>
+                                    @{
+                                        var classText = "color:" + ColorTranslator.ToHtml(@player.PlrColor) + ";" +
+                                                        "\nfont-size: large;" +
+                                                        "\nfont-weight: bold;" +
+                                                        "\ntext-shadow: 1px 1px 0px black;";
+                    
+                                        <div style="@classText">@player.InGameName</div>
+                                    }
+                                </table>
+                            }
+                        }
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     }
 </div>
 
@@ -98,14 +97,14 @@
     private double _mouseStartY = 0;
     private double _mousePrevX = 0;
     private double _mousePrevY = 0;
-    private const double MaxClickDistance = 10;
+        private const double MaxClickDistance = 10;
     
     private List<string> _messages = new List<string>();
     private string _messageInput;
     
     [Parameter] public string IdString { get; set; }
     private LobbyGame _game = null;
-    
+
     //canvas stuff
     private static Canvas2DContext _contextGame, _contextMap;
     protected static BECanvasComponent _canvasGame, _canvasMap;
@@ -180,7 +179,6 @@
                 
             });
 
-
             #endregion
         
             if ((User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) == null)
@@ -188,7 +186,7 @@
                 User = PlayerFactory.CreateHumanPlayer();
                 await ProtectedSessionStorage.SetAsync("LoginData", User);
             }
-        
+            
             await _client.Connection.SendAsync("JoinGame", IdString);
             IsConnected = _client.Connection.State == HubConnectionState.Connected;
         }
@@ -215,9 +213,7 @@
     {
         _hubConnection.SendAsync("ChangeLobbyStat", IdString, lobbyParam, changedValue);
     }*/
-
     
-        
 
     private async void MouseScrollHandler(WheelEventArgs evnt)
     {
@@ -269,8 +265,8 @@
             var pos = _rendererGame.GetCursorPosition(evnt.ClientX, evnt.ClientY, width, height);
             Console.WriteLine($"Click Detected at {pos}!");
 
-            //todo add some _real_ functionality: Add symbol, notify server.
-            //just as a demonstration: a quick through-cycle of 20 players (+1 for no owner).
+    //todo add some _real_ functionality: Add symbol, notify server.
+    //just as a demonstration: a quick through-cycle of 20 players (+1 for no owner).
             var owner = _grid.GetSymbol(pos);
             switch (owner)
             {
@@ -296,18 +292,19 @@
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        //todo current problems:
-        //resizing the window also needs to trigger a resize of the canvas.
-        //moving the viewpoint of the game renderer stops new lines from rendering.
+    //todo current problems:
+    //resizing the window also needs to trigger a resize of the canvas.
+    //moving the viewpoint of the game renderer stops new lines from rendering.
 
-        #region ClientServerHandling
+    #region ClientServerHandling
         if (firstRender)
         {
             _client = new ConnectionHubClient(NavigationManager);
+            IsConnected = true;
 
             if ((User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) == null)
             {
-                // Fehlermeldung an User
+    // Fehlermeldung an User
                 NavigationManager.NavigateTo("/?error=IdLost");
             }
 
@@ -318,8 +315,8 @@
                     TypeNameHandling = TypeNameHandling.All
                 };
                 _game = JsonConvert.DeserializeObject<LobbyGame>(jsGame, settings);
-                IsConnected = true;
-                // maybe init stuff from game
+                if (_game != null) _client.Connection.SendAsync("OnUserConnectedToLobby", _game.players.IndexOf(User));
+    // maybe init stuff from game
                 StateHasChanged();
             });
             
@@ -328,7 +325,7 @@
                 NavigationManager.NavigateTo("/?error="+errormessage);  
             });
 
-            //await _client.Connection.SendAsync("InitGameId", IdString, User.SessionID);
+    //await _client.Connection.SendAsync("InitGameId", IdString, User.SessionID);
             var settings = new JsonSerializerSettings()
             {
                 TypeNameHandling = TypeNameHandling.All
@@ -336,7 +333,7 @@
             var jsonUser = JsonConvert.SerializeObject(User, settings);
             await _client.Connection.SendAsync("ConnectToGame", IdString, jsonUser);
         }
-        #endregion
+    #endregion
         
         if (firstRender)
         {
@@ -382,7 +379,7 @@
     
     public static Grid GenerateTempMockGrid()
     {
-        //todo remove me once we synchronize the real grid!
+    //todo remove me once we synchronize the real grid!
         const int width = 50, height = 50, players = 20;
         var items = (int)Math.Sqrt(width * height);
         

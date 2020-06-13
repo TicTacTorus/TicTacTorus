@@ -271,6 +271,7 @@
                     TypeNameHandling = TypeNameHandling.All
                 };
                 _lobby = JsonConvert.DeserializeObject<Source.LobbySpecificContent.Lobby>(lobby, jsonSerializerSettings);
+                if (_lobby != null) await _client.Connection.SendAsync("OnUserConnectedToLobby", _lobby.Players.IndexOf(User));
                 StateHasChanged();
                 
                 User.SessionID = sessionID;
@@ -331,6 +332,7 @@
             
             
             await _client.Connection.SendAsync("JoinLobby", IdString, jsonUser);
+            
             IsConnected = _client.Connection.State == HubConnectionState.Connected;
             StateHasChanged();
         }
