@@ -113,8 +113,8 @@
         NavigationManager.NavigateTo("/user/" + User.ID);
     }
 
-    private void SendNewLobbyRequest()
+    private async Task SendNewLobbyRequest()
     {
-        _client.Connection.SendAsync("CreateLobby", User);
+        await _client.Connection.SendAsync("CreateLobby", User);
     }
 }

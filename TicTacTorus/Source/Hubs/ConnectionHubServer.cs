@@ -57,9 +57,13 @@ namespace TicTacTorus.Source.Hubs
                 await Clients.Group(lobbyId).SendAsync("ReceiveMessage", "Game", "There was something wrong. "+p.InGameName+" couldn't be removed");
             }
         }
-        
-        
 
+        public async Task CheckLobbyExisting(string id)
+        {
+            var exists = !Server.Instance.LobbyIdIsUnique(id);
+            await Clients.Caller.SendAsync("ReceiveLobbyExisting", exists);
+        }
+        
         public async Task JoinGame(string lobbyId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
@@ -128,7 +132,6 @@ namespace TicTacTorus.Source.Hubs
         }
 
         #endregion
-        
         #region LobbyToGame
         
         public async Task StartGame(string lobbyId)
@@ -167,7 +170,6 @@ namespace TicTacTorus.Source.Hubs
         
 
         #endregion
-        
         #region Chat
         public async Task SendMessage(string lobbyId, string user, string message)
         {
