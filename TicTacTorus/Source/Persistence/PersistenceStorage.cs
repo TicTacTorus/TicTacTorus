@@ -387,18 +387,17 @@ namespace TicTacTorus.Source.Persistence
 		
 		#endregion
 		#region PlayerStat
-		public static PlayerStats GetPlayerStat(HumanPlayer player)
+		public static PlayerStats GetPlayerStat(string id)
 		{
 			PlayerStats playerstat =null;
 			
-			
-		
 			var _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			_con.Open();
 			SQLiteCommand command = new SQLiteCommand(_con);
 		
 			command.CommandText = $"select  p.PlayerName,p.playedGames,p.WonGames,c.Length,c.Value from PlayerStatistic p,Chains c " +
-			                      $"where c.PlayerName = '"+ player.ID+"' and c.PlayerName=p.PlayerName";
+			                      $"where c.PlayerName = '"+ id +"' and c.PlayerName=p.PlayerName";
+			
 			var reader = command.ExecuteReader();
 			var pg =0;
 			var wg = 0;
@@ -419,9 +418,7 @@ namespace TicTacTorus.Source.Persistence
 		{
 			SQLiteConnection _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			_con.Open();
-
-
-
+			
 			SQLiteCommand command = new SQLiteCommand(_con);//for ExecuteReader
 			SQLiteCommand command2 = new SQLiteCommand(_con);//foor ExecuteNonQuery
 			command.CommandText = $"select count(*) from PlayerStatistic where PlayerName = '" + player.ID + "'  ";

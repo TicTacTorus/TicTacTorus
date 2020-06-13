@@ -22,7 +22,7 @@
     <h1 class="headers my-auto">TicTacTorus</h1>
 </div>
 
-@if(hasLoaded)
+@if(_hasLoaded)
 {
 <div class="d-flex justify-content-center">
     <div class="row">
@@ -31,17 +31,17 @@
                 <div class="text-center mx-4">
                     <div class="my-3">
                         <b>
-                            <h1>@userid</h1></b>
+                            <h1>@Userid</h1></b>
                     </div>
                     <!-- if logged in player == userid inputs enabled else disabled ### -->
-                    @if (userid.Equals(_user))
+                    @if (Userid.Equals(_user))
                     {
                         <div><b>In-Game Name</b></div>
-                        <input type="text" @bind="_newName" @onkeyup="ChangePlayerName" placeholder=@_profile.InGameName/>
+                        <input type="text" @bind="_newName" @onkeyup="ChangePlayerName" placeholder=@_profileIngameName/>
                         <div class="mt-2"><b>Password</b></div>
-                        <input type="password" @onkeyup="ChangePassword" @bind="pw1" placeholder="**********"/>
+                        <input type="password" @onkeyup="ChangePassword" @bind="_pw1" placeholder="**********"/>
                         <div class="mt-2"><b>Confirm Password</b></div>
-                        <input type="password" @onkeyup="ChangePassword" @bind="pw2" placeholder="**********"/>
+                        <input type="password" @onkeyup="ChangePassword" @bind="_pw2" placeholder="**********"/>
                     }
                     else
                     {
@@ -57,7 +57,7 @@
                     </div>
                     <div class="text-center my-3">
                         <b>Symbol Color</b>
-                        @if (userid.Equals(_user))
+                        @if (Userid.Equals(_user))
                         {
                             <input type="color" @bind="_profileColor"/>
                             <button class="btn btn-end-custom" @onclick="@ChangeColor">Change Color</button>
@@ -81,12 +81,12 @@
                         <div class="col box-only p-2 m-1">
                             <h5 class="text-center mt-2">Games played</h5>
                             <hr>
-                            <h5><b><!--@_profile.playerStats.PlayedGames --></b></h5>
+                            <h5><b>@_gamesPlayed</b></h5>
                         </div>
                         <div class="col box-only p-2 m-1">
                             <h5 class="text-center mt-2">Wins</h5>
                             <hr>
-                            <h5><b><!--@_profile.playerStats.WonGames--></b></h5>
+                            <h5><b>@_gamesWon</b></h5>
                         </div>
                         <div class="col box-only p-2 m-1">
                             <h5 class="text-center mt-2">Symbols placed</h5>
@@ -105,7 +105,7 @@
     </div>
 </div>
 }
-else if (errorMessage != null)
+else if (_errorMessage != null)
 {
     <div class="d-flex justify-content-center">
         <div class="row">
@@ -113,7 +113,7 @@ else if (errorMessage != null)
                 <div class="box w-100">
                     <div class="text-center mx-4">
                         <div class="my-1">
-                            @errorMessage
+                            @_errorMessage
                         </div>
                     </div>
                 </div>
@@ -125,43 +125,42 @@ else if (errorMessage != null)
 @code
 {
     [Parameter] 
-    public string userid { get; set; }
+    public string Userid { get; set; }
     
     private static ConnectionHubClient _client;
-    private string _user { get; set; }
-    private static HumanPlayer LoggedInUser { get; set; }
+    private string _user;
+    private static HumanPlayer _loggedInUser;
 
     private HumanPlayer _profile;
-    private string _profileIngameName { get; set; }
-    private static string _profileColor { get; set; }
-    
-    private static string _newName { get; set; }
-    private static string pw1 { get; set; }
-    private static string pw2 { get; set; }
+    private string _profileIngameName;
+    private static string _profileColor;
 
-    private bool hasLoaded = true;
-    private string errorMessage = null;
+    private PlayerStats _stats;
+    private static int _gamesWon;
+    private static int _gamesPlayed;
+
+    private static string _newName;
+    private static string _pw1;
+    private static string _pw2;
+
+    private bool _hasLoaded = true;
+    private string _errorMessage = null;
 }
 
 @functions
 {
-    protected override async Task OnInitializedAsync()
-    {
-        _profile = PersistenceStorage.LoadPlayer(userid);
-        _profileIngameName = _profile.InGameName;
-        _profileColor = HexConverter(_profile.PlrColor);
-        StateHasChanged();
-    }
-    
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             _client = new ConnectionHubClient(NavigationManager);
 
-            if ((LoggedInUser = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) != null)
+            await _client.Connection.SendAsync("GetPlayer", Userid);
+            await _client.Connection.SendAsync("GetStats", Userid);
+
+            if ((_loggedInUser = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) != null)
             {
-                _user = LoggedInUser.ID;
+                _user = _loggedInUser.ID;
                 StateHasChanged();
             }
             else
@@ -170,32 +169,54 @@ else if (errorMessage != null)
                 StateHasChanged();
             }
 
-            if (LoggedInUser != null) await _client.Connection.SendAsync("GetPlayerStats", LoggedInUser.ID, userid);
+            if (_loggedInUser != null) await _client.Connection.SendAsync("GetPlayerStats", _loggedInUser.ID, Userid);
+            StateHasChanged();
         }
         
         #region listener
-
-        _client.Connection.On<string, string>("ReceiveStatsNoAuthorisation", (player, stats) =>
+        
+        _client.Connection.On<string>("ReceivePlayer", (player) =>
         {
-            // TODO anpassen
             _profile = JsonConvert.DeserializeObject<HumanPlayer>(player);
-            _profile.playerStats = JsonConvert.DeserializeObject<PlayerStats>(stats);
-            hasLoaded = true;
+            _profileIngameName = _profile.InGameName;
+            _profileColor = HexConverter(_profile.PlrColor);
             StateHasChanged();
         });
         
-        _client.Connection.On<string, string>("ReceiveStatsAsOwner", (player, stats) =>
+        _client.Connection.On("PasswordIsChanged", () =>
         {
-            // TODO anpassen
-            _profile = JsonConvert.DeserializeObject<HumanPlayer>(player);
-            _profile.playerStats = JsonConvert.DeserializeObject<PlayerStats>(stats);
-            hasLoaded = true;
+            StateHasChanged();
+        });
+
+        _client.Connection.On<Color>("ColorIsChanged", color =>
+        {
+            _profileColor = HexConverter(color);
+            StateHasChanged();
+        });
+        
+        _client.Connection.On<Color>("SymbolIsChanged", color =>
+        {
+            // TODO Symbol stuff
+            StateHasChanged();
+        });
+
+        _client.Connection.On<string>("ReceiveStats", (stats) =>
+        {
+            _stats = JsonConvert.DeserializeObject<PlayerStats>(stats);
+            _gamesPlayed = _stats.PlayedGames;
+            _gamesWon = _stats.WonGames;
+            StateHasChanged();
+        });
+
+        _client.Connection.On<string>("NameIsChanged", (name) =>
+        {
+            _profileIngameName = name;
             StateHasChanged();
         });
 
         _client.Connection.On<string>("Error", (message) =>
         {
-            errorMessage = message;
+            _errorMessage = message;
             StateHasChanged();
         });
 
@@ -222,34 +243,35 @@ else if (errorMessage != null)
     protected override void OnParametersSet()
     {
     //TODO send request to server
-        if (PersistenceStorage.CheckPlayerIdIsUnique(userid))
+        if (PersistenceStorage.CheckPlayerIdIsUnique(Userid))
         { 
             NavigationManager.NavigateTo("/?error=userDoesNotExist");
         }
     }
 
-    private static void ChangeSymbol()
+    private static async Task ChangeSymbol()
     {
-        // TODO Send message to server, add/update symbol to database
+        // TODO Symbol stuff
+        await _client.Connection.SendAsync("ChangePlayerSymbol", _loggedInUser.ID, 1);
     }
 
-    private static void ChangeColor()
+    private static async Task ChangeColor()
     {
-        PersistenceStorage.UpdateColor(LoggedInUser.ID, ColorTranslator.FromHtml(_profileColor));
+        await _client.Connection.SendAsync("ChangeSymbolColor", _profileColor);
     }
 
-    private static void ChangePassword(KeyboardEventArgs e)
+    private static async Task ChangePassword(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
         {
-            if (pw1 != "" && pw2 != "")
+            if (!_pw1.Equals(""))
             {
-                if (pw1.Equals(pw2))
+                if (_pw1.Equals(_pw2))
                 {
-                    SaltedHash s = new SaltedHash(pw1);
-                    PersistenceStorage.UpdateSaltHash(LoggedInUser.ID, s.Salt, s.Hash);
-                    pw1 = "";
-                    pw2 = "";
+                    SaltedHash s = new SaltedHash(_pw1);
+                    await _client.Connection.SendAsync("ChangePassword", _loggedInUser.ID, s.Salt, s.Hash);
+                    _pw1 = "";
+                    _pw2 = "";
                 }
             }
         }
@@ -259,7 +281,7 @@ else if (errorMessage != null)
     {
         if (e.Key == "Enter")
         {
-            await _client.Connection.SendAsync("ChangeIngameName", LoggedInUser.ID, _newName);
+            await _client.Connection.SendAsync("ChangeIngameName", _loggedInUser.ID, _newName);
             _newName = "";
         }
     }
