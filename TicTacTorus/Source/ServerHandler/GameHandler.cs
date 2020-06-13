@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.AspNetCore.SignalR;
 using TicTacTorus.Source.Ingame;
 using TicTacTorus.Source.PlayerSpecificContent;
 
@@ -11,9 +12,9 @@ namespace TicTacTorus.Source.ServerHandler
 
         #region Init
 
-        public static LobbyGame CreateGame(string lobbyId)
+        public static LobbyGame CreateGame(string lobbyId, IHubCallerClients clients)
         {
-            return Server.Instance.CreateLobbyGameFromLobby(lobbyId);;
+            return Server.Instance.CreateLobbyGameFromLobby(lobbyId, clients);
         }
 
 

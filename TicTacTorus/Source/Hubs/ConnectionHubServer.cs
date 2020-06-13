@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Drawing;
+using System.Reflection.Metadata;
 using System.Threading.Tasks;
 using System.Xml.Schema;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using TicTacTorus.Source.Generator;
+using TicTacTorus.Source.Ingame.Move;
 using TicTacTorus.Source.LobbySpecificContent;
 using TicTacTorus.Source.LoginContent.Security;
 using TicTacTorus.Source.Persistence;
@@ -141,7 +144,7 @@ namespace TicTacTorus.Source.Hubs
         
         public async Task StartGame(string lobbyId)
         {
-            GameHandler.CreateGame(lobbyId);
+            GameHandler.CreateGame(lobbyId, Clients);
             await Clients.Group(lobbyId).SendAsync("ChangeToGame", true);
             //TODO Returns Game to Clients? (Jack need your confirmation. Check pls last commit if that's ok what I have done)
             //await Clients.Caller.SendAsync("", Server.Instance.CreateGameFromLobby(lobby));
@@ -172,7 +175,9 @@ namespace TicTacTorus.Source.Hubs
         #endregion
         #region Game
 
-        
+        public void ReceivePlayerMove(IMove move)
+        {
+        }
 
         #endregion
         #region Chat
@@ -236,31 +241,22 @@ namespace TicTacTorus.Source.Hubs
             }
         }
 
-        public async Task GetPlayerStats(string userId, string playerId)
+        /*public async Task GetPlayerStats(string userId, string playerId)
         {
             try
             {
                 var player = PersistenceStorage.LoadPlayer(playerId);
                 var playerStats = PersistenceStorage.GetPlayerStat(player);
-                if (userId == null || userId != playerId)
-                {
-                    // filter some information
-                    player.Hash = null;
-                    player.Salt = null;
-                    player.playerStats = null;
-                
-                    var jsonPlayer = JsonConvert.SerializeObject(player);
-                    var jsonStats = JsonConvert.SerializeObject(playerStats);
+               
+                // filter some information
+                player.Hash = null;
+                player.Salt = null;
+                player.playerStats = null;
+            
+                var jsonPlayer = JsonConvert.SerializeObject(player);
+                var jsonStats = JsonConvert.SerializeObject(playerStats);
 
-                    await Clients.Caller.SendAsync("ReceiveStatsNoAuthorisation", jsonPlayer,playerStats);
-                }
-                else
-                {
-                    var jsonPlayer = JsonConvert.SerializeObject(player);
-                    var jsonStats = JsonConvert.SerializeObject(playerStats);
-
-                    await Clients.Caller.SendAsync("ReceiveStatsAsOwner", jsonPlayer, jsonStats);
-                }
+                await Clients.Caller.SendAsync("ReceiveStats", jsonPlayer,jsonStats);
             }
             catch
             {
@@ -268,7 +264,7 @@ namespace TicTacTorus.Source.Hubs
                 return;
             }
             
-        }
+        }*/
 
         /*
         //Gets called everytime a user connects to a hub (I know performance is not good >.<)
@@ -284,13 +280,41 @@ namespace TicTacTorus.Source.Hubs
         }*/
 
         #endregion
-        #region User
+        #region Userprofile
 
-        public void ChangeIngameName(string id, string name)
+        public async Task ChangeIngameName(string id, string name)
         {
             PersistenceStorage.UpdateInGameName(id, name);
+            await Clients.Caller.SendAsync("NameIsChanged", name);
         }
-
+        public async Task ChangePassword(string id, byte[]newSalt, byte[]newHash)
+        {
+            PersistenceStorage.UpdateSaltHash(id, newSalt, newHash);
+            await Clients.Caller.SendAsync("PasswordIsChanged");
+        }
+        public async Task ChangeSymbolColor(string id, string color)
+        {
+            Color c = ColorTranslator.FromHtml(color);
+            PersistenceStorage.UpdateColor(id, c);
+            await Clients.Caller.SendAsync("ColorIsChanged", color);
+        }
+        public async Task ChangePlayerSymbol(string id, byte symbol)
+        {
+            PersistenceStorage.UpdatePlayerSymbol(id, symbol);
+            await Clients.Caller.SendAsync("SymbolIsChanged", symbol);
+        }
+        public async Task GetPlayer(string id)
+        {
+            HumanPlayer player = PersistenceStorage.LoadPlayer(id);
+            string jsonPlayer = JsonConvert.SerializeObject(player);
+            await Clients.Caller.SendAsync("ReceivePlayer", jsonPlayer);
+        }
+        public async Task GetStats(string id)
+        {
+            PlayerStats stats = PersistenceStorage.GetPlayerStat(id);
+            string jsonStats = JsonConvert.SerializeObject(stats);
+            await Clients.Caller.SendAsync("ReceiveStats", jsonStats);
+        }
         #endregion
         #region Lobbies
 

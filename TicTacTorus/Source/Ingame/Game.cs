@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
+using TicTacTorus.Source.Hubs;
 using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk;
 using TicTacTorus.Source.Ingame.GridSpecificContent.Grid;
 using TicTacTorus.Source.Ingame.GridSpecificContent.Position;
@@ -30,14 +33,17 @@ namespace TicTacTorus.Source.Ingame
 
         public IList<IMove> MoveHistory { private set; get; }
 
+        private IHubCallerClients _clients;
+        
         #endregion
         #region Constructors
 
-        public Game(ILobby lobby)
+        public Game(ILobby lobby, IHubCallerClients clients)
         {
             StartTime = DateTime.Now;
-            _players = lobby.GetAllPlayers();
             ID = lobby.Id;
+            _players = lobby.GetAllPlayers();
+            _clients = clients;
             
             //todo give us sensible config values from the lobby
             _grid = new Grid(50, 50);
@@ -47,10 +53,8 @@ namespace TicTacTorus.Source.Ingame
         #endregion
         #region Game Loop
 
-        public void Run()
+        public async Task Run()
         {
-            //todo something something starting thread? or is it just using a thread that lobby started?
-
             /*
                 --- first rough concept ---
                 start move timer (if finite)
@@ -68,18 +72,20 @@ namespace TicTacTorus.Source.Ingame
             IPlayer lastPlayer = null;
             do
             {
+                var playerIndex = _activePlayerIndex;
                 lastPlayer = ChooseNextPlayer();
                 IMove move = null;
+
+                var connection = _clients.Group(UniquePlayerGroup(ID, playerIndex));
                 do
                 {
-                    //todo debate: if we save the connection inside the player we could create a ChooseMove() method inside the player.
-                    //move = lastPlayer.ChooseMove(_grid, MoveSeconds);
-                } while (move != null && move.CanDo(_grid, PlayerOrder));
+                    move = lastPlayer.ChooseMove(connection, _grid, MoveSeconds);
+                } while (move != null && !move.CanDo(_grid, PlayerOrder));
                 move.Do(_grid, PlayerOrder);
                 MoveHistory.Add(move);
             } while (!_referee.HasWon(_grid, lastChange));
 
-            //todo we have a winner!
+            await _clients.Group(ID.ToString()).SendAsync("AnnounceWinner");
             
         }
         
@@ -88,17 +94,24 @@ namespace TicTacTorus.Source.Ingame
 
         private IPlayer ChooseNextPlayer()
         {
-            IPlayer result = _players[PlayerOrder[_activePlayerIndex]];
-            ++_activePlayerIndex;
-            if (_activePlayerIndex >= _players.Count)
+            IPlayer result = null;
+            //this loop terminates once iterated through the whole list (and returns null in this case)
+            for (var i = 0; i < _players.Count && result == null; ++i)
             {
-                _activePlayerIndex = 0;
+                result = _players[PlayerOrder[_activePlayerIndex]];
+                ++_activePlayerIndex;
+                _activePlayerIndex %= (byte)_players.Count;
             }
             return result;
         }
+
+        public static string UniquePlayerGroup(Base64 gameID, int playerIndex)
+        {
+            return $"{gameID}::{playerIndex}";
+        }
         
         #endregion
-        #region FieldChangeMethods
+        #region Field Changing Methods
 
         public bool AddPlayer(IPlayer player)
         {
