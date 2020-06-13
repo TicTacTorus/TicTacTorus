@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace TicTacTorus.Source.Generator
 {
@@ -13,9 +14,8 @@ namespace TicTacTorus.Source.Generator
         
         protected Random _rnd;
 
-        protected Randomizer(int seed = DefaultSeed)
+        protected Randomizer(int seed = DefaultSeed) : this(CreateRandom(seed))
         {
-            _rnd = CreateRandom(seed);
         }
 
         protected Randomizer(Random shared)
@@ -26,6 +26,11 @@ namespace TicTacTorus.Source.Generator
         public static Random CreateRandom(int seed = DefaultSeed)
         {
             return seed == DefaultSeed ? new Random() : new Random(seed);
+        }
+
+        public void ChangeSeed(int seed)
+        {
+            _rnd = CreateRandom(seed);
         }
     }
 }
