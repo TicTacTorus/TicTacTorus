@@ -16,14 +16,16 @@ namespace TicTacTorus.Source.Persistence
 
 		public static bool CreatePlayer(HumanPlayer createPlayer) //NUR notNull Variable
 		{
-			SQLiteConnection con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			//neuer Player wird bei Registrierung der Datenbank hinzugefügt
 			if (createPlayer.ID != null ){
 				con.Open();
-                                 
-				SQLiteCommand command = new SQLiteCommand(con);
-				command.CommandText = "Insert Into User (loginName, salt, hash, inGameName, color, PlayerSymbol)" +
-				                      "Values (@Id, @Salt, @Hash, @InGameName, @Color, @Symbol)";
+
+				SQLiteCommand command = new SQLiteCommand(con)
+				{
+					CommandText = "Insert Into User (loginName, salt, hash, inGameName, color, PlayerSymbol)" +
+					              "Values (@Id, @Salt, @Hash, @InGameName, @Color, @Symbol)"
+				};
 				var idParam = new SQLiteParameter("@Id", DbType.String, createPlayer.ID.Length) {Value = createPlayer.ID};
 				var saltParam = new SQLiteParameter("@Salt", DbType.Binary, SaltedHash.SaltBytes) {Value = createPlayer.Salt};
 				var hashParam = new SQLiteParameter("@Hash", DbType.Binary, SaltedHash.HashBytes) {Value = createPlayer.Hash};
@@ -47,12 +49,12 @@ namespace TicTacTorus.Source.Persistence
              
 				//Player Statistic
 			
-				List<int> ch = new List<int>();
+				var ch = new List<int>();
 				
 				
 				PlayerStats playerStats = new PlayerStats(0,0, ch);
 				createPlayer.playerStats = playerStats;
-				PersistenceStorage.SavePlayerStat(createPlayer,playerStats);
+				SavePlayerStat(createPlayer,playerStats);
 
 				con.Close();
 				return true;
@@ -67,13 +69,15 @@ namespace TicTacTorus.Source.Persistence
 		//If other users want to look at your account site
 		public static HumanPlayer LoadPlayer(string id)
 		{  
-			SQLiteConnection  con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
-			HumanPlayer player = new HumanPlayer();
+			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			var player = new HumanPlayer();
 			con.Open();
-                                 
-			SQLiteCommand command = new SQLiteCommand(con);
-            
-			command.CommandText = $"select * from User where loginName ='"+id+"'";
+
+			var command = new SQLiteCommand(con)
+			{
+				CommandText = $"select * from User where loginName ='" + id + "'"
+			};
+
 			var reader = command.ExecuteReader();
 			while (reader.Read())
 			{
@@ -108,13 +112,15 @@ namespace TicTacTorus.Source.Persistence
 			
 			while (reader.Read())
 			{
-				player = new HumanPlayer();
+				player = new HumanPlayer
+				{
+					ID = reader[0] as string,
+					Salt = reader[1] as byte[],
+					Hash = reader[2] as byte[],
+					InGameName = reader[3] as string,
+					PlrColor = Color.FromArgb(Convert.ToInt32(reader[6]))
+				};
 
-				player.ID = reader[0] as string;
-				player.Salt = reader[1] as byte[];
-				player.Hash = reader[2] as byte[];
-				player.InGameName = reader[3] as string;
-				player.PlrColor = Color.FromArgb(Convert.ToInt32(reader[6]));
 				//player.Symbol = (byte) reader[7];
 				
 				sh = new SaltedHash(player.Salt, player.Hash);
@@ -139,14 +145,16 @@ namespace TicTacTorus.Source.Persistence
 		//Checks if Password of userId is correct
 		public static bool VerifyPassword(string id, string pw)
 		{
-			SQLiteConnection  con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
-			SaltedHash s =new SaltedHash(pw);
+			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			var s =new SaltedHash(pw);
 			var answer = false;
 			con.Open();
-                                 
-			SQLiteCommand command = new SQLiteCommand(con);
-            
-			command.CommandText = $"select salt,hash from User where loginName ='"+id+"'";
+
+			var command = new SQLiteCommand(con)
+			{
+				CommandText = $"select salt,hash from User where loginName ='" + id + "'"
+			};
+
 			var reader = command.ExecuteReader();
 			while (reader.Read())
 			{
@@ -162,13 +170,15 @@ namespace TicTacTorus.Source.Persistence
 		//Checks if id is already taken
 		public static bool CheckPlayerIdIsUnique(string id)
 		{
-			SQLiteConnection con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			con.Open();
-                                 
-			SQLiteCommand command = new SQLiteCommand(con);
-            
-			command.CommandText = $"select count(*) from User where loginName = '"+id+"';";
-			
+
+			var command = new SQLiteCommand(con)
+			{
+				CommandText = $"select count(*) from User where loginName = '" + id + "';"
+			};
+
+
 			if (Convert.ToInt32(command.ExecuteScalar()) > 0)
 			{
 				con.Close();
@@ -183,28 +193,32 @@ namespace TicTacTorus.Source.Persistence
 
 		public static void UpdateInGameName(string id, string name)
 		{
-			SQLiteConnection  con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			con.Open();
-                                 
-			SQLiteCommand command = new SQLiteCommand(con);
-            
-			command.CommandText = $"update  User Set inGameName ='"+ name+"' where loginName = '"+id+"'";
+
+			var command = new SQLiteCommand(con)
+			{
+				CommandText = $"update  User Set inGameName ='" + name + "' where loginName = '" + id + "'"
+			};
+
 			command.ExecuteNonQuery();
 			con.Close(); 
 		}
 
 		public static void UpdateSaltHash(string id,byte[]newSalt,byte[]newHash)
 		{
-			SQLiteConnection  con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			con.Open();
-                                 
-			SQLiteCommand command = new SQLiteCommand(con);
 
-			command.CommandText = "Update User " +
-			                      "SET salt = @Salt, " +
-			                      "hash = @Hash " +
-			                      "WHERE loginName = @Id";
-			
+			SQLiteCommand command = new SQLiteCommand(con)
+			{
+				CommandText = "Update User " +
+				              "SET salt = @Salt, " +
+				              "hash = @Hash " +
+				              "WHERE loginName = @Id"
+			};
+
+
 			var idParam = new SQLiteParameter("@Id", DbType.String, id.Length) {Value = id};                      
 			var saltParam = new SQLiteParameter("@Salt", DbType.Binary, SaltedHash.SaltBytes) {Value = newSalt};
 			var hashParam = new SQLiteParameter("@Hash", DbType.Binary, SaltedHash.HashBytes) {Value = newHash};
@@ -232,24 +246,28 @@ namespace TicTacTorus.Source.Persistence
 		*/
 		public static void UpdateColor(string id, Color color)
 		{
-			SQLiteConnection  con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			con.Open();
-                                 
-			SQLiteCommand command = new SQLiteCommand(con);
-            
-			command.CommandText = $"update  User Set color ='"+ color.ToArgb()+"' where loginName = '"+id+"'";
+
+			SQLiteCommand command = new SQLiteCommand(con)
+			{
+				CommandText = $"update  User Set color ='" + color.ToArgb() + "' where loginName = '" + id + "'"
+			};
+
 			command.ExecuteNonQuery();
 			con.Close();   
 		}
 		
 		public static void UpdatePlayerSymbol(string id, byte symbol)
 		{
-			SQLiteConnection  con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			con.Open();
-                                 
-			SQLiteCommand command = new SQLiteCommand(con);
-            
-			command.CommandText = $"update  User Set PlayerSymbol ='"+ symbol+"' where loginName = '"+id+"'";
+
+			SQLiteCommand command = new SQLiteCommand(con)
+			{
+				CommandText = $"update  User Set PlayerSymbol ='" + symbol + "' where loginName = '" + id + "'"
+			};
+
 			command.ExecuteNonQuery();
 			con.Close();   
 		}
@@ -257,12 +275,14 @@ namespace TicTacTorus.Source.Persistence
 		#region Delete User
 		public static void DeleteUser(string id)
 		{
-			SQLiteConnection  con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			con.Open();
-                                 
-			SQLiteCommand command = new SQLiteCommand(con);
-            
-			command.CommandText = $"delete from User where loginName =" +id+"  ";
+
+			var command = new SQLiteCommand(con)
+			{
+				CommandText = $"delete from User where loginName =" + id + "  "
+			};
+
 			command.ExecuteNonQuery();
 			con.Close();   
 
@@ -283,7 +303,7 @@ namespace TicTacTorus.Source.Persistence
 			};
 
 			var reader = command.ExecuteReader();
-			Blob blob = new Blob();
+			var blob = new Blob();
 			while (reader.Read())
 			{
 				blob = (Blob) reader[0] ;
@@ -295,7 +315,7 @@ namespace TicTacTorus.Source.Persistence
 		// List von allen Symbolen (für Auswahl in Lobby/User)
 		public static List<Blob> GetSymbols()
 		{
-			List<Blob> blobs = new List<Blob>();
+			var blobs = new List<Blob>();
 			
 			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			con.Open();
@@ -315,23 +335,27 @@ namespace TicTacTorus.Source.Persistence
 		}
 		public static void SaveSymbol(Blob symbol)
 		{
-			SQLiteConnection  con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			con.Open();
-                                 
-			SQLiteCommand command = new SQLiteCommand(con);
-            
-			command.CommandText = $"insert into PlayerSymbols(symbols) values ("+ symbol+") ";
+
+			var command = new SQLiteCommand(con)
+			{
+				CommandText = $"insert into PlayerSymbols(symbols) values (" + symbol + ") "
+			};
+
 			command.ExecuteNonQuery();
 			con.Close();   
 		}
 		public static void DeleteSymbol(byte id)
 		{
-			SQLiteConnection  con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			con.Open();
-                                 
-			SQLiteCommand command = new SQLiteCommand(con);
-            
-			command.CommandText = $"delete from PlayerSymbols where ps =" +id+"  ";
+
+			var command = new SQLiteCommand(con)
+			{
+				CommandText = $"delete from PlayerSymbols where ps =" + id + "  "
+			};
+
 			command.ExecuteNonQuery();
 			con.Close();   
 		}
@@ -341,7 +365,7 @@ namespace TicTacTorus.Source.Persistence
 
 		public static string GetAnonymName(byte id)
 		{
-			string anonymName = "";
+			var anonymName = "";
 			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			con.Open();
 			var command = new SQLiteCommand(con)
@@ -360,23 +384,27 @@ namespace TicTacTorus.Source.Persistence
 		}
 		public static void SaveAnonymName(string anonymName)
 		{
-			SQLiteConnection  con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			con.Open();
-                                 
-			SQLiteCommand command = new SQLiteCommand(con);
-            
-			command.CommandText = $"insert into AnonymNames(names) values ("+ anonymName+") ";
+
+			var command = new SQLiteCommand(con)
+			{
+				CommandText = $"insert into AnonymNames(names) values (" + anonymName + ") "
+			};
+
 			command.ExecuteNonQuery();
 			con.Close();
 		}
 		public static void DeleteAnonymName(byte id)
 		{
-			SQLiteConnection  con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			con.Open();
-                                 
-			SQLiteCommand command = new SQLiteCommand(con);
-            
-			command.CommandText = $"delete from AnonymNames where AN =" +id+"  ";
+
+			var command = new SQLiteCommand(con)
+			{
+				CommandText = $"delete from AnonymNames where AN =" + id + "  "
+			};
+
 			command.ExecuteNonQuery();
 			con.Close();
 		}
@@ -385,24 +413,24 @@ namespace TicTacTorus.Source.Persistence
 		#region PlayerStat
 		public static PlayerStats GetPlayerStat(string id)
 		{
-			PlayerStats playerstat = new PlayerStats();
+			var playerstat = new PlayerStats();
 			
 			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			con.Open();
-			SQLiteCommand command = new SQLiteCommand(con);
-		
-			command.CommandText = $"select  p.PlayerName,p.playedGames,p.WonGames,c.Length,c.Value from PlayerStatistic p,Chains c " +
-			                      $"where c.PlayerName = '"+ id +"' and c.PlayerName=p.PlayerName";
+			var command = new SQLiteCommand(con)
+			{
+				CommandText =
+					$"select  p.PlayerName,p.playedGames,p.WonGames,c.Length,c.Value from PlayerStatistic p,Chains c " +
+					$"where c.PlayerName = '" + id + "' and c.PlayerName=p.PlayerName"
+			};
 			
 			var reader = command.ExecuteReader();
-			
-			int pg;
-			int wg;
-			List<int> ch = new List<int>();
+
+			var ch = new List<int>();
 			while (reader.Read())
 			{ 
-				pg= (int) reader[1];
-				wg = (int) reader[2];
+				var pg = (int) reader[1];
+				var wg = (int) reader[2];
 				ch.Add((int)reader[4]);
 				
 				playerstat = new PlayerStats(pg,wg, ch);
@@ -414,12 +442,15 @@ namespace TicTacTorus.Source.Persistence
 
 		public static void SavePlayerStat(HumanPlayer player, PlayerStats playStNewDif)
 		{
-			SQLiteConnection con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
 			con.Open();
+
+			var command = new SQLiteCommand(con)
+			{
+				CommandText = $"select count(*) from PlayerStatistic where PlayerName = '" + player.ID + "'  "
+			}; //for ExecuteReader
+			var command2 = new SQLiteCommand(con);//foor ExecuteNonQuery
 			
-			SQLiteCommand command = new SQLiteCommand(con);//for ExecuteReader
-			SQLiteCommand command2 = new SQLiteCommand(con);//foor ExecuteNonQuery
-			command.CommandText = $"select count(*) from PlayerStatistic where PlayerName = '" + player.ID + "'  ";
 
 			var reader = command.ExecuteReader();
 			
@@ -448,10 +479,11 @@ namespace TicTacTorus.Source.Persistence
 					command.CommandText =
 						$"select  p.PlayerName,p.playedGames,p.WonGames,c.Length,c.Value from PlayerStatistic p,Chains c " +
 						$"where c.PlayerName = '" + player.ID + "' and c.PlayerName=p.PlayerName'";
+					
 					reader = command.ExecuteReader();
 					var pg = 0;
 					var wg = 0;
-					List<int> ch = new List<int>();
+					var ch = new List<int>();
 					while (reader.Read())
 					{
 						pg = (int) reader[1];
@@ -503,21 +535,22 @@ namespace TicTacTorus.Source.Persistence
 					}
 				}
 			}
-
 			con.Close();
 		}
 		public static void DeletePlayerStat(string name)
 		{
-			SQLiteConnection  _con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
-			_con.Open();
-                                 
-			SQLiteCommand command = new SQLiteCommand(_con);
-            
-			command.CommandText = $"delete from Chains where PlayerName = '" + name + "' ";
+			var con = new SQLiteConnection("Data Source=DatabaseTicTacTorus.dat");
+			con.Open();
+
+			var command = new SQLiteCommand(con)
+			{
+				CommandText = $"delete from Chains where PlayerName = '" + name + "' "
+			};
+
 			command.ExecuteNonQuery();
 			command.CommandText = $"delete from PlayerStatistic where PlayerName = '" +name+"' ";
 			command.ExecuteNonQuery();
-			_con.Close();
+			con.Close();
 		}
 		#endregion 
 	}
