@@ -111,45 +111,27 @@
                 <!-- Settings Box -->
                 <div class="box box-lobby w-100">
                     <div class="box-content">
-                        <b>
-                            <h3 class="text-center">Settings</h3></b>
+                        <b><h3 class="text-center">Settings</h3></b>
                         <hr>
-                        <div>
-                            <table>
-                                @if (User.ID == _lobby?.GetPlayerAt(0).ID)
-                                {
-                                    <tr>
-                                        <h3>Change Lobby Information</h3></tr>
-                                    <tr>
-                                        <div class="mt-2"><b>Titles</b></div>
-                                        <input type="text" @onkeyup="ChangeTitle" @bind="_newTitle" placeholder="@_lobby?.Name"/>
-                                    </tr>
-                                    <tr>
-                                        <div class="mt-2"><b>Description</b></div>
-                                        <input type="text" @onkeyup="ChangeDescription" @bind="_newDescription" placeholder="@_lobby?.Description"/>
-                                    </tr>
-                                    <tr>
-                                        <div class="mt-2"><b>Status</b></div>
-                                        <input type="text" @onkeyup="ChangeStatus" @bind="_newStatus" placeholder="@_lobby?.Status"/>
-                                    </tr>
-                                    <tr>
-                            <!--
-                            <td>
-                                <div class="mt-2"><b>Maximum Players</b></div>
-                                <input type="number" @oninput="ChangeMaxPlayers" @bind="_newPlayerCount" placeholder="@_lobby?.MaxPlayerCount"/>
-                            </td>
-                            <td>
-                                <select @onchange="ChangeVisibility" bind="@_newPrivate">
-                                    <option value="true">Private Lobby</option>
-                                    <option value="false">Public Lobby</option>
-                                </select>
-                            </td>
-                            -->
-                                    </tr>
-                                    <hr>
-                                }
-                            </table>
-                        </div>
+                        <table>
+                            @if (User.ID == _lobby?.GetPlayerAt(0).ID)
+                            {
+                                <tr>
+                                    <h3>Change Lobby Information</h3></tr>
+                                <tr>
+                                    <div class="mt-2"><b>Lobby Title</b></div>
+                                    <input type="text" @onkeyup="ChangeTitle" @bind="_newTitle" placeholder="@_lobby?.Name"/>
+                                </tr>
+                                <tr>
+                                    <div class="mt-2"><b>Lobby Description</b></div>
+                                    <input type="text" @onkeyup="ChangeDescription" @bind="_newDescription" placeholder="@_lobby?.Description"/>
+                                </tr>
+                                <tr>
+                                    <div class="mt-2"><b>Lobby Status</b></div>
+                                    <input type="text" @onkeyup="ChangeStatus" @bind="_newStatus" placeholder="@_lobby?.Status"/>
+                                </tr>
+                            }
+                        </table>
                     </div>
                 </div>
             </div>
@@ -160,26 +142,27 @@
 @code{
     [Parameter]
     public string IdString { get; set; }
+
     private static HumanPlayer User { get; set; }
     private ConnectionHubClient _client;
     static Source.LobbySpecificContent.Lobby _lobby;
     
     private string InviteLink { get; set; } = "tictactorus.de/game/";
     
-    private List<string> _messages = new List<string>();
+    private readonly List<string> _messages = new List<string>();
     private string _messageInput;
 
     public bool IsConnected;
     
     #region ForChanges
     
-    #pragma warning disable 649
+#pragma warning disable 649
     private string _newDescription;
     private string _newStatus;
     private string _newTitle;
     private string _newPlayerCount;
     private bool _newPrivate;
-    #pragma warning restore 649
+#pragma warning restore 649
 
     #endregion
 
@@ -228,13 +211,13 @@
         
     private void ChangeMaxPlayers()
     {
-        // TODO aufruf der funktion (durch welches event?)
+    // TODO aufruf der funktion (durch welches event?)
         _client.Connection.SendAsync("ChangeLobbyPlayerCount", IdString, _newPlayerCount);
     }
 
     private void ChangeVisibility()
     {
-        // TODO: setzt immer auf privat (false?) --> prüfen
+    // TODO: setzt immer auf privat (false?) --> prüfen
         _client.Connection.SendAsync("ChangeLobbyVisibility", IdString, _newPrivate);
     }
     
@@ -242,9 +225,9 @@
     
     void RemovePlayerFromLobby(IPlayer player)
     {
-        // remove them
+    // remove them
         _client.Connection.SendAsync("RemovePlayerFromLobby", IdString, player.SessionID);
-        // message remaining players
+    // message remaining players
         SendSystemMessage(player.InGameName + " was removed by the Host");
     }
 
@@ -252,15 +235,7 @@
     {
         await JSRuntime.InvokeVoidAsync("link.copyText", InviteLink);
     }
-
-    protected override void OnParametersSet()
-    {
-        //TODO send request to server
-        if (Server.Instance.LobbyIdIsUnique(IdString))
-        { 
-            NavigationManager.NavigateTo("/?error=lobbyNotFound");
-        }
-    }
+    
     #region StartAndEnd
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -268,10 +243,19 @@
         {
             _client = new ConnectionHubClient(NavigationManager);
             
-
             InviteLink += IdString;
 
+            await _client.Connection.SendAsync("CheckLobbyExisting", IdString);
+            
             #region Listener Methods
+            
+            _client.Connection.On<bool>("ReceiveLobbyExisting", (exists) =>
+            {
+                if (!exists)
+                {
+                    NavigationManager.NavigateTo("/?error=lobbyNotFound");
+                }
+            });
         
             _client.Connection.On<string, string>("ReceiveMessage", (user, message) =>
             {
@@ -282,11 +266,11 @@
         
             _client.Connection.On<string, string>("GetLobby", async (lobby, sessionID) =>
             {
-                var settings = new JsonSerializerSettings()
+                var jsonSerializerSettings = new JsonSerializerSettings()
                 {
                     TypeNameHandling = TypeNameHandling.All
                 };
-                _lobby = JsonConvert.DeserializeObject<Source.LobbySpecificContent.Lobby>(lobby, settings);
+                _lobby = JsonConvert.DeserializeObject<Source.LobbySpecificContent.Lobby>(lobby, jsonSerializerSettings);
                 StateHasChanged();
                 
                 User.SessionID = sessionID;
@@ -295,11 +279,11 @@
 
             _client.Connection.On<string>("LobbyChanged", (lobby) =>
             {
-                var settings = new JsonSerializerSettings()
+                var jsonSerializerSettings = new JsonSerializerSettings()
                 {
                     TypeNameHandling = TypeNameHandling.All
                 };
-                _lobby = JsonConvert.DeserializeObject<Source.LobbySpecificContent.Lobby>(lobby, settings);
+                _lobby = JsonConvert.DeserializeObject<Source.LobbySpecificContent.Lobby>(lobby, jsonSerializerSettings);
                 StateHasChanged();
             });
 
@@ -331,7 +315,7 @@
                 NavigationManager.NavigateTo("/ingame/"+IdString);
             });
         
-            #endregion
+    #endregion
 
             if ((User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) == null)
             {
@@ -343,6 +327,9 @@
                 TypeNameHandling = TypeNameHandling.All
             };
             string jsonUser = JsonConvert.SerializeObject(User, settings);
+            
+            
+            
             await _client.Connection.SendAsync("JoinLobby", IdString, jsonUser);
             IsConnected = _client.Connection.State == HubConnectionState.Connected;
             StateHasChanged();
@@ -366,6 +353,4 @@
         _client.Connection.SendAsync("SendMessage", IdString, "Game", message);
     }
     #endregion
-
-    
 }
