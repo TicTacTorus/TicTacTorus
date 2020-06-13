@@ -147,51 +147,7 @@
             _navTwo = _navTwo.Substring(0, _navTwo.IndexOf(" ", StringComparison.Ordinal));
         }
     }
-
-    protected override async void OnAfterRender(bool firstRender)
-    {
-        if (firstRender)
-        {
-            _client = new ConnectionHubClient(NavigationManager);
-        
-            #region Client Listeners
-
-            _client.Connection.On<string, string>("ReceiveMessage", (user, message) =>
-            {
-                var encodedMsg = $"{user}: {message}";
-                _messages.Add(encodedMsg);
-                StateHasChanged();
-            });
-            
-            
-            _client.Connection.On<string>("ReceivePlayerMove", (moveObj) =>
-            {
-                //ReceivedMove = moveObj;
-                StateHasChanged();
-            });
-            _client.Connection.On<string>("AnnounceWinner", (winnerName) =>
-            {
-                //Winner = winnerName;
-                StateHasChanged();
-            });
-
-            _client.Connection.On("ActivatePlayer", () =>
-            {
-                //activate control buttons / allow making a move
-            });
-
-            #endregion
-        
-            if ((User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) == null)
-            {
-                User = PlayerFactory.CreateHumanPlayer();
-                await ProtectedSessionStorage.SetAsync("LoginData", User);
-            }
-            
-            await _client.Connection.SendAsync("JoinGame", IdString);
-            IsConnected = _client.Connection.State == HubConnectionState.Connected;
-        }
-    }
+    
 
     #endregion
     #region Site Functionality
@@ -301,7 +257,40 @@
         if (firstRender)
         {
             _client = new ConnectionHubClient(NavigationManager);
-            IsConnected = true;
+        
+            #region Client Listeners
+
+            _client.Connection.On<string, string>("ReceiveMessage", (user, message) =>
+            {
+                var encodedMsg = $"{user}: {message}";
+                _messages.Add(encodedMsg);
+                StateHasChanged();
+            });
+            
+            
+            _client.Connection.On<string>("ReceivePlayerMove", (moveObj) =>
+            {
+    //ReceivedMove = moveObj;
+                StateHasChanged();
+            });
+            _client.Connection.On<string>("AnnounceWinner", (winnerName) =>
+            {
+    //Winner = winnerName;
+                StateHasChanged();
+            });
+
+            _client.Connection.On("ActivatePlayer", () =>
+            {
+    //activate control buttons / allow making a move
+            });
+
+            #endregion
+        
+            if ((User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) == null)
+            {
+                User = PlayerFactory.CreateHumanPlayer();
+                await ProtectedSessionStorage.SetAsync("LoginData", User);
+            }
 
             if ((User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) == null)
             {
@@ -353,6 +342,9 @@
             await _rendererGame.Draw((int)_canvasGame.Width, (int)_canvasGame.Height, _contextGame);
             await _rendererMap.Draw((int) _canvasMap.Width, (int) _canvasMap.Height, _contextMap);
         }
+        
+        await _client.Connection.SendAsync("JoinGame", IdString);
+        IsConnected = _client.Connection.State == HubConnectionState.Connected;
     }
 
     [JSInvokable]

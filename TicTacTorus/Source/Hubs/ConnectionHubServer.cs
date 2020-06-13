@@ -1,19 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Drawing;
-using System.Reflection.Metadata;
 using System.Threading.Tasks;
-using System.Xml.Schema;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
-using TicTacTorus.Source.Generator;
 using TicTacTorus.Source.Ingame.Move;
 using TicTacTorus.Source.LobbySpecificContent;
-using TicTacTorus.Source.LoginContent.Security;
 using TicTacTorus.Source.Persistence;
 using TicTacTorus.Source.PlayerSpecificContent;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 using TicTacTorus.Source.ServerHandler;
 
 namespace TicTacTorus.Source.Hubs
@@ -181,10 +175,12 @@ namespace TicTacTorus.Source.Hubs
 
         #endregion
         #region Chat
+        
         public async Task SendMessage(string lobbyId, string user, string message)
         {
             await Clients.Group(lobbyId).SendAsync("ReceiveMessage", user, message);
         }
+        
         #endregion
         #region Login / Register
 
