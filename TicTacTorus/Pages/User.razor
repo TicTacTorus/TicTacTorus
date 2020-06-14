@@ -147,12 +147,23 @@ else if (_errorMessage != null)
 
 @functions
 {
+    protected override async Task OnParametersSetAsync()
+    {
+        _client = new ConnectionHubClient(NavigationManager);
+        await _client.Connection.SendAsync("CheckPlayerExists", Userid);
+        _client.Connection.On<bool>("ReceiveUserExists", (exists) =>
+        {
+            if (exists)
+            {
+                NavigationManager.NavigateTo("/?error=userDoesNotExist");
+            }
+        });
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            _client = new ConnectionHubClient(NavigationManager);
-
             if ((_loggedInUser = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) != null)
             {
                 _user = _loggedInUser.ID;
@@ -163,7 +174,6 @@ else if (_errorMessage != null)
                 _user = "";
                 StateHasChanged();
             }
-            
             StateHasChanged();
         }
         
@@ -236,15 +246,6 @@ else if (_errorMessage != null)
         }
 
         return rtn;
-    }
-    
-    protected override void OnParametersSet()
-    {
-    //TODO send request to server
-        if (PersistenceStorage.CheckPlayerIdIsUnique(Userid))
-        { 
-            NavigationManager.NavigateTo("/?error=userDoesNotExist");
-        }
     }
 
     private static async Task ChangeSymbol()
