@@ -60,11 +60,6 @@ namespace TicTacTorus.Source.Hubs
             var exists = !Server.Instance.LobbyIdIsUnique(id);
             await Clients.Caller.SendAsync("ReceiveLobbyExisting", exists);
         }
-        
-        public async Task JoinGame(string lobbyId)
-        {
-            await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
-        }
 
         public Task LeaveLobby(string lobbyId)
         {
@@ -165,6 +160,11 @@ namespace TicTacTorus.Source.Hubs
                 await Clients.Caller.SendAsync("ConnectToGameFailed", "game_has_started");
             }
         }
+        /*
+        public async Task JoinGame(string lobbyId)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
+        }*/
         
         #endregion
         #region Game
