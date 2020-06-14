@@ -14,7 +14,7 @@ namespace TicTacTorus.Source.ServerHandler
 
         public static LobbyGame CreateGame(string lobbyId, IHubCallerClients clients)
         {
-            return Server.Instance.CreateLobbyGameFromLobby(lobbyId, clients);
+            return Server.Instance.CreateGameFromLobby(lobbyId, clients);
         }
 
 

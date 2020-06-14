@@ -8,16 +8,16 @@ namespace TicTacTorus.Source.ServerHandler
     public class LobbyGame
     {
         [JsonIgnore]
-        private Game _game;
+        public Game Game { get; }
 
         public string ID { get; set; }
         public List<IPlayer> players { get; set; }
 
         public LobbyGame(Game game)
         {
-            _game = game;
+            Game = game;
             ID = game.ID.ToString();
-            players = _game.GetPlayerList();
+            players = Game.GetPlayerList();
         }
 
         public LobbyGame()
@@ -29,7 +29,7 @@ namespace TicTacTorus.Source.ServerHandler
 
         public bool AddPlayer(IPlayer p)
         {
-            if (!_game.AddPlayer(p)) return false;
+            if (!Game.AddPlayer(p)) return false;
             players.Add(p);
             return true;
         }

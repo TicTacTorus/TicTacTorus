@@ -160,12 +160,7 @@ namespace TicTacTorus.Source.Hubs
                 await Clients.Caller.SendAsync("ConnectToGameFailed", "game_has_started");
             }
         }
-        /*
-        public async Task JoinGame(string lobbyId)
-        {
-            await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
-        }*/
-        
+
         #endregion
         #region Game
 
@@ -236,44 +231,6 @@ namespace TicTacTorus.Source.Hubs
                     "An Database Error occurred with the following message: " + e);
             }
         }
-
-        /*public async Task GetPlayerStats(string userId, string playerId)
-        {
-            try
-            {
-                var player = PersistenceStorage.LoadPlayer(playerId);
-                var playerStats = PersistenceStorage.GetPlayerStat(player);
-               
-                // filter some information
-                player.Hash = null;
-                player.Salt = null;
-                player.playerStats = null;
-            
-                var jsonPlayer = JsonConvert.SerializeObject(player);
-                var jsonStats = JsonConvert.SerializeObject(playerStats);
-
-                await Clients.Caller.SendAsync("ReceiveStats", jsonPlayer,jsonStats);
-            }
-            catch
-            {
-                await Clients.Caller.SendAsync("Error", "An Error occurred. Please try again later.");
-                return;
-            }
-            
-        }*/
-
-        /*
-        //Gets called everytime a user connects to a hub (I know performance is not good >.<)
-        public async Task GetSessionID(string userId)
-        {
-            await Clients.Caller.SendAsync("ReceiveSessionID", Server.Instance.GetSessionId(userId));
-        }
-
-        //Gets called everytime a user lefts a hub (I know is also bad :| )
-        public void RemoveSessionID(string userId)
-        {
-            Server.Instance.RemoveSessionId(userId);
-        }*/
 
         #endregion
         #region Userprofile
