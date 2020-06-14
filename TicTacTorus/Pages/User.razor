@@ -9,100 +9,7 @@
 @inject ProtectedSessionStorage ProtectedSessionStorage
 @inject NavigationManager NavigationManager
 
-<div class="my-5 lobbies-grid">
-    <button class="btn-back" onclick="location.href ='/';">
-        <svg class="bi bi-arrow-left" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" d="M5.854 4.646a.5.5 0 010 .708L3.207 8l2.647 2.646a.5.5 0 01-.708.708l-3-3a.5.5 0 010-.708l3-3a.5.5 0 01.708 0z" clip-rule="evenodd"/>
-            <path fill-rule="evenodd" d="M2.5 8a.5.5 0 01.5-.5h10.5a.5.5 0 010 1H3a.5.5 0 01-.5-.5z" clip-rule="evenodd"/>
-        </svg>
-    </button>
-    <h1 class="headers my-auto">TicTacTorus</h1>
-</div>
-
-@if(_hasLoaded)
-{
-<div class="d-flex justify-content-center">
-    <div class="row">
-        <div class="col-sm-8 col-md-5 col-lg-4 mx-auto m-2">
-            <div class="box w-100">
-                <div class="text-center mx-4">
-                    <div class="my-3">
-                        <b>
-                            <h1>@Userid</h1></b>
-                    </div>
-                    <!-- if logged in player == userid inputs enabled else disabled ### -->
-                    @if (Userid.Equals(_user))
-                    {
-                        <div><b>In-Game Name</b></div>
-                        <input type="text" @bind="_newName" @onkeyup="ChangePlayerName" placeholder=@_profileIngameName/>
-                        <div class="mt-2"><b>Password</b></div>
-                        <input type="password" @onkeyup="ChangePassword" @bind="_pw1" placeholder="**********"/>
-                        <div class="mt-2"><b>Confirm Password</b></div>
-                        <input type="password" @onkeyup="ChangePassword" @bind="_pw2" placeholder="**********"/>
-                    }
-                    else
-                    {
-                        @if (_profile != null)
-                        {
-                            <div><b>In-Game Name</b></div>
-                            <p> @_profileIngameName</p>
-                        }
-                    }
-                    <hr class="mx-2">
-                    <div class="box-only mt-2 p-1" @onclick="ChangeSymbol">
-                        <img src="/Media/Images/circle.png" title="Change profile picture" alt="profile picture"/>
-                    </div>
-                    <div class="text-center my-3">
-                        <b>Symbol Color</b>
-                        @if (Userid.Equals(_user))
-                        {
-                            <input type="color" @bind="_profileColor"/>
-                            <button class="btn btn-end-custom" @onclick="@ChangeColor">Change Color</button>
-                        }
-                        else
-                        {
-                            <input type="color" @bind="_profileColor" disabled/>
-                        }
-                        <!-- ### -->
-                    </div>
-                </div>
-            </div>
-        </div>
-                
-        <div class="col-sm-8 col-md-7 col-lg-8 mx-auto m-2">
-            <div class="box p-2">
-                <div class="text-center mx-4">
-                    <h3 class="text-center mt-1"><b>Statistics</b></h3>
-                    <hr>
-                    <div class="row">
-                        <div class="col box-only p-2 m-1">
-                            <h5 class="text-center mt-2">Games played</h5>
-                            <hr>
-                            <h5><b>@_gamesPlayed</b></h5>
-                        </div>
-                        <div class="col box-only p-2 m-1">
-                            <h5 class="text-center mt-2">Wins</h5>
-                            <hr>
-                            <h5><b>@_gamesWon</b></h5>
-                        </div>
-                        <div class="col box-only p-2 m-1">
-                            <h5 class="text-center mt-2">Symbols placed</h5>
-                            <hr>
-                            <h5><b>1024</b></h5>
-                        </div>
-                        <div class="col box-only p-2 m-1">
-                            <h5 class="text-center mt-2">4x Streaks</h5>
-                            <hr>
-                            <h5><b>23</b></h5>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-}
-else if (_errorMessage != null)
+@if (_errorMessage != null)
 {
     <div class="d-flex justify-content-center">
         <div class="row">
@@ -118,12 +25,105 @@ else if (_errorMessage != null)
         </div>
     </div>
 }
+else
+{
+    <div class="my-5 lobbies-grid">
+        <button class="btn-back" onclick="location.href ='/';">
+            <svg class="bi bi-arrow-left" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M5.854 4.646a.5.5 0 010 .708L3.207 8l2.647 2.646a.5.5 0 01-.708.708l-3-3a.5.5 0 010-.708l3-3a.5.5 0 01.708 0z" clip-rule="evenodd"/>
+                <path fill-rule="evenodd" d="M2.5 8a.5.5 0 01.5-.5h10.5a.5.5 0 010 1H3a.5.5 0 01-.5-.5z" clip-rule="evenodd"/>
+            </svg>
+        </button>
+        <h1 class="headers my-auto">TicTacTorus</h1>
+    </div>
+
+    <div class="d-flex justify-content-center">
+        <div class="row">
+            <div class="col-sm-8 col-md-5 col-lg-4 mx-auto m-2">
+                <div class="box w-100">
+                    <div class="text-center mx-4">
+                        <div class="my-3">
+                            <b>
+                                <h1>@Userid</h1></b>
+                        </div>
+                        <!-- if logged in player == userid inputs enabled else disabled ### -->
+                        @if (Userid.Equals(_user))
+                        {
+                            <div><b>In-Game Name</b></div>
+                            <input type="text" @bind="_newName" @onkeyup="ChangePlayerName" placeholder=@_profileIngameName/>
+                            <div class="mt-2"><b>Password</b></div>
+                            <input type="password" @onkeyup="ChangePassword" @bind="_pw1" placeholder="**********"/>
+                            <div class="mt-2"><b>Confirm Password</b></div>
+                            <input type="password" @onkeyup="ChangePassword" @bind="_pw2" placeholder="**********"/>
+                        }
+                        else
+                        {
+                            @if (_profile != null)
+                            {
+                                <div><b>In-Game Name</b></div>
+                                <p> @_profileIngameName</p>
+                            }
+                        }
+                        <hr class="mx-2">
+                        <div class="box-only mt-2 p-1" @onclick="ChangeSymbol">
+                            <img src="/Media/Images/circle.png" title="Change profile picture" alt="profile picture"/>
+                        </div>
+                        <div class="text-center my-3">
+                            <b>Symbol Color</b>
+                            @if (Userid.Equals(_user))
+                            {
+                                <input type="color" @bind="@_profileColor"/>
+                                <button class="btn btn-end-custom" @onclick="@ChangeColor">Change Color</button>
+                            }
+                            else
+                            {
+                                <input type="color" @bind="_profileColor" disabled/>
+                            }
+                            <!-- ### -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-8 col-md-7 col-lg-8 mx-auto m-2">
+                <div class="box p-2">
+                    <div class="text-center mx-4">
+                        <h3 class="text-center mt-1"><b>Statistics</b></h3>
+                        <hr>
+                        <div class="row">
+                            <div class="col box-only p-2 m-1">
+                                <h5 class="text-center mt-2">Games played</h5>
+                                <hr>
+                                <h5><b>@_gamesPlayed</b></h5>
+                            </div>
+                            <div class="col box-only p-2 m-1">
+                                <h5 class="text-center mt-2">Wins</h5>
+                                <hr>
+                                <h5><b>@_gamesWon</b></h5>
+                            </div>
+                            <div class="col box-only p-2 m-1">
+                                <h5 class="text-center mt-2">Symbols placed</h5>
+                                <hr>
+                                <h5><b>@_symbolsPlaced</b></h5>
+                            </div>
+                            <div class="col box-only p-2 m-1">
+                                <h5 class="text-center mt-2">4x Streaks</h5>
+                                <hr>
+                                <h5><b>@_streak</b></h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @code
 {
-    [Parameter] 
+    [Parameter]
     public string Userid { get; set; }
-    
+
     private static ConnectionHubClient _client;
     private string _user;
     private static HumanPlayer _loggedInUser;
@@ -136,13 +136,15 @@ else if (_errorMessage != null)
     private static int _gamesWon;
     private static int _gamesPlayed;
     private static List<int> _chains;
+    private static int _symbolsPlaced;
+    private static int _streak;
 
     private static string _newName;
     private static string _pw1;
     private static string _pw2;
-
-    private bool _hasLoaded = true;
-    private string _errorMessage = null;
+    
+    private string _errorMessage;
+    // private readonly string _userid;
 }
 
 @functions
@@ -174,13 +176,21 @@ else if (_errorMessage != null)
                 _user = "";
                 StateHasChanged();
             }
-            StateHasChanged();
         }
         
-        await _client.Connection.SendAsync("GetPlayer", Userid);
-        await _client.Connection.SendAsync("GetStats", Userid);
-        
-        #region listener
+        if (_profile == null)
+        {
+            await _client.Connection.SendAsync("GetPlayer", Userid);
+            StateHasChanged();
+        }
+
+        if (_stats == null)
+        {
+            await _client.Connection.SendAsync("GetStats", Userid);
+            StateHasChanged();
+        }
+
+    #region listener
         
         _client.Connection.On<string>("ReceivePlayer", (player) =>
         {
@@ -192,16 +202,17 @@ else if (_errorMessage != null)
         
         _client.Connection.On("PasswordIsChanged", () =>
         {
+            // TODO show success/failure message
             StateHasChanged();
         });
 
-        _client.Connection.On<Color>("ColorIsChanged", color =>
+        _client.Connection.On<string>("ColorIsChanged", color =>
         {
-            _profileColor = HexConverter(color);
+            _profileColor = color;
             StateHasChanged();
         });
         
-        _client.Connection.On<Color>("SymbolIsChanged", color =>
+        _client.Connection.On<string>("SymbolIsChanged", color =>
         {
             // TODO Symbol stuff
             StateHasChanged();
@@ -213,6 +224,8 @@ else if (_errorMessage != null)
             _gamesPlayed = _stats.PlayedGames;
             _gamesWon = _stats.WonGames;
             _chains = _stats.Chains;
+            _symbolsPlaced = _chains.Sum();
+            _streak = _chains.Count;
             StateHasChanged();
         });
 
@@ -234,7 +247,7 @@ else if (_errorMessage != null)
     
     private static string HexConverter(Color c)
     {
-        String rtn = String.Empty;
+        var rtn = string.Empty;
         try
         {
             rtn = "#" + c.R.ToString("X2") + c.G.ToString("X2") + c.B.ToString("X2");
@@ -256,7 +269,7 @@ else if (_errorMessage != null)
 
     private static async Task ChangeColor()
     {
-        await _client.Connection.SendAsync("ChangeSymbolColor", _profileColor);
+        await _client.Connection.SendAsync("ChangeSymbolColor", _loggedInUser.ID, _profileColor);
     }
 
     private static async Task ChangePassword(KeyboardEventArgs e)
@@ -267,7 +280,7 @@ else if (_errorMessage != null)
             {
                 if (_pw1.Equals(_pw2))
                 {
-                    SaltedHash s = new SaltedHash(_pw1);
+                    var s = new SaltedHash(_pw1);
                     await _client.Connection.SendAsync("ChangePassword", _loggedInUser.ID, s.Salt, s.Hash);
                     _pw1 = "";
                     _pw2 = "";
