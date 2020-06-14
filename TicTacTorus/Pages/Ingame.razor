@@ -102,8 +102,13 @@
     private List<string> _messages = new List<string>();
     private string _messageInput;
     
+    #region HubStuff
     [Parameter] public string IdString { get; set; }
     private LobbyGame _game = null;
+    JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings() {
+        TypeNameHandling = TypeNameHandling.All
+    };
+    #endregion
 
     //canvas stuff
     private static Canvas2DContext _contextGame, _contextMap;
@@ -286,11 +291,12 @@
 
             #endregion
         
+            /*
             if ((User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) == null)
             {
                 User = PlayerFactory.CreateHumanPlayer();
                 await ProtectedSessionStorage.SetAsync("LoginData", User);
-            }
+            }*/
 
             if ((User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) == null)
             {
@@ -300,13 +306,9 @@
 
             _client.Connection.On<string>("ReceiveGameInformation", (jsGame) =>
             {
-                var settings = new JsonSerializerSettings()
-                {
-                    TypeNameHandling = TypeNameHandling.All
-                };
-                _game = JsonConvert.DeserializeObject<LobbyGame>(jsGame, settings);
+                _game = JsonConvert.DeserializeObject<LobbyGame>(jsGame, _jsonSerializerSettings);
                 if (_game != null) _client.Connection.SendAsync("OnUserConnectedToLobby", _game.players.IndexOf(User));
-    // maybe init stuff from game
+                // maybe init stuff from game
                 StateHasChanged();
             });
             
@@ -315,13 +317,12 @@
                 NavigationManager.NavigateTo("/?error="+errormessage);  
             });
 
-    //await _client.Connection.SendAsync("InitGameId", IdString, User.SessionID);
-            var settings = new JsonSerializerSettings()
-            {
-                TypeNameHandling = TypeNameHandling.All
-            };
-            var jsonUser = JsonConvert.SerializeObject(User, settings);
+            //await _client.Connection.SendAsync("InitGameId", IdString, User.SessionID);
+            var jsonUser = JsonConvert.SerializeObject(User, _jsonSerializerSettings);
             await _client.Connection.SendAsync("ConnectToGame", IdString, jsonUser);
+            
+            //await _client.Connection.SendAsync("JoinGame", IdString);
+            IsConnected = _client.Connection.State == HubConnectionState.Connected;
         }
     #endregion
         
@@ -343,8 +344,6 @@
             await _rendererMap.Draw((int) _canvasMap.Width, (int) _canvasMap.Height, _contextMap);
         }
         
-        await _client.Connection.SendAsync("JoinGame", IdString);
-        IsConnected = _client.Connection.State == HubConnectionState.Connected;
     }
 
     [JSInvokable]

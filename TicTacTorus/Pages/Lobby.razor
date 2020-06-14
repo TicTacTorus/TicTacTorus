@@ -149,6 +149,10 @@
     
     private string InviteLink { get; set; } = "tictactorus.de/game/";
     
+    JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings() {
+        TypeNameHandling = TypeNameHandling.All
+    };
+    
     private readonly List<string> _messages = new List<string>();
     private string _messageInput;
 
@@ -222,6 +226,7 @@
     }
     
     #endregion
+    #region OtherLobbyActions
     
     void RemovePlayerFromLobby(IPlayer player)
     {
@@ -236,6 +241,7 @@
         await JSRuntime.InvokeVoidAsync("link.copyText", InviteLink);
     }
     
+    #endregion
     #region StartAndEnd
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -266,11 +272,7 @@
         
             _client.Connection.On<string, string>("GetLobby", async (lobby, sessionID) =>
             {
-                var jsonSerializerSettings = new JsonSerializerSettings()
-                {
-                    TypeNameHandling = TypeNameHandling.All
-                };
-                _lobby = JsonConvert.DeserializeObject<Source.LobbySpecificContent.Lobby>(lobby, jsonSerializerSettings);
+                _lobby = JsonConvert.DeserializeObject<Source.LobbySpecificContent.Lobby>(lobby, _jsonSerializerSettings);
                 if (_lobby != null) await _client.Connection.SendAsync("OnUserConnectedToLobby", _lobby.Players.IndexOf(User));
                 StateHasChanged();
                 
@@ -280,11 +282,7 @@
 
             _client.Connection.On<string>("LobbyChanged", (lobby) =>
             {
-                var jsonSerializerSettings = new JsonSerializerSettings()
-                {
-                    TypeNameHandling = TypeNameHandling.All
-                };
-                _lobby = JsonConvert.DeserializeObject<Source.LobbySpecificContent.Lobby>(lobby, jsonSerializerSettings);
+                _lobby = JsonConvert.DeserializeObject<Source.LobbySpecificContent.Lobby>(lobby, _jsonSerializerSettings);
                 StateHasChanged();
             });
 
