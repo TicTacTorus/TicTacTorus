@@ -86,7 +86,6 @@ namespace TicTacTorus.Source.Ingame
             } while (!_referee.HasWon(_grid, lastChange));
 
             await _clients.Group(ID.ToString()).SendAsync("AnnounceWinner");
-            
         }
         
         #endregion

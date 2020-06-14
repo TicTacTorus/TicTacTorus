@@ -278,6 +278,10 @@ namespace TicTacTorus.Source.Hubs
         #endregion
         #region Userprofile
 
+        public async Task CheckPlayerExists(string id)
+        {
+            await Clients.Caller.SendAsync("ReceiveUserExists", PersistenceStorage.CheckPlayerIdIsUnique(id));
+        }
         public async Task ChangeIngameName(string id, string name)
         {
             PersistenceStorage.UpdateInGameName(id, name);
