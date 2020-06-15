@@ -287,7 +287,13 @@ namespace TicTacTorus.Source.Hubs
         public async Task GetCurrentLobbies()
         {
             var list = new LobbyList().Lobbies;
-            await Clients.Caller.SendAsync("ReceiveCurrentLobbies", list);
+            
+            var settings = new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.All
+            };
+            var jsonList = JsonConvert.SerializeObject(list, Formatting.Indented, settings);
+            await Clients.Caller.SendAsync("ReceiveCurrentLobbies", jsonList);
         }
 
         #endregion

@@ -9,13 +9,13 @@ namespace TicTacTorus.Source.Generator
         public static Lobby CreateLobbyNoId(IPlayer owner)
         {
             return new Lobby(CreateLobbyName(owner), owner, CreateLobbyStatus(),
-                CreateLobbyDescription(owner), 5, true);
+                CreateLobbyDescription(owner), 20, true);
         }
         
         public static ILobby CreateLobbyWithId(IPlayer owner)
         {
             ILobby lobby = new Lobby(CreateLobbyName(owner), owner, CreateLobbyStatus(),
-                CreateLobbyDescription(owner), 5, true);
+                CreateLobbyDescription(owner), 20, true);
             lobby = AddId(lobby);
             return lobby;
         }
