@@ -12,8 +12,9 @@ namespace TicTacTorus.Source.Utility
         private const int BitsPerDigit = 6;
         public const string Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
         
+        // setter public for JsonSerializer
         [JsonProperty(Required = Required.Always)]
-        public byte[] Data { get; }
+        public byte[] Data { get; set; }
 
         #endregion
         #region (Named) Constructors
