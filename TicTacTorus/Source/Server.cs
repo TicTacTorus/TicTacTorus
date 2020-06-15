@@ -16,7 +16,7 @@ namespace TicTacTorus.Source
     public sealed class Server
     {
         private readonly IDictionary<string, ILobby> _lobbies;
-        private readonly IDictionary<string, LobbyGame> _lobbygames;   
+        private readonly IDictionary<string, ClientGame> _lobbygames;   
         
         //private readonly IDictionary<string, string> _sessionIDs;
 
@@ -30,7 +30,7 @@ namespace TicTacTorus.Source
         private Server()
         {
             _lobbies = new ConcurrentDictionary<string, ILobby>();
-            _lobbygames = new ConcurrentDictionary<string, LobbyGame>();
+            _lobbygames = new ConcurrentDictionary<string, ClientGame>();
         }
         // Makes Singleton Thread-safe
         private class Nested
@@ -46,7 +46,7 @@ namespace TicTacTorus.Source
         }
         
         public IDictionary<string,ILobby> Lobbies => _lobbies;
-        public IDictionary<string, LobbyGame> LobbyGames => _lobbygames;
+        public IDictionary<string, ClientGame> LobbyGames => _lobbygames;
 
         #endregion
         #region Lobby
@@ -81,7 +81,7 @@ namespace TicTacTorus.Source
         #endregion
         #region LobbyGame
 
-        public LobbyGame GetLobbyGameById(string id)
+        public ClientGame GetLobbyGameById(string id)
         {
             return _lobbygames[id];
         }
@@ -96,11 +96,11 @@ namespace TicTacTorus.Source
             return _lobbygames[id].Game;
         }
         
-        public LobbyGame AddGame(Game game)
+        public ClientGame AddGame(Game game)
         {
             if (GameIdIsUnique(game.ID.ToString()))
             {
-                var lg = new LobbyGame(game);
+                var lg = new ClientGame(game);
                 _lobbygames.Add(game.ID.ToString(), lg);
                 return lg;
             }
@@ -118,7 +118,7 @@ namespace TicTacTorus.Source
         /// <returns>
         /// new Game(lobby), null if ID of lobby was not unique or lobby could not be removed from list
         /// </returns>
-        public LobbyGame CreateGameFromLobby(string lobbyId, IHubCallerClients clients)
+        public ClientGame CreateGameFromLobby(string lobbyId, IHubCallerClients clients)
         {
             var lobby = GetLobbyById(lobbyId);
             if (_lobbygames.ContainsKey(lobbyId) || !_lobbies.Remove(lobbyId)) return null;
@@ -126,7 +126,7 @@ namespace TicTacTorus.Source
             lobby.Players = new List<IPlayer>();
                 
             var game = new Game(lobby, clients);
-            var lgame = new LobbyGame(game);
+            var lgame = new ClientGame(game);
             
             _lobbygames.Add(lgame.ID, lgame);
 

@@ -100,7 +100,7 @@
     
     #region HubStuff
     [Parameter] public string IdString { get; set; }
-    private LobbyGame _game = null;
+    private ClientGame _game = null;
     JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings() {
         TypeNameHandling = TypeNameHandling.All
     };
@@ -303,7 +303,7 @@
 
             _client.Connection.On<string>("ReceiveGameInformation", (jsGame) =>
             {
-                _game = JsonConvert.DeserializeObject<LobbyGame>(jsGame, _jsonSerializerSettings);
+                _game = JsonConvert.DeserializeObject<ClientGame>(jsGame, _jsonSerializerSettings);
                 if (_game != null) _client.Connection.SendAsync("OnUserConnectedToLobby", _game.players.IndexOf(User));
                 // maybe init stuff from game
                 StateHasChanged();

@@ -5,7 +5,7 @@ using TicTacTorus.Source.PlayerSpecificContent;
 
 namespace TicTacTorus.Source.ServerHandler
 {
-    public class LobbyGame
+    public class ClientGame
     {
         [JsonIgnore]
         public Game Game { get; }
@@ -13,14 +13,14 @@ namespace TicTacTorus.Source.ServerHandler
         public string ID { get; set; }
         public List<IPlayer> players { get; set; }
 
-        public LobbyGame(Game game)
+        public ClientGame(Game game)
         {
             Game = game;
             ID = game.ID.ToString();
             players = Game.GetPlayerList();
         }
 
-        public LobbyGame()
+        public ClientGame()
         {
             players = new List<IPlayer>();
         }
