@@ -8,13 +8,7 @@
 @using TicTacTorus.Source.Generator
 @using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk
 @using TicTacTorus.Source.Ingame.GridSpecificContent.Position
-@using System.Security.Principal
-@using Microsoft.Extensions.FileSystemGlobbing.Internal.PathSegments
-@using TicTacTorus.Source
-@using System.Security.Cryptography.Xml
-@using System.Runtime.InteropServices.WindowsRuntime
 @using Newtonsoft.Json
-@using TicTacTorus.Source.Ingame
 @using TicTacTorus.Source.PlayerSpecificContent
 @using System.Drawing
 @using TicTacTorus.Source.ServerHandler
@@ -97,7 +91,9 @@
     private double _mouseStartY = 0;
     private double _mousePrevX = 0;
     private double _mousePrevY = 0;
-        private const double MaxClickDistance = 10;
+    private const double MaxClickDistance = 10;
+
+    private bool _isActive = false;
     
     private List<string> _messages = new List<string>();
     private string _messageInput;
@@ -226,7 +222,7 @@
             
             var pos = _rendererGame.GetCursorPosition(evnt.ClientX, evnt.ClientY, width, height);
             Console.WriteLine($"Click Detected at {pos}!");
-
+            
     //todo add some _real_ functionality: Add symbol, notify server.
     //just as a demonstration: a quick through-cycle of 20 players (+1 for no owner).
             var owner = _grid.GetSymbol(pos);
@@ -286,6 +282,7 @@
 
             _client.Connection.On("ActivatePlayer", () =>
             {
+                _isActive = true;
     //activate control buttons / allow making a move
             });
 
