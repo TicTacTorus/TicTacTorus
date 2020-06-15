@@ -78,8 +78,7 @@
     {
         if ((User = await ProtectedSessionStore.GetAsync<HumanPlayer>("LoginData")) == null)
         {
-            User = PlayerFactory.CreateHumanPlayer();
-            await ProtectedSessionStore.SetAsync("LoginData", User);
+            User = new HumanPlayer();
         }
         StateHasChanged();
     }

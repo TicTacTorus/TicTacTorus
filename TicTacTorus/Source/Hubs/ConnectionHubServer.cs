@@ -4,11 +4,13 @@ using System.Drawing;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
+using TicTacTorus.Source.Ingame;
 using TicTacTorus.Source.Ingame.Move;
 using TicTacTorus.Source.LobbySpecificContent;
 using TicTacTorus.Source.Persistence;
 using TicTacTorus.Source.PlayerSpecificContent;
 using TicTacTorus.Source.ServerHandler;
+using TicTacTorus.Source.Utility;
 
 namespace TicTacTorus.Source.Hubs
 {
@@ -25,16 +27,20 @@ namespace TicTacTorus.Source.Hubs
         {
             var hPlayer = JsonConvert.DeserializeObject<HumanPlayer>(player);
             hPlayer.SessionID = Context.ConnectionId;
+			
             var lobby = LobbyHandler.AddPlayerToLobby(lobbyId, hPlayer);
-
             var indented = Formatting.Indented;
             var settings = new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.All
             };
             var jsLobby = JsonConvert.SerializeObject(lobby, indented, settings);
+
             await Clients.Caller.SendAsync("GetLobby", jsLobby, Context.ConnectionId);
             await Clients.Group(lobbyId).SendAsync("LobbyChanged", jsLobby);
+            await Groups.AddToGroupAsync(Context.ConnectionId,
+                Game.UniquePlayerGroup(new Base64(lobbyId),
+                    Server.Instance.Lobbies[lobbyId].Players.FindIndex(p => p.InGameName == hPlayer.InGameName)));
             await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
         }
         
@@ -152,6 +158,9 @@ namespace TicTacTorus.Source.Hubs
             {
                 var jsGame = JsonConvert.SerializeObject(response.Item1, Formatting.Indented, settings);
                 await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
+                await Groups.AddToGroupAsync(Context.ConnectionId,
+                    Game.UniquePlayerGroup(new Base64(gameId),
+                        Server.Instance.LobbyGames[gameId].players.FindIndex(p => p.InGameName == player?.InGameName)));
                 //await Clients.Group(gameId).SendAsync("ReceiveGameInformation", jsGame);
                 await Clients.Caller.SendAsync("ReceiveGameInformation", jsGame);
             }

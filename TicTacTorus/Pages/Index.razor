@@ -102,7 +102,7 @@
             
             if ((User = await ProtectedSessionStore.GetAsync<HumanPlayer>("LoginData")) == null)
             {
-                User = PlayerFactory.CreateHumanPlayer();
+                User = new HumanPlayer();
             }
             StateHasChanged();
         }
@@ -115,6 +115,8 @@
 
     private async Task SendNewLobbyRequest()
     {
+        User = PlayerFactory.CreateHumanPlayer();
+        await ProtectedSessionStore.SetAsync("LoginData", User);
         await _client.Connection.SendAsync("CreateLobby", User);
     }
 }
