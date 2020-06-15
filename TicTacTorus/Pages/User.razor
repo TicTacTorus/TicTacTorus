@@ -50,11 +50,11 @@ else
                         @if (Userid.Equals(_user))
                         {
                             <div><b>In-Game Name</b></div>
-                            <input type="text" @bind="_newName" @onkeyup="ChangePlayerName" placeholder=@_profileIngameName/>
+                            <input type="text" @bind="_newName" @onkeyup="ChangePlayerName" placeholder=@_profileIngameName/ autocomplete="off">
                             <div class="mt-2"><b>Password</b></div>
-                            <input type="password" @onkeyup="ChangePassword" @bind="_pw1" placeholder="**********"/>
+                            <input type="password" @onkeyup="ChangePassword" @bind="_pw1" placeholder="**********" autocomplete="off"/>
                             <div class="mt-2"><b>Confirm Password</b></div>
-                            <input type="password" @onkeyup="ChangePassword" @bind="_pw2" placeholder="**********"/>
+                            <input type="password" @onkeyup="ChangePassword" @bind="_pw2" placeholder="**********" autocomplete="off"/>
                         }
                         else
                         {

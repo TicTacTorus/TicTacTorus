@@ -61,22 +61,22 @@
                             <div class="form-group">
                                 <label for="registerLoginName">Login name*</label>
                                 <InputText id="registerLoginName" @bind-Value="_registerPlayer.Id" 
-                                           class="form-control" placeholder="Enter login name" required />
+                                           class="form-control" placeholder="Enter login name" required autocomplete="off"/>
                             </div>
                             <div class="form-group">
                                 <label for="registerInGameName">In-Game name*</label>
                                 <InputText id="registerInGameName" @bind-Value="_registerPlayer.InGameName" 
-                                           class="form-control" aria-describedby="inGameNameHelp" placeholder="Name In-Game"/>
+                                           class="form-control" aria-describedby="inGameNameHelp" placeholder="Name In-Game" autocomplete="off"/>
                             </div>
                             <div class="form-group">
                                 <label for="registerPassword">Password*</label>
                                 <InputText type="password" id="registerPassword" @bind-Value="_registerPlayer.Password"
-                                           class="form-control"  placeholder="Password" required/>
+                                           class="form-control"  placeholder="Password" required autocomplete="off"/>
                             </div>
                             <div class="form-group">
                                 <label for="registerConfirmPassword">Confirm Password*</label>
                                 <InputText type="password" id="registerConfirmPassword" @bind-Value="_registerPlayer.ConfirmPassword"
-                                           class="form-control" placeholder="Password" required/>
+                                           class="form-control" placeholder="Password" required autocomplete="off"/>
                             </div>
                             <button type="submit" class="btn btn-primary" style="width: 100%">Sign Up</button>
                         </EditForm>
