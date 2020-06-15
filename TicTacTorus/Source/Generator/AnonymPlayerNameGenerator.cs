@@ -24,8 +24,11 @@ namespace TicTacTorus.Source.Generator
             ('n', 978), ('p',  79), ('q',   2), ('r', 700), ('s', 727),
             ('t', 615), ('v',  67), ('w', 189), ('x',   3), ('z', 113)
         );
-        
-        public static string GetString()
+
+        private const int MaxConsonantStreak = 3;
+        private const int MaxVocalStreak = 2;
+
+        public static string GetString(int minLength = 3, int lengthVariation = 7)
         {
             var rnd = new Random();
             if (rnd.Next(10000) == 0)
@@ -35,15 +38,22 @@ namespace TicTacTorus.Source.Generator
             }
 
             var result = "";
-            var consonantCount = 0;
-            
-            var length = rnd.Next(5, 10);
+            int vocalCount = 0, consonantCount = 0;
+            var length = Math.Abs(minLength) + rnd.Next(Math.Abs(lengthVariation + 1));
             for (var i = 0; i < length; ++i)
             {
-                var isConsonant = consonantCount < 3 && ChooseConsonant(rnd);
-                consonantCount = isConsonant ? consonantCount + 1 : 0;
+                var isConsonant = consonantCount < MaxConsonantStreak && ChooseConsonant(rnd) || vocalCount >= MaxVocalStreak;
+                if (isConsonant)
+                {
+                    ++consonantCount;
+                    vocalCount = 0;
+                }
+                else
+                {
+                    ++vocalCount;
+                    consonantCount = 0;
+                }
                 var c = (isConsonant ? Consonants : Vocals).Choose(rnd);
-
                 result += i == 0 ? char.ToUpper(c) : char.ToLower(c);
             }
             return result;

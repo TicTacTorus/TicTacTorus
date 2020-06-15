@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Threading.Tasks;
 using Blazor.Extensions.Canvas.Canvas2D;
+using Microsoft.AspNetCore.Components;
 using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk;
 using TicTacTorus.Source.Ingame.GridSpecificContent.Position;
 
@@ -53,14 +54,13 @@ namespace TicTacTorus.Source.Canvas
 
             var visibleX = width / SymbolSize;
             var visibleY = height / SymbolSize;
-            var centerX = _viewX;
-            var centerY = _viewY;
-            var top = centerY - visibleY / 2 - 1;
-            var bottom = centerY + visibleY / 2;
-            var left = centerX - visibleX / 2 - 1;
-            var right = centerX + visibleX / 2;
-            //Console.WriteLine($"GameRenderer::Draw values: SymbolSize: {SymbolSize:N2}, vis: ({visibleX:N2}, {visibleY:N2}), center: ({centerX:N2}, {centerY:N2}), size: ({width:N2}, {height:N2}), vertical: ({top:N2}, {bottom:N2}), horizontal: ({left:N2}, {right:N2})");
-            
+            var top = _viewY - visibleY / 2 - 1;
+            var bottom = _viewY + visibleY / 2;
+            var left = _viewX - visibleX / 2 - 1;
+            var right = _viewX + visibleX / 2;
+            //Console.WriteLine($"GameRenderer::Draw values: SymbolSize = {SymbolSize:N2}, size = ({width:N2}, {height:N2}) -> ({visibleX:N2}, {visibleY:N2}), center = ({_viewX:N2}, {_viewY:N2}), top left = ({left:N2}, {top:N2}), bottom right = ({right:N2}, {bottom:N2})");
+
+            await canvas.BeginBatchAsync();
             await canvas.BeginPathAsync();
 
             await DrawVisibleGrid(canvas, width, height, top, bottom, left, right);
@@ -116,6 +116,9 @@ namespace TicTacTorus.Source.Canvas
             }
 
             //todo: inform how to draw bitmaps, then draw _symbols[owner] here.
+            //edit: okay, what the fuck is ElementReference!?
+            //ElementReference image;
+            //canvas.DrawImageAsync(image, x, y, width, height);
         }
 
         private static async Task DrawDataSymbol(Canvas2DContext canvas, int x, int y, int width, int height, byte owner)
@@ -196,10 +199,13 @@ namespace TicTacTorus.Source.Canvas
             MoveViewpoint(dx * (1 / SymbolSize), dy * (1 / SymbolSize));
         }
 
-        public void MoveViewpoint(double dx, double dy)
+        private void MoveViewpoint(double dx, double dy)
         {
             _viewX += dx;
             _viewY += dy;
+
+            _viewX %= _data.Width;
+            _viewY %= _data.Height;
         }
 
         public void Zoom(int steps, double fixPointX = 0, double fixPointY = 0)
@@ -218,7 +224,7 @@ namespace TicTacTorus.Source.Canvas
             }
         }
 
-        public void ZoomIn(int steps = 1, double fixPointX = 0, double fixPointY = 0)
+        private void ZoomIn(int steps = 1, double fixPointX = 0, double fixPointY = 0)
         {
             //var oldZoom = _zoom;
             for (var i = 0; i < steps; ++i)
@@ -232,7 +238,7 @@ namespace TicTacTorus.Source.Canvas
             }
         }
 
-        public void ZoomOut(int steps = 1, double fixPointX = 0, double fixPointY = 0)
+        private void ZoomOut(int steps = 1, double fixPointX = 0, double fixPointY = 0)
         {
             //var oldZoom = _zoom;
             for (var i = 0; i < steps; ++i)
