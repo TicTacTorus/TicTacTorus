@@ -175,7 +175,7 @@ namespace TicTacTorus.Source.Persistence
 
 			var command = new SQLiteCommand(con)
 			{
-				CommandText = $"select count(*) from User where loginName = '" + id + "';"
+				CommandText = $"select count(*) from User where loginName = '" + id + "'"
 			};
 
 
