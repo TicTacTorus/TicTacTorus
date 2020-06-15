@@ -7,7 +7,7 @@ namespace TicTacTorus.Source.Ingame.Move
 {
     public class PlacementMove : IMove
     {
-        public byte Owner { get; }
+        public byte Owner { set; get; }
         public GlobalPos Position { get; }
 
         public PlacementMove(byte who, GlobalPos where)

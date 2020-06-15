@@ -6,8 +6,7 @@ namespace TicTacTorus.Source.Ingame.Move
 {
     public class PlayerShuffleMove : IMove
     {
-        public byte Owner { get; }
-        public GlobalPos Position { get; }
+        public byte Owner { set; get; }
         public Permutation Change { get; }
 
         public PlayerShuffleMove(byte owner, Permutation shuffle)

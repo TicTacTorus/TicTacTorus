@@ -16,6 +16,7 @@ namespace TicTacTorus.Source.ServerHandler
         public ClientGame(Game game)
         {
             Game = game;
+            Game.Parent = this;
             ID = game.ID.ToString();
             players = Game.GetPlayerList();
         }

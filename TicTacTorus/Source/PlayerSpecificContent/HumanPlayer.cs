@@ -1,6 +1,5 @@
 ﻿using System.Drawing;
 using Microsoft.AspNetCore.SignalR;
-using TicTacTorus.Source.Hubs;
 using TicTacTorus.Source.Ingame.GridSpecificContent.Grid;
 using TicTacTorus.Source.Ingame.Move;
 using TicTacTorus.Source.LoginContent.Security;

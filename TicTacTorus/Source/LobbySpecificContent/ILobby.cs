@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using TicTacTorus.Source.Ingame;
 using TicTacTorus.Source.PlayerSpecificContent;
 using Base64 = TicTacTorus.Source.Utility.Base64;
 
@@ -13,6 +14,7 @@ namespace TicTacTorus.Source.LobbySpecificContent
         public Base64 Id { get; set; }
         public bool IsPrivate { get; set; }
         public List<IPlayer> Players { get; set; }
+        public GameSettings Settings { get; }
 
         public bool AddPlayer(IPlayer player);
         public bool RemovePlayer(IPlayer player);

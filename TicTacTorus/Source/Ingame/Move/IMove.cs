@@ -5,7 +5,7 @@ namespace TicTacTorus.Source.Ingame.Move
 {
     public interface IMove
     {
-        public byte Owner { get; }
+        public byte Owner { set; get; }
         
         bool CanDo(IGrid grid, Permutation playerOrder);
         
