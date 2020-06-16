@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 using TicTacTorus.Source.Ingame;
+using TicTacTorus.Source.Ingame.GridSpecificContent.Position;
+using TicTacTorus.Source.Ingame.Move;
 using TicTacTorus.Source.PlayerSpecificContent;
 
 namespace TicTacTorus.Source.ServerHandler
@@ -36,5 +38,20 @@ namespace TicTacTorus.Source.ServerHandler
         }
 
         #endregion
+
+        public void DenyMove(in int plrIndex)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void DistributeMove(in int plrIndex, IMove move)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void AnnounceWinners(Dictionary<byte, GlobalPos> winners)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

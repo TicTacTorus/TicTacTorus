@@ -33,6 +33,8 @@ namespace TicTacTorus.Source.Canvas
         public GameRenderer(Grid grid, params (Bitmap, Color)[] symbols)
         {
             _data = grid;
+            _viewX = (double)grid.Width / 2;
+            _viewY = (double)grid.Height / 2;
 
             _symbols = new Bitmap[symbols.Length];
             for (var i = 0; i < _symbols.Length; ++i)
