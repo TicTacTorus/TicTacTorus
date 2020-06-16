@@ -246,14 +246,9 @@
     }
 
     #endregion
-    #region Canvas
-    
+  
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-    //todo current problems:
-    //resizing the window also needs to trigger a resize of the canvas.
-    //moving the viewpoint of the game renderer stops new lines from rendering.
-
     #region ClientServerHandling
         if (firstRender)
         {
@@ -287,8 +282,8 @@
             });
 
             #endregion
-        
-            /*
+
+    /*
             if ((User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) == null)
             {
                 User = PlayerFactory.CreateHumanPlayer();
@@ -321,7 +316,10 @@
             IsConnected = _client.Connection.State == HubConnectionState.Connected;
         }
     #endregion
-        
+    #region Canvas
+    //todo current problems:
+    //resizing the window also needs to trigger a resize of the canvas.
+    //moving the viewpoint of the game renderer stops new lines from rendering.
         if (firstRender)
         {
             await JSRuntime.InvokeVoidAsync("stretch_first_canvas");
@@ -339,8 +337,10 @@
             await _rendererGame.Draw((int)_canvasGame.Width, (int)_canvasGame.Height, _contextGame);
             await _rendererMap.Draw((int) _canvasMap.Width, (int) _canvasMap.Height, _contextMap);
         }
-        
+        #endregion
     }
+    
+    #region Canvas
 
     [JSInvokable]
     public async Task UpdateCanvasSize()
