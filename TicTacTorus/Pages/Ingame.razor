@@ -31,7 +31,7 @@
         </div>-->
         <BECanvas @ref="_canvasMap" Width="100" Height="100"></BECanvas>
     </div>
-    @if(IsConnected)
+    @if(IsConnected && _initialized)
     {
         <div class=" box box-map">
             <div class="box-game">
@@ -116,15 +116,16 @@
     protected static BECanvasComponent _canvasGame, _canvasMap;
 
     //local copy of the grid, this gets updated and displayed
-    private static Grid _grid = GenerateTempMockGrid();
+    private static Grid _grid = null;
     private static GlobalPos _lastChange = new GlobalPos(0, 0);
 
-    private static GameRenderer _rendererGame = new GameRenderer(_grid);
+    private static GameRenderer _rendererGame = null;
     private static MapRenderer _rendererMap = new MapRenderer(null);
     
     private static HumanPlayer User { get; set; }
 
     public bool IsConnected = false;
+    private static bool _initialized = false;
 
 }
 
@@ -184,9 +185,12 @@
         {
             return;
         }
-        
-        _rendererGame.Zoom(-Math.Sign(evnt.DeltaY), evnt.ClientX, evnt.ClientY);
-        await RedrawGame();
+
+        if (_initialized)
+        {
+            _rendererGame.Zoom(-Math.Sign(evnt.DeltaY), evnt.ClientX, evnt.ClientY);
+            await RedrawGame();
+        }
     }
 
     private async void MouseMoveHandler(MouseEventArgs evnt)
@@ -200,7 +204,7 @@
         var dragged = Math.Sqrt(dx * dx + dy * dy);
         _mouseDistance += dragged;
 
-        if (_mouseDistance > MaxClickDistance)
+        if (_mouseDistance > MaxClickDistance && _initialized)
         {
             _rendererGame.MoveZoomedViewpoint(dx, dy);
             await RedrawGame();
@@ -220,7 +224,7 @@
 
     private async void MouseUpHandler(MouseEventArgs evnt)
     {
-        if (_mouseDistance <= MaxClickDistance)
+        if (_mouseDistance <= MaxClickDistance && _initialized)
         {
             var width = await JSRuntime.InvokeAsync<int>("client_width");
             var height = await JSRuntime.InvokeAsync<int>("client_height");
@@ -244,9 +248,12 @@
             }
             */
 
+            if (_initialized)
+            {
+                _grid.SetSymbol(pos, _myIndex, true);
+                await RedrawGame();
+            }
             SendPlacementMove(pos);
-            _grid.SetSymbol(pos, _myIndex, true);
-            await RedrawGame();
         }
         
         _mouseDown = false;
@@ -309,7 +316,9 @@
                     NavigationManager.NavigateTo("/error=gamenotfound");
                 }
                 _grid = new Grid(_game.Settings.GridSize, _game.Settings.GridSize);
+                _rendererGame = new GameRenderer(_grid);
                 _myIndex = playerIndex;
+                _initialized = true;
                 StateHasChanged();
                 //_client.Connection.SendAsync("OnUserConnectedToLobby", _game.players.IndexOf(User));
             });
@@ -339,7 +348,7 @@
         _contextGame = await _canvasGame.CreateCanvas2DAsync();
         _contextMap = await _canvasMap.CreateCanvas2DAsync();
         
-        if (firstRender)
+        if (firstRender && _initialized)
         {
             await RedrawGame();
             await RedrawMap();
@@ -364,41 +373,21 @@
     [JSInvokable]
     public static async Task RedrawGame()
     {
-        _contextGame = await _canvasGame.CreateCanvas2DAsync();
-        await _rendererGame.Draw((int)_canvasGame.Width, (int)_canvasGame.Height, _contextGame);
+        if (_initialized)
+        {
+            _contextGame = await _canvasGame.CreateCanvas2DAsync();
+            await _rendererGame.Draw((int) _canvasGame.Width, (int) _canvasGame.Height, _contextGame);
+        }
     }
     
     [JSInvokable]
     public static async Task RedrawMap()
     {
-        _contextMap = await _canvasMap.CreateCanvas2DAsync();
-        await _rendererMap.Draw((int)_canvasMap.Width, (int)_canvasMap.Height, _contextMap);
-    }
-    
-    public static Grid GenerateTempMockGrid()
-    {
-    //todo remove me once we synchronize the real grid!
-        const int width = 50, height = 50, players = 20;
-        var items = (int)Math.Sqrt(width * height);
-        
-        var grid = new Grid(width, height);
-        var rnd = new Random();
-        var posGen = new PositionGenerator(rnd);
-        for (var y = 0; y < grid.Height; ++y)
+        if (_initialized)
         {
-            grid.SetSymbol(new GlobalPos(0, y), 0);
+            _contextMap = await _canvasMap.CreateCanvas2DAsync();
+            await _rendererMap.Draw((int) _canvasMap.Width, (int) _canvasMap.Height, _contextMap);
         }
-        for (var x = 0; x < grid.Width; ++x)
-        {
-            grid.SetSymbol(new GlobalPos(x, 0), 0);
-        }
-
-        for (var i = 0; i < items; ++i)
-        {
-            var pos = posGen.GetGlobalPos(width, height);
-            grid.SetSymbol(pos, (byte)rnd.Next(players), false);
-        }
-        return grid;
     }
 
     #endregion
