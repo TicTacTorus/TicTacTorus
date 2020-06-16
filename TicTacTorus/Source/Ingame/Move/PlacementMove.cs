@@ -8,7 +8,7 @@ namespace TicTacTorus.Source.Ingame.Move
     public class PlacementMove : IMove
     {
         public byte Owner { set; get; }
-        public GlobalPos Position { get; }
+        public GlobalPos Position { set; get; }
 
         public PlacementMove(byte who, GlobalPos where)
         {
@@ -29,6 +29,21 @@ namespace TicTacTorus.Source.Ingame.Move
         public void Undo(IGrid grid, Permutation playerOrder)
         {
             grid.SetSymbol(Position, BasicChunk.NoOwner, true);
+        }
+
+        public GlobalPos GetAreaCorner()
+        {
+            return Position;
+        }
+
+        public int GetAreaWidth()
+        {
+            return 1;
+        }
+
+        public int GetAreaHeight()
+        {
+            return 1;
         }
     }
 }

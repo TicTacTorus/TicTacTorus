@@ -33,5 +33,21 @@ namespace TicTacTorus.Source.Ingame.Move
         {
             Change.Inverse().Permute(playerOrder);
         }
+
+
+        public GlobalPos GetAreaCorner()
+        {
+            return new GlobalPos();
+        }
+
+        public int GetAreaWidth()
+        {
+            return 0;
+        }
+
+        public int GetAreaHeight()
+        {
+            return 0;
+        }
     }
 }
