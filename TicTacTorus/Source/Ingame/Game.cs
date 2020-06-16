@@ -110,10 +110,58 @@ namespace TicTacTorus.Source.Ingame
 
         public void ReceivePlayerMove(int plrIndex, IMove move)
         {
-            if (plrIndex == _activePlayerIndex)
+            if (plrIndex != _activePlayerIndex)
             {
-                //todo: process move
+                return;
             }
+            if (!move.CanDo(_grid, PlayerOrder))
+            {
+                //send error message to player
+                Parent.DenyMove(plrIndex);
+                return;
+            }
+
+            //send move to all users
+            Parent.DistributeMove(plrIndex, move);
+
+            //check the changed area for any winner(s).
+            var winners = new Dictionary<byte, GlobalPos>();
+            var width = move.GetAreaWidth();
+            var height = move.GetAreaHeight();
+            if (width > 0 && height > 0)
+            {
+                var start = move.GetAreaCorner();
+                var pos = new GlobalPos(start.X, start.Y);
+                for (var y = 0; y < height; ++y)
+                {
+                    pos.X = start.X;
+                    for (var x = 0; x < width; ++x)
+                    {
+                        if (_referee.HasWon(_grid, pos))
+                        {
+                            var owner = _grid.GetSymbol(pos);
+                            _grid.SetSymbol(pos, owner);
+                            if (!winners.ContainsKey(owner))
+                            {
+                                winners[owner] = new GlobalPos();
+                            }
+                        }
+                        ++pos.X;
+                    }
+                    ++pos.Y;
+                }
+            }
+
+            if (winners.Count > 0)
+            {
+                Parent.AnnounceWinners(winners);
+            }
+            NextPlayer();
+        }
+
+        void AnnounceWinners()
+        {
+            
         }
         
         #endregion
