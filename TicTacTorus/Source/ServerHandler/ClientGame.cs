@@ -6,6 +6,7 @@ using TicTacTorus.Source.Ingame;
 using TicTacTorus.Source.Ingame.GridSpecificContent.Position;
 using TicTacTorus.Source.Ingame.Move;
 using TicTacTorus.Source.PlayerSpecificContent;
+using TicTacTorus.Source.Utility;
 
 namespace TicTacTorus.Source.ServerHandler
 {
@@ -16,6 +17,7 @@ namespace TicTacTorus.Source.ServerHandler
 
         public string ID { get; set; }
         public List<IPlayer> players { get; set; }
+        public int[] PlayerOrder { get; set; }
         public GameSettings Settings { get; set; }
 
         [JsonIgnore]
@@ -27,6 +29,7 @@ namespace TicTacTorus.Source.ServerHandler
             Game.Parent = this;
             ID = game.ID.ToString();
             players = Game.GetPlayerList();
+            PlayerOrder = game.PlayerOrder.ToArray();
             Settings = game.Settings;
         }
         
