@@ -12,13 +12,13 @@ namespace TicTacTorus.Source.ServerHandler
 
         #region Init
 
-        public static LobbyGame CreateGame(string lobbyId, IHubCallerClients clients)
+        public static ClientGame CreateGame(string lobbyId, IHubCallerClients clients)
         {
-            return Server.Instance.CreateLobbyGameFromLobby(lobbyId, clients);
+            return Server.Instance.CreateGameFromLobby(lobbyId, clients);
         }
 
 
-        public static Tuple<LobbyGame, bool> AddPlayerToGame(string gameId, IPlayer player)
+        public static Tuple<ClientGame, bool> AddPlayerToGame(string gameId, IPlayer player)
         {
             var game = Server.Instance.GetLobbyGameById(gameId);
             return Tuple.Create(game, game.AddPlayer(player));

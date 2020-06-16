@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using TicTacTorus.Source.Utility;
+using TicTacTorus.Source.LobbySpecificContent;
 
-namespace TicTacTorus.Source.LobbySpecificContent
+namespace TicTacTorus.Source.ServerHandler
 {
     public class LobbyList
     {
@@ -17,11 +16,11 @@ namespace TicTacTorus.Source.LobbySpecificContent
         private List<ILobby> FetchAllActiveLobbies()
         {
             var lobbies = Server.Instance.GetPublicLobbies().Values.ToList();
-
+            
             return lobbies;
         }
 
-        public void UpdateLobbies()
+        private void UpdateLobbies()
         {
             Lobbies = FetchAllActiveLobbies();
         }

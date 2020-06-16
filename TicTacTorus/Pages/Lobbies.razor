@@ -6,6 +6,7 @@
 @using TicTacTorus.Source
 @using TicTacTorus.Source.Generator
 @using TicTacTorus.Source.PlayerSpecificContent
+@using TicTacTorus.Source.ServerHandler
 @inject NavigationManager NavigationManager
 @inject ProtectedSessionStorage ProtectedSessionStore
 
@@ -70,7 +71,11 @@
             {
                 try
                 {
-                    _list.Lobbies = new List<ILobby>(JsonConvert.DeserializeObject<List<Source.LobbySpecificContent.Lobby>>(list));
+                    var settings = new JsonSerializerSettings()
+                    {
+                        TypeNameHandling = TypeNameHandling.All
+                    };
+                    _list.Lobbies = JsonConvert.DeserializeObject<List<ILobby>>(list, settings);
                 }
                 catch (JsonException e)
                 {
@@ -81,7 +86,7 @@
             
             if ((User = await ProtectedSessionStore.GetAsync<HumanPlayer>("LoginData")) == null)
             {
-                User = PlayerFactory.CreateHumanPlayer();
+                User = new HumanPlayer();
             }
             StateHasChanged();
         }

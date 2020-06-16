@@ -4,11 +4,13 @@ using System.Drawing;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
+using TicTacTorus.Source.Ingame;
 using TicTacTorus.Source.Ingame.Move;
 using TicTacTorus.Source.LobbySpecificContent;
 using TicTacTorus.Source.Persistence;
 using TicTacTorus.Source.PlayerSpecificContent;
 using TicTacTorus.Source.ServerHandler;
+using TicTacTorus.Source.Utility;
 
 namespace TicTacTorus.Source.Hubs
 {
@@ -25,16 +27,20 @@ namespace TicTacTorus.Source.Hubs
         {
             var hPlayer = JsonConvert.DeserializeObject<HumanPlayer>(player);
             hPlayer.SessionID = Context.ConnectionId;
+			
             var lobby = LobbyHandler.AddPlayerToLobby(lobbyId, hPlayer);
-
             var indented = Formatting.Indented;
             var settings = new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.All
             };
             var jsLobby = JsonConvert.SerializeObject(lobby, indented, settings);
+
             await Clients.Caller.SendAsync("GetLobby", jsLobby, Context.ConnectionId);
             await Clients.Group(lobbyId).SendAsync("LobbyChanged", jsLobby);
+            await Groups.AddToGroupAsync(Context.ConnectionId,
+                Game.UniquePlayerGroup(new Base64(lobbyId),
+                    Server.Instance.Lobbies[lobbyId].Players.FindIndex(p => p.InGameName == hPlayer.InGameName)));
             await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
         }
         
@@ -152,6 +158,9 @@ namespace TicTacTorus.Source.Hubs
             {
                 var jsGame = JsonConvert.SerializeObject(response.Item1, Formatting.Indented, settings);
                 await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
+                await Groups.AddToGroupAsync(Context.ConnectionId,
+                    Game.UniquePlayerGroup(new Base64(gameId),
+                        Server.Instance.LobbyGames[gameId].players.FindIndex(p => p.InGameName == player?.InGameName)));
                 //await Clients.Group(gameId).SendAsync("ReceiveGameInformation", jsGame);
                 await Clients.Caller.SendAsync("ReceiveGameInformation", jsGame);
             }
@@ -160,12 +169,7 @@ namespace TicTacTorus.Source.Hubs
                 await Clients.Caller.SendAsync("ConnectToGameFailed", "game_has_started");
             }
         }
-        /*
-        public async Task JoinGame(string lobbyId)
-        {
-            await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
-        }*/
-        
+
         #endregion
         #region Game
 
@@ -237,44 +241,6 @@ namespace TicTacTorus.Source.Hubs
             }
         }
 
-        /*public async Task GetPlayerStats(string userId, string playerId)
-        {
-            try
-            {
-                var player = PersistenceStorage.LoadPlayer(playerId);
-                var playerStats = PersistenceStorage.GetPlayerStat(player);
-               
-                // filter some information
-                player.Hash = null;
-                player.Salt = null;
-                player.playerStats = null;
-            
-                var jsonPlayer = JsonConvert.SerializeObject(player);
-                var jsonStats = JsonConvert.SerializeObject(playerStats);
-
-                await Clients.Caller.SendAsync("ReceiveStats", jsonPlayer,jsonStats);
-            }
-            catch
-            {
-                await Clients.Caller.SendAsync("Error", "An Error occurred. Please try again later.");
-                return;
-            }
-            
-        }*/
-
-        /*
-        //Gets called everytime a user connects to a hub (I know performance is not good >.<)
-        public async Task GetSessionID(string userId)
-        {
-            await Clients.Caller.SendAsync("ReceiveSessionID", Server.Instance.GetSessionId(userId));
-        }
-
-        //Gets called everytime a user lefts a hub (I know is also bad :| )
-        public void RemoveSessionID(string userId)
-        {
-            Server.Instance.RemoveSessionId(userId);
-        }*/
-
         #endregion
         #region Userprofile
 
@@ -321,7 +287,13 @@ namespace TicTacTorus.Source.Hubs
         public async Task GetCurrentLobbies()
         {
             var list = new LobbyList().Lobbies;
-            await Clients.Caller.SendAsync("ReceiveCurrentLobbies", list);
+            
+            var settings = new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.All
+            };
+            var jsonList = JsonConvert.SerializeObject(list, Formatting.Indented, settings);
+            await Clients.Caller.SendAsync("ReceiveCurrentLobbies", jsonList);
         }
 
         #endregion

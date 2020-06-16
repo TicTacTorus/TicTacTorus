@@ -36,7 +36,7 @@
         <div class="row">
             <div class="col-sm-9 col-md-7 col-lg-4 mx-auto my-1">
                 <!-- Players Box -->
-                <div class="box box-lobby w-100">
+                <div class="box box-lobby w-100 overflow-auto">
                     <div class="box-content">
                         <b>
                             <h3 class="text-center">Players (
@@ -72,7 +72,6 @@
                                     }
                                 }
                             </table>
-                            <!-- Content goes here -->
                         </div>
                     </div>
                 </div>
@@ -273,7 +272,6 @@
             _client.Connection.On<string, string>("GetLobby", async (lobby, sessionID) =>
             {
                 _lobby = JsonConvert.DeserializeObject<Source.LobbySpecificContent.Lobby>(lobby, _jsonSerializerSettings);
-                if (_lobby != null) await _client.Connection.SendAsync("OnUserConnectedToLobby", _lobby.Players.IndexOf(User));
                 StateHasChanged();
                 
                 User.SessionID = sessionID;
@@ -326,8 +324,6 @@
                 TypeNameHandling = TypeNameHandling.All
             };
             string jsonUser = JsonConvert.SerializeObject(User, settings);
-            
-            
             
             await _client.Connection.SendAsync("JoinLobby", IdString, jsonUser);
             

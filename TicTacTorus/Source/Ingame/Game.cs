@@ -21,7 +21,8 @@ namespace TicTacTorus.Source.Ingame
         
         public Base64 ID { get; }
         public DateTime StartTime { get; }
-        public int MoveSeconds { get; }
+
+        public GameSettings Settings { get; }
 
         private List<IPlayer> _players = new List<IPlayer>();
         private bool _hasStarted = false;
@@ -34,7 +35,9 @@ namespace TicTacTorus.Source.Ingame
         public IList<IMove> MoveHistory { private set; get; }
 
         private IHubCallerClients _clients;
-        
+
+        public ClientGame Parent;
+
         #endregion
         #region Constructors
 
@@ -43,11 +46,10 @@ namespace TicTacTorus.Source.Ingame
             StartTime = DateTime.Now;
             ID = lobby.Id;
             _players = lobby.GetAllPlayers();
-            _clients = clients;
             
-            //todo give us sensible config values from the lobby
-            _grid = new Grid(50, 50);
-            _referee = new LineReferee(5);
+            Settings = lobby.Settings;
+            _grid = new Grid(Settings.GridSize, Settings.GridSize);
+            _referee = new LineReferee(Settings.WinChainLength);
         }
         
         #endregion
@@ -72,38 +74,72 @@ namespace TicTacTorus.Source.Ingame
             IPlayer lastPlayer = null;
             do
             {
-                var playerIndex = _activePlayerIndex;
-                lastPlayer = ChooseNextPlayer();
+                lastPlayer = ChoosePlayer();
                 IMove move = null;
 
-                var connection = _clients.Group(UniquePlayerGroup(ID, playerIndex));
+                var connection = _clients.Group(UniquePlayerGroup(ID, _activePlayerIndex));
                 do
                 {
-                    move = lastPlayer.ChooseMove(connection, _grid, MoveSeconds);
+                    //todo: discuss exactly how to do IMove exchange. ReceivePlayerMove might be an idea, but that means we have to restructure our main loop.
+                    
+                    move = lastPlayer.ChooseMove(connection, _grid, Settings.TimeLimitSec);
                 } while (move != null && !move.CanDo(_grid, PlayerOrder));
                 move.Do(_grid, PlayerOrder);
                 MoveHistory.Add(move);
+
+                NextPlayer();
             } while (!_referee.HasWon(_grid, lastChange));
 
             await _clients.Group(ID.ToString()).SendAsync("AnnounceWinner");
         }
         
         #endregion
-        #region Helper Methods
+        #region Communication
 
+        public void ReceivePlayerMove(IPlayer plr, IMove move)
+        {
+            try
+            {
+                var index = _players.IndexOf(plr);
+                ReceivePlayerMove(index, move);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+            }
+        }
+
+        public void ReceivePlayerMove(int plrIndex, IMove move)
+        {
+            if (plrIndex == _activePlayerIndex)
+            {
+                //todo: process move
+            }
+        }
+        
+        #endregion
+        #region Helper Methods
+        
         private IPlayer ChooseNextPlayer()
         {
-            IPlayer result = null;
+            NextPlayer();
+            return ChoosePlayer();
+        }
+
+        private IPlayer ChoosePlayer()
+        {
+            return _players[PlayerOrder[_activePlayerIndex]];
+        }
+
+        private void NextPlayer()
+        {
             //this loop terminates once iterated through the whole list (and returns null in this case)
-            for (var i = 0; i < _players.Count && result == null; ++i)
+            for (var i = 0; i < _players.Count && _players[PlayerOrder[_activePlayerIndex]] == null; ++i)
             {
-                result = _players[PlayerOrder[_activePlayerIndex]];
                 ++_activePlayerIndex;
                 _activePlayerIndex %= (byte)_players.Count;
             }
-            return result;
         }
-
+        
         public static string UniquePlayerGroup(Base64 gameID, int playerIndex)
         {
             return $"{gameID}::{playerIndex}";

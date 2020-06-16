@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using TicTacTorus.Source.Ingame;
 using TicTacTorus.Source.PlayerSpecificContent;
 using TicTacTorus.Source.Utility;
 
@@ -20,6 +21,8 @@ namespace TicTacTorus.Source.LobbySpecificContent
         public bool IsPrivate { get; set; }
 
         public List<IPlayer> Players { get; set; }
+        
+        public GameSettings Settings { private set; get; }
 
         #endregion
         #region Constructors
@@ -28,12 +31,20 @@ namespace TicTacTorus.Source.LobbySpecificContent
         {
             Players = new List<IPlayer>();
         }
-        public Lobby(string name,int maxPlayerCount, bool isPrivate)
+        public Lobby(string name, int maxPlayerCount, bool isPrivate)
         {
             Players = new List<IPlayer>(maxPlayerCount);
             MaxPlayerCount = maxPlayerCount;
             Name = name;
             IsPrivate = isPrivate;
+
+            //todo give us sensible config values
+            Settings = new GameSettings
+            {
+                GridSize = 50,
+                WinChainLength = 5,
+                TimeLimitSec = 0
+            };
         }
         public Lobby(string name, string status, string description, int maxPlayerCount, bool isPrivate) 
             : this(name, maxPlayerCount, isPrivate)

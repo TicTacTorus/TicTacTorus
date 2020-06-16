@@ -8,13 +8,7 @@
 @using TicTacTorus.Source.Generator
 @using TicTacTorus.Source.Ingame.GridSpecificContent.Chunk
 @using TicTacTorus.Source.Ingame.GridSpecificContent.Position
-@using System.Security.Principal
-@using Microsoft.Extensions.FileSystemGlobbing.Internal.PathSegments
-@using TicTacTorus.Source
-@using System.Security.Cryptography.Xml
-@using System.Runtime.InteropServices.WindowsRuntime
 @using Newtonsoft.Json
-@using TicTacTorus.Source.Ingame
 @using TicTacTorus.Source.PlayerSpecificContent
 @using System.Drawing
 @using TicTacTorus.Source.ServerHandler
@@ -97,14 +91,16 @@
     private double _mouseStartY = 0;
     private double _mousePrevX = 0;
     private double _mousePrevY = 0;
-        private const double MaxClickDistance = 10;
+    private const double MaxClickDistance = 10;
+
+    private bool _isActive = false;
     
     private List<string> _messages = new List<string>();
     private string _messageInput;
     
     #region HubStuff
     [Parameter] public string IdString { get; set; }
-    private LobbyGame _game = null;
+    private ClientGame _game = null;
     JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings() {
         TypeNameHandling = TypeNameHandling.All
     };
@@ -226,7 +222,7 @@
             
             var pos = _rendererGame.GetCursorPosition(evnt.ClientX, evnt.ClientY, width, height);
             Console.WriteLine($"Click Detected at {pos}!");
-
+            
     //todo add some _real_ functionality: Add symbol, notify server.
     //just as a demonstration: a quick through-cycle of 20 players (+1 for no owner).
             var owner = _grid.GetSymbol(pos);
@@ -286,6 +282,7 @@
 
             _client.Connection.On("ActivatePlayer", () =>
             {
+                _isActive = true;
     //activate control buttons / allow making a move
             });
 
@@ -306,7 +303,7 @@
 
             _client.Connection.On<string>("ReceiveGameInformation", (jsGame) =>
             {
-                _game = JsonConvert.DeserializeObject<LobbyGame>(jsGame, _jsonSerializerSettings);
+                _game = JsonConvert.DeserializeObject<ClientGame>(jsGame, _jsonSerializerSettings);
                 if (_game != null) _client.Connection.SendAsync("OnUserConnectedToLobby", _game.players.IndexOf(User));
                 // maybe init stuff from game
                 StateHasChanged();
@@ -321,7 +318,6 @@
             var jsonUser = JsonConvert.SerializeObject(User, _jsonSerializerSettings);
             await _client.Connection.SendAsync("ConnectToGame", IdString, jsonUser);
             
-            //await _client.Connection.SendAsync("JoinGame", IdString);
             IsConnected = _client.Connection.State == HubConnectionState.Connected;
         }
     #endregion
@@ -372,7 +368,7 @@
     public static Grid GenerateTempMockGrid()
     {
     //todo remove me once we synchronize the real grid!
-        const int width = 50, height = 50, players = 20;
+        const int width = 3, height = 3, players = 20;
         var items = (int)Math.Sqrt(width * height);
         
         var grid = new Grid(width, height);

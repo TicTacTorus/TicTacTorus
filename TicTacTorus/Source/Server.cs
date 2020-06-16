@@ -16,12 +16,7 @@ namespace TicTacTorus.Source
     public sealed class Server
     {
         private readonly IDictionary<string, ILobby> _lobbies;
-        private readonly IDictionary<string, Game> _games;
-
-        private readonly IDictionary<string, LobbyGame> _lobbygames;    /// <summary>
-                                                                        /// If it works, then games in this server-list
-                                                                        /// are unneccesary, as games are contained in LobbyGame
-                                                                        /// </summary>
+        private readonly IDictionary<string, ClientGame> _lobbygames;   
         
         //private readonly IDictionary<string, string> _sessionIDs;
 
@@ -35,9 +30,7 @@ namespace TicTacTorus.Source
         private Server()
         {
             _lobbies = new ConcurrentDictionary<string, ILobby>();
-            _games = new ConcurrentDictionary<string, Game>();
-            _lobbygames = new ConcurrentDictionary<string, LobbyGame>();
-            //_sessionIDs = new ConcurrentDictionary<string, string>();
+            _lobbygames = new ConcurrentDictionary<string, ClientGame>();
         }
         // Makes Singleton Thread-safe
         private class Nested
@@ -52,14 +45,8 @@ namespace TicTacTorus.Source
             internal static readonly Server Instance = new Server();
         }
         
-        public IDictionary<string,ILobby> Lobbies
-        {
-            get { return _lobbies; }
-        }
-        public IDictionary<string,Game> Games
-        {
-            get { return _games; }
-        }
+        public IDictionary<string,ILobby> Lobbies => _lobbies;
+        public IDictionary<string, ClientGame> LobbyGames => _lobbygames;
 
         #endregion
         #region Lobby
@@ -92,54 +79,35 @@ namespace TicTacTorus.Source
         }
 
         #endregion
-        #region Game
-
-        public bool AddGame(Game game)
-        {
-            if (GameIdIsUnique(game.ID.ToString()))
-            {
-                _games.Add(game.ID.ToString(), game);
-                return true;
-            }
-
-            return false;
-        }
-
-        public Game GetGameById(string id)
-        {
-            return _games[id];
-        }
-
-        public bool GameIdIsUnique(string id)
-        {
-            return _games.ContainsKey(id);
-        }
-
-        #endregion
-
         #region LobbyGame
 
-        public LobbyGame CreateLobbyGameFromLobby(string lobbyId, IHubCallerClients clients)
-        {
-            var lobby = GetLobbyById(lobbyId);
-            if (_games.ContainsKey(lobbyId) || !_lobbies.Remove(lobbyId)) return null;
-            // Delete Player list first
-            lobby.Players = new List<IPlayer>();
-                
-            var game = new Game(lobby, clients);
-            _games.Add(game.ID.ToString(), game);
-            
-            var lgame = new LobbyGame(game);
-            _lobbygames.Add(lgame.ID, lgame);
-
-            return lgame;
-        }
-
-        public LobbyGame GetLobbyGameById(string id)
+        public ClientGame GetLobbyGameById(string id)
         {
             return _lobbygames[id];
         }
 
+        public bool GameIdIsUnique(string id)
+        {
+            return _lobbygames.ContainsKey(id);
+        }
+        
+        public Game GetGameById(string id)
+        {
+            return _lobbygames[id].Game;
+        }
+        
+        public ClientGame AddGame(Game game)
+        {
+            if (GameIdIsUnique(game.ID.ToString()))
+            {
+                var lg = new ClientGame(game);
+                _lobbygames.Add(game.ID.ToString(), lg);
+                return lg;
+            }
+
+            return null;
+        }
+        
         #endregion
         #region ConvertLobbyToGame
 
@@ -150,58 +118,21 @@ namespace TicTacTorus.Source
         /// <returns>
         /// new Game(lobby), null if ID of lobby was not unique or lobby could not be removed from list
         /// </returns>
-        public Game CreateGameFromLobby(ILobby lobby, IHubCallerClients clients)
-        {
-            Game game = null;
-            if (!_games.ContainsKey(lobby.Id.ToString()) && _lobbies.Remove(lobby.Id.ToString()))
-            {
-                game = new Game(lobby, clients);
-                _games.Add(game.ID.ToString(), game);
-            }
-
-            return game;
-        }
-        
-        public Game CreateGameFromLobby(string lobbyId, IHubCallerClients clients)
+        public ClientGame CreateGameFromLobby(string lobbyId, IHubCallerClients clients)
         {
             var lobby = GetLobbyById(lobbyId);
-            if (_games.ContainsKey(lobbyId) || !_lobbies.Remove(lobbyId)) return null;
+            if (_lobbygames.ContainsKey(lobbyId) || !_lobbies.Remove(lobbyId)) return null;
             // Delete Player list first
             lobby.Players = new List<IPlayer>();
                 
             var game = new Game(lobby, clients);
-            _games.Add(game.ID.ToString(), game);
+            var lgame = new ClientGame(game);
+            
+            _lobbygames.Add(lgame.ID, lgame);
 
-            return game;
+            return lgame;
         }
 
         #endregion
-/*
-        #region SessionID
-
-        //Creates new Session ID and returns it only if ID is not already taken
-        public string GetSessionId(string userId)
-        {
-            string sId;
-            if (_sessionIDs.ContainsKey(userId))
-            {
-                return _sessionIDs[userId];
-            }
-
-            while (!_sessionIDs.Values.Contains(sId = Base64.Random(16).ToString()))
-            {
-                _sessionIDs.Add(userId, sId);
-                break;
-            }
-            return _sessionIDs[userId];
-        }
-
-        public void RemoveSessionId(string userId)
-        {
-            _sessionIDs.Remove(userId);
-        }
-
-        #endregion
-        */
     }
 }
