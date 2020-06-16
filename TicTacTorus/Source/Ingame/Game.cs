@@ -44,6 +44,8 @@ namespace TicTacTorus.Source.Ingame
             StartTime = DateTime.Now;
             ID = lobby.Id;
             _players = lobby.GetAllPlayers();
+
+            PlayerOrder = Permutation.Random(_players.Count);
             
             Settings = lobby.Settings;
             _grid = new Grid(Settings.GridSize, Settings.GridSize);
@@ -159,11 +161,6 @@ namespace TicTacTorus.Source.Ingame
             NextPlayer();
         }
 
-        void AnnounceWinners()
-        {
-            
-        }
-        
         #endregion
         #region Helper Methods
         
