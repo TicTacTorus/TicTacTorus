@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
+using TicTacTorus.Source.Hubs;
 using TicTacTorus.Source.Ingame;
 using TicTacTorus.Source.Ingame.GridSpecificContent.Position;
 using TicTacTorus.Source.Ingame.Move;
@@ -14,6 +15,7 @@ namespace TicTacTorus.Source.ServerHandler
 
         public string ID { get; set; }
         public List<IPlayer> players { get; set; }
+        public GameSettings Settings { get; set; }
 
         public ClientGame(Game game)
         {
@@ -21,6 +23,7 @@ namespace TicTacTorus.Source.ServerHandler
             Game.Parent = this;
             ID = game.ID.ToString();
             players = Game.GetPlayerList();
+            Settings = game.Settings;
         }
 
         public ClientGame()

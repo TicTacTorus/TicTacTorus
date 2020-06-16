@@ -303,12 +303,18 @@
                 NavigationManager.NavigateTo("/?error=IdLost");
             }
 
-            _client.Connection.On<string>("ReceiveGameInformation", (jsGame) =>
+            _client.Connection.On<string, byte>("ReceiveGameInformation", (jsGame, playerIndex) =>
             {
                 _game = JsonConvert.DeserializeObject<ClientGame>(jsGame, _jsonSerializerSettings);
-                if (_game != null) _client.Connection.SendAsync("OnUserConnectedToLobby", _game.players.IndexOf(User));
-                // maybe init stuff from game
+                if (_game == null)
+                {
+                    // error handling
+                    NavigationManager.NavigateTo("/error=gamenotfound");
+                }
+                _grid = new Grid(_game.Settings.GridSize, _game.Settings.GridSize);
+                _myIndex = playerIndex;
                 StateHasChanged();
+                _client.Connection.SendAsync("OnUserConnectedToLobby", _game.players.IndexOf(User));
             });
             
             _client.Connection.On<string>("ConnectToGameFailed", (errormessage)  =>
@@ -410,7 +416,7 @@
     private void SendPlacementMove(GlobalPos pos)
     {
         var move = new PlacementMove(_myIndex, pos);
-        _client.Connection.SendAsync("ReceivePlacementMove", IdString, move);
+        _client.Connection.SendAsync("ReceivePlacementMove", IdString, _myIndex, move);
     }
     
     #endregion

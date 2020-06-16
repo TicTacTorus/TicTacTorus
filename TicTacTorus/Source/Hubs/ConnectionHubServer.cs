@@ -160,7 +160,7 @@ namespace TicTacTorus.Source.Hubs
                 await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
                 await Groups.AddToGroupAsync(Context.ConnectionId,
                     Game.UniquePlayerGroup(new Base64(gameId),
-                        Server.Instance.LobbyGames[gameId].players.FindIndex(p => p.InGameName == player?.InGameName)));
+                        Server.Instance.ClientGames[gameId].players.FindIndex(p => p.InGameName == player?.InGameName)));
                 //await Clients.Group(gameId).SendAsync("ReceiveGameInformation", jsGame);
                 await Clients.Caller.SendAsync("ReceiveGameInformation", jsGame);
             }
@@ -173,8 +173,17 @@ namespace TicTacTorus.Source.Hubs
         #endregion
         #region Game
 
-        public void ReceivePlayerMove(IMove move)
+        public void ReceivePlayerMove(string gameId, byte playerIndex, IMove move)
         {
+            var validMove = GameHandler.PlaceMove(gameId, playerIndex, move);
+            if (validMove)
+            {
+                // send everyone
+            }
+            else
+            {
+                // send error
+            }
         }
 
         #endregion
