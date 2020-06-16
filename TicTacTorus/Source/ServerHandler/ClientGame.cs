@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using TicTacTorus.Source.Hubs;
 using TicTacTorus.Source.Ingame;
@@ -17,6 +18,9 @@ namespace TicTacTorus.Source.ServerHandler
         public List<IPlayer> players { get; set; }
         public GameSettings Settings { get; set; }
 
+        [JsonIgnore]
+        private IHubCallerClients _hubClients;
+
         public ClientGame(Game game)
         {
             Game = game;
@@ -24,6 +28,11 @@ namespace TicTacTorus.Source.ServerHandler
             ID = game.ID.ToString();
             players = Game.GetPlayerList();
             Settings = game.Settings;
+        }
+        
+        public ClientGame(Game game, IHubCallerClients hub) : this(game)
+        {
+            _hubClients = hub;
         }
 
         public ClientGame()
@@ -42,9 +51,12 @@ namespace TicTacTorus.Source.ServerHandler
 
         #endregion
 
-        public void DenyMove(in int plrIndex)
+        #region Moves
+
+        public async void DenyMove(int plrIndex)
         {
-            throw new System.NotImplementedException();
+            await _hubClients.Group(ID).SendAsync("ReceiveMessage", "Referee", "Invalid Move");
+            //_hubClients.Group(ID).SendAsync( "MoveError", "Move invalid of player " + Game.GetPlayerList()[plrIndex]);
         }
 
         public void DistributeMove(in int plrIndex, IMove move)
@@ -56,5 +68,8 @@ namespace TicTacTorus.Source.ServerHandler
         {
             throw new System.NotImplementedException();
         }
+
+        #endregion
+        
     }
 }

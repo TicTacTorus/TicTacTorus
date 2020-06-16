@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.SignalR;
 using TicTacTorus.Source.Ingame;
 using TicTacTorus.Source.Ingame.Move;
@@ -10,10 +11,11 @@ namespace TicTacTorus.Source.ServerHandler
     {
         #region Ingame
 
-        public static bool PlaceMove(string gameId, in byte playerIndex, IMove move)
+        public static bool PlaceMove(string gameId, IMove move)
         {
             var game = Server.Instance.GetClientGameById(gameId);
-            game.Game.ReceivePlayerMove(playerIndex, move);
+            //game.Game.ReceivePlayerMove(playerIndex, move);
+            game.DenyMove(move.Owner);
 
             return false;
         }
@@ -26,16 +28,16 @@ namespace TicTacTorus.Source.ServerHandler
         #endregion
         #region Init
 
-        public static ClientGame CreateGame(string lobbyId, IHubCallerClients clients)
+        public static ClientGame CreateGame(string lobbyId, IHubCallerClients hubClients)
         {
-            return Server.Instance.CreateGameFromLobby(lobbyId, clients);
+            return Server.Instance.CreateGameFromLobby(lobbyId, hubClients);
         }
 
 
-        public static Tuple<ClientGame, bool> AddPlayerToGame(string gameId, IPlayer player)
+        public static Tuple<ClientGame, bool, int> AddPlayerToGame(string gameId, IPlayer player)
         {
             var game = Server.Instance.GetClientGameById(gameId);
-            return Tuple.Create(game, game.AddPlayer(player));
+            return Tuple.Create(game, game.AddPlayer(player), game.players.IndexOf(player));
         }
 
         #endregion

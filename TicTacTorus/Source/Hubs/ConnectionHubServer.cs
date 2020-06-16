@@ -162,7 +162,7 @@ namespace TicTacTorus.Source.Hubs
                     Game.UniquePlayerGroup(new Base64(gameId),
                         Server.Instance.ClientGames[gameId].players.FindIndex(p => p.InGameName == player?.InGameName)));
                 //await Clients.Group(gameId).SendAsync("ReceiveGameInformation", jsGame);
-                await Clients.Caller.SendAsync("ReceiveGameInformation", jsGame);
+                await Clients.Caller.SendAsync("ReceiveGameInformation", jsGame, (byte)response.Item3);
             }
             else
             {
@@ -171,11 +171,12 @@ namespace TicTacTorus.Source.Hubs
         }
 
         #endregion
-        #region Game
+        #region GameInput
 
-        public void ReceivePlayerMove(string gameId, byte playerIndex, IMove move)
+        public async Task ReceivePlacementMove(string gameId, string jsonMove)
         {
-            var validMove = GameHandler.PlaceMove(gameId, playerIndex, move);
+            var move = JsonConvert.DeserializeObject<PlacementMove>(jsonMove);
+            var validMove = GameHandler.PlaceMove(gameId, move);
             if (validMove)
             {
                 // send everyone
@@ -186,6 +187,16 @@ namespace TicTacTorus.Source.Hubs
             }
         }
 
+        #endregion
+
+        #region GameOutput
+
+        public async void SendMoveError(string gameId, string message, byte indx)
+        {
+            await Clients.Group(gameId).SendAsync("ReceiveMessage", "Referee", message);
+            await Clients.Group(gameId + indx).SendAsync("MoveFailed");
+        }
+        
         #endregion
         #region Chat
         

@@ -288,18 +288,15 @@
     //activate control buttons / allow making a move
             });
 
+            _client.Connection.On("MoveFailed", () =>
+            {
+                _messages.Add("dooooooooooh!");
+            });
+
             #endregion
 
-    /*
             if ((User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) == null)
             {
-                User = PlayerFactory.CreateHumanPlayer();
-                await ProtectedSessionStorage.SetAsync("LoginData", User);
-            }*/
-
-            if ((User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) == null)
-            {
-    // Fehlermeldung an User
                 NavigationManager.NavigateTo("/?error=IdLost");
             }
 
@@ -314,7 +311,7 @@
                 _grid = new Grid(_game.Settings.GridSize, _game.Settings.GridSize);
                 _myIndex = playerIndex;
                 StateHasChanged();
-                _client.Connection.SendAsync("OnUserConnectedToLobby", _game.players.IndexOf(User));
+                //_client.Connection.SendAsync("OnUserConnectedToLobby", _game.players.IndexOf(User));
             });
             
             _client.Connection.On<string>("ConnectToGameFailed", (errormessage)  =>
@@ -407,16 +404,11 @@
     #endregion
     #region Communication
 
-    private void InitializeClient(byte playerIndex, int gridSize /*maybe more?*/)
-    {
-        _myIndex = playerIndex;
-        _grid = new Grid(gridSize, gridSize);
-    }
-    
     private void SendPlacementMove(GlobalPos pos)
     {
         var move = new PlacementMove(_myIndex, pos);
-        _client.Connection.SendAsync("ReceivePlacementMove", IdString, _myIndex, move);
+        var jsonMove = JsonConvert.SerializeObject(move);
+        _client.Connection.SendAsync("ReceivePlacementMove", IdString, jsonMove);
     }
     
     #endregion

@@ -34,14 +34,12 @@ namespace TicTacTorus.Source.Ingame
 
         public IList<IMove> MoveHistory { private set; get; }
 
-        private IHubCallerClients _clients;
-
         public ClientGame Parent;
 
         #endregion
         #region Constructors
 
-        public Game(ILobby lobby, IHubCallerClients clients)
+        public Game(ILobby lobby)
         {
             StartTime = DateTime.Now;
             ID = lobby.Id;
@@ -55,6 +53,7 @@ namespace TicTacTorus.Source.Ingame
         #endregion
         #region Game Loop
 
+        /*
         public async Task Run()
         {
             /*
@@ -68,7 +67,7 @@ namespace TicTacTorus.Source.Ingame
                 add move to history
                 repeat until won
                 at any time, somehow reset the move cycle if the timer stops
-            */
+            *
             
             var lastChange = new GlobalPos(0, 0);
             IPlayer lastPlayer = null;
@@ -92,6 +91,7 @@ namespace TicTacTorus.Source.Ingame
 
             await _clients.Group(ID.ToString()).SendAsync("AnnounceWinner");
         }
+        */
         
         #endregion
         #region Communication

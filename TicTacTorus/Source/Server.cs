@@ -122,8 +122,8 @@ namespace TicTacTorus.Source
             // Delete Player list first
             lobby.Players = new List<IPlayer>();
                 
-            var game = new Game(lobby, clients);
-            var lgame = new ClientGame(game);
+            var game = new Game(lobby);
+            var lgame = new ClientGame(game, clients);
             
             _games.Add(lgame.ID, lgame);
 
