@@ -192,6 +192,13 @@ namespace TicTacTorus.Source.Utility
             return "{ " + result + " }";
         }
 
+        public int[] ToArray()
+        {
+            var result = new int[Length];
+            _items.CopyTo(result, 0);
+            return result;
+        }
+        
         #endregion
     }
 }
