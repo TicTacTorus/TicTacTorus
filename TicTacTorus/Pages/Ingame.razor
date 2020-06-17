@@ -259,7 +259,7 @@
                 StateHasChanged();
             });
             
-            _client.Connection.On<string, string>("ReceiveError", (title, message) =>
+            _client.Connection.On<string, string>("ReceiveAlert", (title, message) =>
             {
                 JSRuntime.InvokeAsync<bool>("custom_alert", title, message);
                 //StateHasChanged(); //need?
@@ -292,6 +292,14 @@
                 StateHasChanged();
             });
 
+            _client.Connection.On<Dictionary<byte, GlobalPos>>("DisplayWinningMoves", (winners) =>
+            {
+                //technically there could be multiple winners depending on the kind of move that's been done (future move types).
+                //so here are the winners and the posisions where the win has been determined.
+                
+                //todo: tell the game renderer to render the winning lines here.
+            });
+            
             _client.Connection.On("ActivatePlayer", () =>
             {
     //activate control buttons / allow making a move
