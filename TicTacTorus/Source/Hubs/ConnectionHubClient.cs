@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 
@@ -16,7 +17,7 @@ namespace TicTacTorus.Source.Hubs
 		public ConnectionHubClient(NavigationManager nav)
 		{
 			Connection = new HubConnectionBuilder()
-				.WithUrl(nav.ToAbsoluteUri("/connectionHub"))
+				.WithUrl(nav.ToAbsoluteUri("/connectionHub"), HttpTransportType.LongPolling)
 				.ConfigureLogging(logging => {
 					logging.SetMinimumLevel(LogLevel.Information);
 					logging.AddConsole();
