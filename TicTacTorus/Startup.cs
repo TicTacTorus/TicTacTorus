@@ -32,11 +32,6 @@ namespace TicTacTorus
             services.AddSignalR();
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddResponseCompression(opts =>
-            {
-                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-                    new[] { "application/octet-stream" });
-            });
             services.AddSession();
         }
 

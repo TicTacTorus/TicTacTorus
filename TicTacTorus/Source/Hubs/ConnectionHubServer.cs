@@ -17,6 +17,12 @@ namespace TicTacTorus.Source.Hubs
 {
     public class ConnectionHubServer : Hub
     {
+        public override Task OnDisconnectedAsync(Exception exception)
+        {
+            Console.WriteLine("lol");
+            return null;
+        }
+
         #region Lobby
         public async Task CreateLobby(HumanPlayer hp)
         {

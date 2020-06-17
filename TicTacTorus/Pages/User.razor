@@ -225,7 +225,7 @@ else
             _gamesWon = _stats.WonGames;
             _chains = _stats.Chains;
             _symbolsPlaced = _chains.Sum();
-            _streak = _chains.Count;
+            _streak = _chains.Count >= 3 ? _chains[3] : 0;
             StateHasChanged();
         });
 

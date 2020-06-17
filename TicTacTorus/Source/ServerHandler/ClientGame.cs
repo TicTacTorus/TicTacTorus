@@ -70,8 +70,8 @@ namespace TicTacTorus.Source.ServerHandler
 
         public async void DenyMove(int plrIndex)
         {
-            //await _hubClients.Group(ID).SendAsync("ReceiveMessage", "Referee", "Invalid Move");
-            await _hubClients.Group(Game.UniquePlayerGroup(ID, plrIndex)).SendAsync( "MoveFailed");
+            var group = Game.UniquePlayerGroup(Game.ID, plrIndex);
+            await _hubClients.Group(group).SendAsync("ReceiveAlert", "Error", "Invalid Move");
         }
 
         public async Task DistributeMove(int plrIndex, IMove move)
@@ -83,8 +83,23 @@ namespace TicTacTorus.Source.ServerHandler
 
         public async void AnnounceWinners(Dictionary<byte, GlobalPos> winners)
         {
-            var jsonWinners = JsonConvert.SerializeObject(winners, Formatting.Indented, _jsonSerializerSettings);
-            await _hubClients.Group(ID).SendAsync("AnnounceWinner", jsonWinners);
+            var title = "We have a winner!";
+            if (winners.Count > 1)
+            {
+                title = "We have multiple winners!";
+            }
+
+            var names = "";
+            foreach (var winner in winners)
+            {
+                if (names.Length > 0)
+                {
+                    names += '\n';
+                }
+                names += Game.GetPlayerList()[winner.Key].InGameName;
+            }
+            await _hubClients.Group(ID).SendAsync("ReceiveAlert", title, names);
+            await _hubClients.Group(ID).SendAsync("DisplayWinningMoves", winners);
         }
 
         #endregion
