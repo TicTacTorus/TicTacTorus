@@ -11,6 +11,7 @@
 @using Newtonsoft.Json
 @using TicTacTorus.Source.PlayerSpecificContent
 @using System.Drawing
+@using System.Reflection
 @using TicTacTorus.Source.Ingame.Move
 @using TicTacTorus.Source.ServerHandler
 @using TicTacTorus.Source.Utility
@@ -258,9 +259,9 @@
                 StateHasChanged();
             });
             
-            _client.Connection.On<string>("ReceiveError", (message) =>
+            _client.Connection.On<string, string>("ReceiveError", (title, message) =>
             {
-                JSRuntime.InvokeAsync<bool>("custom_alert", message);
+                JSRuntime.InvokeAsync<bool>("custom_alert", title, message);
                 //StateHasChanged(); //need?
             });
             
