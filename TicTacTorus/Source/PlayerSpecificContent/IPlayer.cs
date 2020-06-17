@@ -11,7 +11,8 @@ namespace TicTacTorus.Source.PlayerSpecificContent
         #region Fields
 
         public string ID { get; set; }
-        public string SessionID { get; set; }
+        //public string SessionID { get; set; }
+        public byte Index { get; set; }
         public string InGameName { get; set; }
         public Color PlrColor { get; set; }
         public byte Symbol { get; set; }

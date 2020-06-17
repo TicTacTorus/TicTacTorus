@@ -53,13 +53,15 @@ namespace TicTacTorus.Source
 
         public bool AddLobby(ILobby lobby)
         {
-            if (LobbyIdIsUnique(lobby.Id.ToString()))
-            {
-                _lobbies.Add(lobby.Id.ToString() ,lobby);
-                return true;
-            }
+            if (!LobbyIdIsUnique(lobby.Id.ToString())) return false;
+            _lobbies.Add(lobby.Id.ToString() ,lobby);
+            return true;
 
-            return false;
+        }
+        
+        public void RemoveLobby(string lobbyId)
+        {
+            _lobbies.Remove(lobbyId);
         }
 
         public ILobby GetLobbyById(string id)
@@ -131,5 +133,7 @@ namespace TicTacTorus.Source
         }
 
         #endregion
+
+        
     }
 }

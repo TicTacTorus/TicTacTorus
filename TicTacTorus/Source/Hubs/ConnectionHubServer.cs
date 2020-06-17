@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Drawing;
 using System.Threading.Tasks;
@@ -25,19 +26,22 @@ namespace TicTacTorus.Source.Hubs
         
         public async Task JoinLobby(string lobbyId, string player)
         {
-            var hPlayer = JsonConvert.DeserializeObject<HumanPlayer>(player);
-            hPlayer.SessionID = Context.ConnectionId;
-			
-            var lobby = LobbyHandler.AddPlayerToLobby(lobbyId, hPlayer);
-            var indented = Formatting.Indented;
             var settings = new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.All
             };
-            var jsLobby = JsonConvert.SerializeObject(lobby, indented, settings);
+            var hPlayer = JsonConvert.DeserializeObject<HumanPlayer>(player);
 
-            await Clients.Caller.SendAsync("GetLobby", jsLobby, Context.ConnectionId);
-            await Clients.Group(lobbyId).SendAsync("LobbyChanged", jsLobby);
+            // logic
+            var lobby= LobbyHandler.AddPlayerToLobby(lobbyId, hPlayer);
+            
+            // prepare json-strings
+            var jsLobby = JsonConvert.SerializeObject(lobby, Formatting.Indented, settings);
+            var jsPlayers = JsonConvert.SerializeObject(lobby.Players, Formatting.Indented, settings);
+
+            // add to group and send
+            await Clients.Caller.SendAsync("GetLobby", jsLobby, hPlayer.Index);
+            await Clients.Group(lobbyId).SendAsync("PlayerListChanged", jsPlayers);
             await Groups.AddToGroupAsync(Context.ConnectionId,
                 Game.UniquePlayerGroup(new Base64(lobbyId),
                     Server.Instance.Lobbies[lobbyId].Players.FindIndex(p => p.InGameName == hPlayer.InGameName)));
@@ -46,20 +50,27 @@ namespace TicTacTorus.Source.Hubs
         
         public async Task RemovePlayerFromLobby(string lobbyId, string player)
         {
-            var p = JsonConvert.DeserializeObject<IPlayer>(player);
-            var (isRemoved, lobby) = LobbyHandler.RemovePlayerFromLobby(lobbyId, p);
+            var settings = new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.All
+            };
+            var p = JsonConvert.DeserializeObject<IPlayer>(player, settings);
+            
+            // logic
+            var playerList = LobbyHandler.RemovePlayerFromLobby(lobbyId, p);
 
-            if (isRemoved)
-            {
-                await Clients.Group(lobbyId).SendAsync("ReceiveMessage", p.InGameName, "I left the Lobby");
-                
-                await Clients.Group(lobbyId).SendAsync("LobbyChanged", JsonConvert.SerializeObject(lobby));
-            }
-            else
-            {
-                await Clients.Group(lobbyId).SendAsync("ReceiveMessage", "Game", "There was something wrong. "+p.InGameName+" couldn't be removed");
-            }
+            
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, lobbyId);
+
+            await Clients.Group(lobbyId).SendAsync("ReceiveMessage", p.InGameName, "I left the Lobby");
+            await Clients.Group(lobbyId).SendAsync("PlayerListChanged", JsonConvert.SerializeObject(playerList, Formatting.Indented, settings));
+           
         }
+        /*
+        public async Task LeaveLobby(string lobbyId, string player)
+        {
+            await RemovePlayerFromLobby(lobbyId, player);
+        }*/
 
         public async Task CheckLobbyExisting(string id)
         {
@@ -67,11 +78,6 @@ namespace TicTacTorus.Source.Hubs
             await Clients.Caller.SendAsync("ReceiveLobbyExisting", exists);
         }
 
-        public Task LeaveLobby(string lobbyId)
-        {
-            return Groups.RemoveFromGroupAsync(Context.ConnectionId, lobbyId);
-        }
-        
         public async Task OnConnectedUser(string userId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, userId);
@@ -112,6 +118,7 @@ namespace TicTacTorus.Source.Hubs
             }
         }
 
+        /*
         public async Task ChangeLobbyPlayerCount(string lobbyId, int maxCount)
         {
             var lobby = Server.Instance.GetLobbyById(lobbyId);
@@ -133,6 +140,7 @@ namespace TicTacTorus.Source.Hubs
             Server.Instance.GetLobbyById(lobbyId).IsPrivate = isPrivate;
             // maybe send refresh to LobbyHandler (and every person on lobbylist-site)?
         }
+        */
 
         #endregion
         #region LobbyToGame

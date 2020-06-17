@@ -189,6 +189,10 @@ namespace TicTacTorus.Source.Ingame
         {
             return $"{gameID}::{playerIndex}";
         }
+        public static string UniquePlayerGroup(string gameID, int playerIndex)
+        {
+            return $"{gameID}::{playerIndex}";
+        }
         
         #endregion
         #region Field Changing Methods

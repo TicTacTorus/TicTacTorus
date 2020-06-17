@@ -39,7 +39,7 @@
                 {
                     <tr id="lobbyRow" onclick="location.href ='game/@lobby.Id.ToString()';">
                         <td>@lobby.Name</td>
-                        <td class="playerCount">@lobby.GetAllPlayers().Count/@lobby.MaxPlayerCount</td>
+                        <td class="playerCount">@lobby.PlayerCount/@lobby.MaxPlayerCount</td>
                         <td class="status">@lobby.Status</td>
                         <td>@lobby.Description</td>
                     </tr>

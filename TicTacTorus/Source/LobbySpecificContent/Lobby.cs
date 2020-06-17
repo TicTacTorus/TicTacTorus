@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.SignalR;
 using TicTacTorus.Source.Ingame;
 using TicTacTorus.Source.PlayerSpecificContent;
 using TicTacTorus.Source.Utility;
@@ -14,6 +16,8 @@ namespace TicTacTorus.Source.LobbySpecificContent
         [StringLength(10, ErrorMessage = "Description is too long.")] 
         public string Name { get; set; }
         public int MaxPlayerCount { get; set; }
+        public int PlayerCount { get; set; }
+
         public string Status { get; set; }
         public string Description { get; set; }
         
@@ -52,6 +56,12 @@ namespace TicTacTorus.Source.LobbySpecificContent
             Status = status;
             Description = description;
         }
+        public Lobby(Base64 id, string name, string status, string description, int maxPlayerCount, bool isPrivate) 
+            : this(name, status, description, maxPlayerCount, isPrivate)
+        {
+            Id = id;
+        }
+        
         public Lobby(string name, IPlayer owner ,string status, string description, int maxPlayerCount, bool isPrivate) 
             : this(name, status, description, maxPlayerCount, isPrivate)
         {
@@ -67,19 +77,27 @@ namespace TicTacTorus.Source.LobbySpecificContent
         #region AccessMethods
         public bool AddPlayer(IPlayer player)
         {
-            if (Players.Count < MaxPlayerCount)
-            {
-                Players.Add(player);
-                return true;
-            }
+            if (Players.Count >= MaxPlayerCount) return false;
+            player.Index = (byte) Players.Count;
+            Players.Add(player);
+            PlayerCount++;
+            return true;
 
-            return false;
         }
 
+        /*
         public bool RemovePlayer(IPlayer player)
         {
-            return Players.Remove(player);
+            //return Players.Remove(player);
+            byte indx = GetIndexByPlayer(player);
+            if (indx >= 0xFF)
+            {
+                return false;
+            }
+
+            return RemovePlayer(indx);
         }
+        
         public bool RemovePlayer(byte index)
         {
             if (Players.Count >= index)
@@ -88,6 +106,13 @@ namespace TicTacTorus.Source.LobbySpecificContent
             }
             Players.RemoveAt(index);
             return true;
+        }
+        */
+
+        public void RemovePlayer(byte index)
+        {
+            Players[index] = null;
+            PlayerCount--;
         }
 
         public IPlayer GetPlayerAt(byte index)
@@ -107,12 +132,22 @@ namespace TicTacTorus.Source.LobbySpecificContent
 
             return null;
         }
+        /*
+        public byte GetIndexByPlayer(IPlayer player)
+        {
+            for(byte i=0; i<Players.Count; i++)
+            {
+                if (Players[i].Equals(player)) return i;
+            }
+
+            return 0xFF;
+        }*/
 
         public List<IPlayer> GetAllPlayers()
         {
             return Players;
         }
-        
+
         #endregion
     }
 

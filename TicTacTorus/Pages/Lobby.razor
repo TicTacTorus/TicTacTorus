@@ -28,9 +28,9 @@
 </div>
 @if (_lobby != null)
 {
-    <section contenteditable="true" class="text-center my-3">
-        <p>@_lobby.Description</p>
-    </section>
+    <div class="text-center my-3">
+        <h2>@_lobby.Description</h2>
+    </div>
     <div class="d-flex justify-content-center">
 
         <div class="row">
@@ -53,22 +53,25 @@
                                 {
                                     @foreach (var elem in _lobby.GetAllPlayers())
                                     {
-                                        <tr id="player_table_row">
-                                            @if (@elem != _lobby.GetPlayerAt(0) && User.ID == (_lobby.GetPlayerAt(0).ID))
-                                            {
-                                                <td><button @onclick="@(() => RemovePlayerFromLobby(@elem))">Kick</button></td>
-                                            }
-                                            <td>
-                                                @{
-                                                    var classText = "color:" + ColorTranslator.ToHtml(@elem.PlrColor) + ";" +
-                                                                    "\nfont-size: large;" +
-                                                                    "\nfont-weight: bold;" +
-                                                                    "\ntext-shadow: 1px 1px 0px black;";
-                                                    <div style="@classText">@elem.InGameName</div>
+                                        @if (elem != null)
+                                        {
+                                            <tr id="player_table_row">
+                                                @if (@elem != _lobby.GetPlayerAt(0) && User.ID == (_lobby.GetPlayerAt(0).ID))
+                                                {
+                                                    <td><button @onclick="@(() => RemovePlayerFromLobby(@elem))">Kick</button></td>
                                                 }
-                                            </td>
-                                            <td>@elem.Symbol</td>
-                                        </tr>
+                                                <td>
+                                                    @{
+                                                        var classText = "color:" + ColorTranslator.ToHtml(@elem.PlrColor) + ";" +
+                                                                        "\nfont-size: large;" +
+                                                                        "\nfont-weight: bold;" +
+                                                                        "\ntext-shadow: 1px 1px 0px black;";
+                                                        <div style="@classText">@elem.InGameName</div>
+                                                    }
+                                                </td>
+                                                <td>@elem.Symbol</td>
+                                            </tr>
+                                        }
                                     }
                                 }
                             </table>
@@ -182,8 +185,8 @@
     private void LeaveLobby()
     {
         NavigationManager.NavigateTo("/");
-        string jsonPlayer = JsonConvert.SerializeObject(User);
-        _client.Connection.SendAsync("RemovePlayerFromLobby", jsonPlayer);
+        var jsonPlayer = JsonConvert.SerializeObject(User, Formatting.Indented, _jsonSerializerSettings);
+        _client.Connection.SendAsync("RemovePlayerFromLobby", IdString, jsonPlayer);
     }
     #endregion
     #region LobbyStatChanges
@@ -230,7 +233,7 @@
     void RemovePlayerFromLobby(IPlayer player)
     {
     // remove them
-        _client.Connection.SendAsync("RemovePlayerFromLobby", IdString, player.SessionID);
+        _client.Connection.SendAsync("RemovePlayerFromLobby", IdString, player.Index);
     // message remaining players
         SendSystemMessage(player.InGameName + " was removed by the Host");
     }
@@ -269,13 +272,11 @@
                 StateHasChanged();
             });
         
-            _client.Connection.On<string, string>("GetLobby", async (lobby, sessionID) =>
+            _client.Connection.On<string, byte>("GetLobby",  (lobby, index) =>
             {
                 _lobby = JsonConvert.DeserializeObject<Source.LobbySpecificContent.Lobby>(lobby, _jsonSerializerSettings);
+                User.Index = index;
                 StateHasChanged();
-                
-                User.SessionID = sessionID;
-                await ProtectedSessionStorage.SetAsync("LoginData", User);
             });
 
             _client.Connection.On<string>("LobbyChanged", (lobby) =>
@@ -284,9 +285,16 @@
                 StateHasChanged();
             });
 
+            _client.Connection.On<string>("PlayerListChanged", (playerList) =>
+            {
+                _lobby.Players = JsonConvert.DeserializeObject<List<IPlayer>>(playerList, _jsonSerializerSettings);
+                StateHasChanged();
+            });
+
             _client.Connection.On<string>("TitleChanged", (title) =>
             {
                 _lobby.Name = title;
+                StateHasChanged();
             });
 
             _client.Connection.On<string>("DescriptionChanged", (description) =>
@@ -323,7 +331,7 @@
             {
                 TypeNameHandling = TypeNameHandling.All
             };
-            string jsonUser = JsonConvert.SerializeObject(User, settings);
+            var jsonUser = JsonConvert.SerializeObject(User, settings);
             
             await _client.Connection.SendAsync("JoinLobby", IdString, jsonUser);
             

@@ -14,9 +14,7 @@ namespace TicTacTorus.Source.ServerHandler
         public static bool PlaceMove(string gameId, IMove move)
         {
             var game = Server.Instance.GetClientGameById(gameId);
-            //game.Game.ReceivePlayerMove(playerIndex, move);
-            game.DenyMove(move.Owner);
-
+            game.SendMoveToGame(move);
             return false;
         }
 

@@ -6,17 +6,11 @@ namespace TicTacTorus.Source.Generator
 {
     public class LobbyFactory
     {
-        public static Lobby CreateLobbyNoId(IPlayer owner)
-        {
-            return new Lobby(CreateLobbyName(owner), owner, CreateLobbyStatus(),
-                CreateLobbyDescription(owner), 20, true);
-        }
-        
         public static ILobby CreateLobbyWithId(IPlayer owner)
         {
-            ILobby lobby = new Lobby(CreateLobbyName(owner), owner, CreateLobbyStatus(),
+            ILobby lobby = new Lobby(CreateLobbyName(owner), CreateLobbyStatus(),
                 CreateLobbyDescription(owner), 20, true);
-            lobby = AddId(lobby);
+            AddId(lobby);
             return lobby;
         }
 
@@ -26,16 +20,12 @@ namespace TicTacTorus.Source.Generator
                 ByteGenerator.GetByte());
             return CreateLobbyWithId(owner);
         }
-
-        private static ILobby AddId(ILobby l)
+        
+        private static void AddId(ILobby l)
         {
             var id = Base64.Random();
-            if (Server.Instance.LobbyIdIsUnique(id.ToString()))
-            {
-                l.Id = id;
-                return l;
-            }
-            return AddId(l);
+            if (!Server.Instance.LobbyIdIsUnique(id.ToString())) AddId(l);
+            l.Id = id;
         }
 
         private static string CreateLobbyName(IPlayer owner)

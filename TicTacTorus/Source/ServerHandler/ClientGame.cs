@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using TicTacTorus.Source.Hubs;
@@ -23,6 +24,9 @@ namespace TicTacTorus.Source.ServerHandler
         [JsonIgnore]
         private IHubCallerClients _hubClients;
 
+        [JsonIgnore] 
+        private JsonSerializerSettings _jsonSerializerSettings;
+
         public ClientGame(Game game)
         {
             Game = game;
@@ -31,6 +35,9 @@ namespace TicTacTorus.Source.ServerHandler
             players = Game.GetPlayerList();
             PlayerOrder = game.PlayerOrder.ToArray();
             Settings = game.Settings;
+            _jsonSerializerSettings = new JsonSerializerSettings() {
+                TypeNameHandling = TypeNameHandling.All
+            };
         }
         
         public ClientGame(Game game, IHubCallerClients hub) : this(game)
@@ -56,20 +63,28 @@ namespace TicTacTorus.Source.ServerHandler
 
         #region Moves
 
+        public void SendMoveToGame(IMove move)
+        {
+            Game.ReceivePlayerMove(move.Owner, move);
+        }
+
         public async void DenyMove(int plrIndex)
         {
-            await _hubClients.Group(ID).SendAsync("ReceiveMessage", "Referee", "Invalid Move");
-            //_hubClients.Group(ID).SendAsync( "MoveError", "Move invalid of player " + Game.GetPlayerList()[plrIndex]);
+            //await _hubClients.Group(ID).SendAsync("ReceiveMessage", "Referee", "Invalid Move");
+            await _hubClients.Group(Game.UniquePlayerGroup(ID, plrIndex)).SendAsync( "MoveFailed");
         }
 
-        public void DistributeMove(in int plrIndex, IMove move)
+        public async Task DistributeMove(int plrIndex, IMove move)
         {
-            throw new System.NotImplementedException();
+            //await _hubClients.Group(ID).SendAsync("ReceiveMessage", "Referee", "Invalid Move");
+            var jsonMove = JsonConvert.SerializeObject(move, Formatting.Indented, _jsonSerializerSettings);
+            await _hubClients.Group(ID).SendAsync("ReceivePlayerMove", jsonMove);
         }
 
-        public void AnnounceWinners(Dictionary<byte, GlobalPos> winners)
+        public async void AnnounceWinners(Dictionary<byte, GlobalPos> winners)
         {
-            throw new System.NotImplementedException();
+            var jsonWinners = JsonConvert.SerializeObject(winners, Formatting.Indented, _jsonSerializerSettings);
+            await _hubClients.Group(ID).SendAsync("AnnounceWinner", jsonWinners);
         }
 
         #endregion
