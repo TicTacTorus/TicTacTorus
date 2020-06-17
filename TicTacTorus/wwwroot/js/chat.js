@@ -1,17 +1,9 @@
 ﻿"use strict";
 
-document.addEventListener('DOMContentLoaded', init, false);
 
+var connection = new signalR.HubConnectionBuilder().withUrl("/connectionHub").build();
+connection.start();
 
-function init() {
-    var connection = new signalR.HubConnectionBuilder().withUrl("/connectionHub").build();
-    connection.start().then(function () {
-        listeners();
-        clientListeners()
-    }).catch(function (err) {
-        return console.error(err.toString());
-    });
-}
 
 function listeners() {
     document.getElementById("messageInput").addEventListener("keyup", event => {
@@ -29,7 +21,7 @@ function listeners() {
 }
 
 function clientListeners() {
-    connection.on("ReceiveMessage", function (user, message) {
+    connection.on("ReceiveMessage2", function (user, message) {
         var msg = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         var encodedMsg = user + " says " + msg + "\n";
         alert("Received: " + msg);

@@ -247,7 +247,7 @@
                 User = PlayerFactory.CreateHumanPlayer();
                 await ProtectedSessionStorage.SetAsync("LoginData", User);
             }
-            _client = new ConnectionHubClient(NavigationManager, new Base64().ToString());
+            _client = new ConnectionHubClient(NavigationManager);
             
             InviteLink += IdString;
 

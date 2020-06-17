@@ -224,7 +224,7 @@ namespace TicTacTorus.Source.Hubs
         
         public async Task SendMessage2(string user, string message)
         {
-            await Clients.All.SendAsync("ReceiveMessage", user, message);
+            await Clients.All.SendAsync("ReceiveMessage2", user, message);
         }
         
         #endregion
