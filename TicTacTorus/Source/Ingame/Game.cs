@@ -153,11 +153,11 @@ namespace TicTacTorus.Source.Ingame
                     ++pos.Y;
                 }
             }
-
+/*
             if (winners.Count > 0)
             {
                 Parent.AnnounceWinners(winners);
-            }
+            }*/
             NextPlayer();
         }
 

@@ -78,6 +78,7 @@ namespace TicTacTorus.Source.ServerHandler
         {
             //await _hubClients.Group(ID).SendAsync("ReceiveMessage", "Referee", "Invalid Move");
             var jsonMove = JsonConvert.SerializeObject(move, Formatting.Indented, _jsonSerializerSettings);
+            await _hubClients.Group(ID).SendAsync("MoveFailed");
             await _hubClients.Group(ID).SendAsync("ReceivePlayerMove", jsonMove);
         }
 
@@ -99,7 +100,7 @@ namespace TicTacTorus.Source.ServerHandler
                 names += Game.GetPlayerList()[winner.Key].InGameName;
             }
             await _hubClients.Group(ID).SendAsync("ReceiveAlert", title, names);
-            await _hubClients.Group(ID).SendAsync("DisplayWinningMoves", winners);
+            await _hubClients.Group(ID).SendAsync("DisplayWinningMoves", JsonConvert.SerializeObject(winners, Formatting.Indented, _jsonSerializerSettings));
         }
 
         #endregion
