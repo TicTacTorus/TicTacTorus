@@ -258,6 +258,12 @@
                 StateHasChanged();
             });
             
+            _client.Connection.On<string>("ReceiveError", (message) =>
+            {
+                JSRuntime.InvokeAsync<bool>("custom_alert", message);
+                //StateHasChanged(); //need?
+            });
+            
             _client.Connection.On<string>("ReceivePlayerMove", (moveObj) =>
             {
                 if (!_initialized)

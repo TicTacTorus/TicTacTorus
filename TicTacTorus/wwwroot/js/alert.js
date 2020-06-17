@@ -2,4 +2,5 @@
 {
     //customize?
     alert(message);
+    return true;
 }
