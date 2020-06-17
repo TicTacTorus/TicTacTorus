@@ -8,6 +8,7 @@
 @using TicTacTorus.Source.Hubs
 @using TicTacTorus.Source.LobbySpecificContent
 @using TicTacTorus.Source.PlayerSpecificContent
+@using TicTacTorus.Source.Utility
 @using JsonSerializer = System.Text.Json.JsonSerializer
 @inject NavigationManager NavigationManager
 @inject ProtectedSessionStorage ProtectedSessionStorage
@@ -87,12 +88,9 @@
                         <b>
                             <h3 class="text-center">Chat</h3></b>
                         <hr>
-                        <textarea id="messagesList" readonly>@foreach (var message in _messages)
-                                                             {
-                                                                 @message<br>
-                                                             }
-                    </textarea>
-                        <input @bind="_messageInput" @onkeyup="SendChatMessage" disabled="@(!IsConnected)" class="w-100 align-bottom"/>
+                        <textarea id="messagesList" readonly>
+                        </textarea>
+                        <input id="messageInput" disabled="@(!IsConnected)" class="w-100 align-bottom"/>
                     </div>
                 </div>
                 <div class="below-chat col">
@@ -244,7 +242,12 @@
     {
         if (firstRender)
         {
-            _client = new ConnectionHubClient(NavigationManager);
+            if ((User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) == null)
+            {
+                User = PlayerFactory.CreateHumanPlayer();
+                await ProtectedSessionStorage.SetAsync("LoginData", User);
+            }
+            _client = new ConnectionHubClient(NavigationManager, new Base64().ToString());
             
             InviteLink += IdString;
 
@@ -322,11 +325,7 @@
         
     #endregion
 
-            if ((User = await ProtectedSessionStorage.GetAsync<HumanPlayer>("LoginData")) == null)
-            {
-                User = PlayerFactory.CreateHumanPlayer();
-                await ProtectedSessionStorage.SetAsync("LoginData", User);
-            }
+            
             var settings = new JsonSerializerSettings()
             {
                 TypeNameHandling = TypeNameHandling.All

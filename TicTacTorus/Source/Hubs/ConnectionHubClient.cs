@@ -14,10 +14,10 @@ namespace TicTacTorus.Source.Hubs
 		#endregion
 		#region Constructor
 
-		public ConnectionHubClient(NavigationManager nav)
+		public ConnectionHubClient(NavigationManager nav, string id = "")
 		{
 			Connection = new HubConnectionBuilder()
-				.WithUrl(nav.ToAbsoluteUri("/connectionHub"), HttpTransportType.LongPolling)
+				.WithUrl(nav.ToAbsoluteUri("/connectionHub/" + id), HttpTransportType.WebSockets)
 				.ConfigureLogging(logging => {
 					logging.SetMinimumLevel(LogLevel.Information);
 					logging.AddConsole();
