@@ -116,9 +116,7 @@
                         <b><h3 class="text-center">Settings</h3></b>
                         <hr>
                         <table>
-                            @if (User.ID == _lobby?.GetPlayerAt(0).ID)
-                            {
-                                <tr>
+                            <tr>
                                     <h3>Change Lobby Information</h3></tr>
                                 <tr>
                                     <div class="mt-2"><b>Lobby Title</b></div>
@@ -132,7 +130,6 @@
                                     <div class="mt-2"><b>Lobby Status</b></div>
                                     <input type="text" @onkeyup="ChangeStatus" @bind="_newStatus" placeholder="@_lobby?.Status"/>
                                 </tr>
-                            }
                         </table>
                     </div>
                 </div>
@@ -150,8 +147,8 @@
     static Source.LobbySpecificContent.Lobby _lobby;
     
     private string InviteLink { get; set; } = "tictactorus.de/game/";
-    
-    JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings() {
+
+    readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings() {
         TypeNameHandling = TypeNameHandling.All
     };
     
@@ -176,7 +173,7 @@
 
 @functions 
 {
-    #region Non-Lobby-Actions
+    #region Lobby-Transfer-Actions
     private void CreateGame()
     {
         _client.Connection.SendAsync("StartGame", IdString);
@@ -184,9 +181,7 @@
 
     private void LeaveLobby()
     {
-        NavigationManager.NavigateTo("/");
-        var jsonPlayer = JsonConvert.SerializeObject(User, Formatting.Indented, _jsonSerializerSettings);
-        _client.Connection.SendAsync("RemovePlayerFromLobby", IdString, jsonPlayer);
+        _client.Connection.SendAsync("RemovePlayerFromLobby", IdString, User.Index);
     }
     #endregion
     #region LobbyStatChanges
@@ -277,6 +272,11 @@
                 _lobby = JsonConvert.DeserializeObject<Source.LobbySpecificContent.Lobby>(lobby, _jsonSerializerSettings);
                 User.Index = index;
                 StateHasChanged();
+            });
+            
+            _client.Connection.On("LeaveLobby", () =>
+            {
+                NavigationManager.NavigateTo("/");
             });
 
             _client.Connection.On<string>("LobbyChanged", (lobby) =>

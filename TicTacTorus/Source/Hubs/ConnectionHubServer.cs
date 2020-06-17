@@ -48,23 +48,22 @@ namespace TicTacTorus.Source.Hubs
             await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
         }
         
-        public async Task RemovePlayerFromLobby(string lobbyId, string player)
+        public async Task RemovePlayerFromLobby(string lobbyId, byte index)
         {
             var settings = new JsonSerializerSettings()
             {
                 TypeNameHandling = TypeNameHandling.All
             };
-            var p = JsonConvert.DeserializeObject<IPlayer>(player, settings);
             
             // logic
-            var playerList = LobbyHandler.RemovePlayerFromLobby(lobbyId, p);
+            var (playerList, removedPlayer) = LobbyHandler.RemovePlayerFromLobby(lobbyId, index);
 
+            // notify removed player
+            await Clients.Group(Game.UniquePlayerGroup(lobbyId, index)).SendAsync("LeaveLobby");
             
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, lobbyId);
-
-            await Clients.Group(lobbyId).SendAsync("ReceiveMessage", p.InGameName, "I left the Lobby");
+            //await Groups.RemoveFromGroupAsync(Context.ConnectionId, lobbyId);
+            await Clients.Group(lobbyId).SendAsync("ReceiveMessage", removedPlayer.InGameName, "I left the Lobby");
             await Clients.Group(lobbyId).SendAsync("PlayerListChanged", JsonConvert.SerializeObject(playerList, Formatting.Indented, settings));
-           
         }
         /*
         public async Task LeaveLobby(string lobbyId, string player)

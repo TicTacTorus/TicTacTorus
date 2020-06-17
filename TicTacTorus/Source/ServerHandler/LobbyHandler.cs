@@ -35,6 +35,7 @@ namespace TicTacTorus.Source.LobbySpecificContent
 			return lobby;
 		}
 
+		/*
 		public static List<IPlayer> RemovePlayerFromLobby(string lobbyId, IPlayer player)
 		{
 			var lobby = Server.Instance.GetLobbyById(lobbyId);
@@ -47,6 +48,22 @@ namespace TicTacTorus.Source.LobbySpecificContent
 			}
 
 			return lobby.Players;
+		}*/
+
+		public static Tuple<List<IPlayer>, IPlayer> RemovePlayerFromLobby(string lobbyId, byte index)
+		{
+			var lobby = Server.Instance.GetLobbyById(lobbyId);
+			var player = lobby.GetPlayerAt(index);
+			
+			lobby.RemovePlayer(index);
+			
+			// remove Lobby from Server if necessary
+			if (lobby.PlayerCount <= 0)
+			{
+				Server.Instance.RemoveLobby(lobbyId);
+			}
+
+			return Tuple.Create(lobby.Players, player);
 		}
         
         
