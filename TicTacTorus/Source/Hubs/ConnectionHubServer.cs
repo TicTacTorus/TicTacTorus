@@ -34,6 +34,10 @@ namespace TicTacTorus.Source.Hubs
 
             // logic
             var lobby= LobbyHandler.AddPlayerToLobby(lobbyId, hPlayer);
+            if (lobby == null)
+            {
+                await Clients.Caller.SendAsync("ReceiveLobbyExisting", false);
+            }
             
             // prepare json-strings
             var jsLobby = JsonConvert.SerializeObject(lobby, Formatting.Indented, settings);

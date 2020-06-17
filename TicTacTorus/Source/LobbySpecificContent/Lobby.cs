@@ -111,6 +111,8 @@ namespace TicTacTorus.Source.LobbySpecificContent
 
         public void RemovePlayer(byte index)
         {
+            if (Players[index] == null)
+                return;
             Players[index] = null;
             PlayerCount--;
         }

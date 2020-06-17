@@ -16,23 +16,31 @@ namespace TicTacTorus.Source.LobbySpecificContent
 		}
 		public static ILobby AddPlayerToLobby(string lobbyId, IPlayer player)
 		{
-			var lobby = Server.Instance.GetLobbyById(lobbyId);
-			
-			if (player.ID == null && !lobby.Players.Exists(p => p.InGameName == player.InGameName))
+			try
 			{
-				lobby.AddPlayer(player);
+				var lobby = Server.Instance.GetLobbyById(lobbyId);
+
+				if (player.ID == null && !lobby.Players.Exists(p => p.InGameName == player.InGameName))
+				{
+					lobby.AddPlayer(player);
+				}
+				else if (!lobby.Players.Exists(p => p.ID == player.ID))
+				{
+					lobby.AddPlayer(player);
+				}
+
+				// prüfe per index
+				if ((lobby.Players.Count > player.Index) && ((lobby.Players[player.Index] == null)))
+				{
+					lobby.AddPlayer(player);
+				}
+
+				return lobby;
 			}
-			else if(!lobby.Players.Exists(p => p.ID == player.ID))
+			catch (Exception e)
 			{
-				lobby.AddPlayer(player);
+				return null;
 			}
-			// prüfe per index
-			if ( (lobby.Players.Count > player.Index) && ( (lobby.Players[player.Index] == null) ) )
-			{
-				lobby.AddPlayer(player);
-			}
-			
-			return lobby;
 		}
 
 		/*
