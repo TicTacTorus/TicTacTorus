@@ -11,6 +11,7 @@
 @using Newtonsoft.Json
 @using TicTacTorus.Source.PlayerSpecificContent
 @using System.Drawing
+@using System.Reflection
 @using TicTacTorus.Source.Ingame.Move
 @using TicTacTorus.Source.ServerHandler
 @using TicTacTorus.Source.Utility
@@ -256,6 +257,12 @@
                 var encodedMsg = $"{user}: {message}";
                 _messages.Add(encodedMsg);
                 StateHasChanged();
+            });
+            
+            _client.Connection.On<string, string>("ReceiveError", (title, message) =>
+            {
+                JSRuntime.InvokeAsync<bool>("custom_alert", title, message);
+                //StateHasChanged(); //need?
             });
             
             _client.Connection.On<string>("ReceivePlayerMove", (moveObj) =>
