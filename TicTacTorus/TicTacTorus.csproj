@@ -96,6 +96,9 @@
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
+      <Content Update="Pages\Chat.razor">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      </Content>
     </ItemGroup>
 
     <ItemGroup>

@@ -248,7 +248,7 @@
     #region Client / Server Handling
         if (firstRender)
         {
-            _client = new ConnectionHubClient(NavigationManager, User.ID);
+            _client = new ConnectionHubClient(NavigationManager);
         
             #region Client Listeners
 
