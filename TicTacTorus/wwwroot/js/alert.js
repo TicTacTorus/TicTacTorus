@@ -1,7 +1,7 @@
 ﻿function custom_alert(title, message)
 {
     //customize?
-    let str = "" + title;
+    let str = "" + title+"!";
     if(str.length > 0)
     {
         str += "\n";
