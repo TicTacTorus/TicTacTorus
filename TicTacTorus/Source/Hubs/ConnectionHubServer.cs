@@ -211,6 +211,11 @@ namespace TicTacTorus.Source.Hubs
             await Clients.Group(lobbyId).SendAsync("ReceiveMessage", user, message);
         }
         
+        public async Task SendMessage2(string user, string message)
+        {
+            await Clients.All.SendAsync("ReceiveMessage", user, message);
+        }
+        
         #endregion
         #region Login / Register
 
