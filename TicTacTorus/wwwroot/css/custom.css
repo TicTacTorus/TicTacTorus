@@ -247,13 +247,20 @@ input {
     box-sizing: border-box;
 }
 
-.canvas, .fill {
+.canvas-grid, .fill {
     position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
     background-color: white;
+}
+
+.canvas-map
+{
+    width: 250px;
+    height: 200px;
+    /*padding: 10px;*/
 }
 
 canvas

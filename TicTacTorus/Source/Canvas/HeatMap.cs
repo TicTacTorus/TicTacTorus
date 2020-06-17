@@ -7,14 +7,14 @@ using TicTacTorus.Source.Ingame.GridSpecificContent.Position;
 
 namespace TicTacTorus.Source.Canvas
 {
-    public class HeatMap : ICanvasRenderer
+    public class HeatMap
     {
         public byte[] Density { get; }
         
         public int Width { get; }
         public int Height { get; }
-        private int _gridWidth;
-        private int _gridHeight;
+        private readonly int _gridWidth;
+        private readonly int _gridHeight;
 
         public HeatMap(int width, int height, int gridWidth, int gridHeight)
         {
@@ -37,32 +37,20 @@ namespace TicTacTorus.Source.Canvas
                 ++Density[index];
             }
         }
-        
-        public Task Draw(int width, int height, Canvas2DContext canvas)
+
+        public void FillArea(GlobalPos corner, int width, int height)
         {
-            var index = 0;
-            for (var y = 0; y < Height; ++y)
+            int top = corner.Y, bottom = corner.Y + height;
+            int left = corner.X, right = corner.X + width;
+
+            var pos = new GlobalPos(top, left);
+            for (pos.Y = top; pos.Y < bottom; ++pos.Y)
             {
-                for (var x = 0; x < Width; ++x, ++index)
+                for (pos.X = left; pos.X < right; ++pos.X)
                 {
-                    var val = Density[index];
-                    if (val == 0)
-                    {
-                        continue;
-                    }
-                    canvas.SetFillStyleAsync(ChooseColor(val));
-                    canvas.RectAsync(x, y, 1, 1);
+                    PlaceSymbol(pos);
                 }
             }
-            
-            //ignore width and height, we have a fixed size. otherwise our data structure wouldn't make sense.
-            throw new NotImplementedException();
-        }
-
-        private static string ChooseColor(byte density)
-        {
-            var part = ((byte)(0xff - density)).ToString("x2");
-            return "#" + part + part + part;
         }
     }
 }

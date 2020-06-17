@@ -13,13 +13,14 @@
 @using System.Drawing
 @using TicTacTorus.Source.Ingame.Move
 @using TicTacTorus.Source.ServerHandler
+@using TicTacTorus.Source.Utility
 @inject NavigationManager NavigationManager
 @inject ProtectedSessionStorage ProtectedSessionStorage
 @inject IJSRuntime JSRuntime;
 
 <!--<div class="fill">&nbsp;</div>-->
 
-<div class="canvas" @onwheel="MouseScrollHandler" @onmousemove="MouseMoveHandler" @onmousedown="MouseDownHandler" @onmouseup="MouseUpHandler">
+<div class="canvas-grid" @onwheel="MouseScrollHandler" @onmousemove="MouseMoveHandler" @onmousedown="MouseDownHandler" @onmouseup="MouseUpHandler">
     <BECanvas @ref="_canvasGame" Width="640" Height="480"></BECanvas>
 </div>
 
@@ -29,7 +30,9 @@
         <!--<div class="p-5 text-center">
             Minimap Content
         </div>-->
-        <BECanvas @ref="_canvasMap" Width="100" Height="100"></BECanvas>
+        <div class="canvas-map">
+            <BECanvas @ref="_canvasMap" Width="300" Height="200"></BECanvas>
+        </div>
     </div>
     @if(IsConnected && _initialized)
     {
@@ -93,8 +96,6 @@
     private double _mousePrevX = 0;
     private double _mousePrevY = 0;
     private const double MaxClickDistance = 10;
-
-    private bool _isActive = false;
     
     private List<string> _messages = new List<string>();
     private string _messageInput;
@@ -117,10 +118,12 @@
 
     //local copy of the grid, this gets updated and displayed
     private static Grid _grid = null;
+    private static HeatMap _map = null;
     private static GlobalPos _lastChange = new GlobalPos(0, 0);
+    private static Permutation _playerOrder = null;
 
     private static GameRenderer _rendererGame = null;
-    private static MapRenderer _rendererMap = new MapRenderer(null);
+    private static MapRenderer _rendererMap = null;
     
     private static HumanPlayer User { get; set; }
 
@@ -181,7 +184,7 @@
 
     private async void MouseScrollHandler(WheelEventArgs evnt)
     {
-        if (Math.Abs(evnt.DeltaY) < 0.0001)
+        if (Math.Abs(evnt.DeltaY) < 0.0001 || !_initialized)
         {
             return;
         }
@@ -230,30 +233,8 @@
             var height = await JSRuntime.InvokeAsync<int>("client_height");
             
             var pos = _rendererGame.GetCursorPosition(evnt.ClientX, evnt.ClientY, width, height);
-            Console.WriteLine($"Click Detected at {pos}!");
-
-            
-            /*
-            var owner = _grid.GetSymbol(pos);
-            switch (owner)
-            {
-                case 19:
-                    owner = BasicChunk.NoOwner;
-                    break;
-                case BasicChunk.NoOwner:
-                    owner = 0;
-                    break;
-                default:
-                    ++owner; break;
-            }
-            */
-
-            if (_initialized)
-            {
-                _grid.SetSymbol(pos, _myIndex, true);
-                await RedrawGame();
-            }
             SendPlacementMove(pos);
+            //Console.WriteLine($"Click Detected at {pos}!");
         }
         
         _mouseDown = false;
@@ -263,7 +244,7 @@
   
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-    #region ClientServerHandling
+    #region Client / Server Handling
         if (firstRender)
         {
             _client = new ConnectionHubClient(NavigationManager);
@@ -277,12 +258,27 @@
                 StateHasChanged();
             });
             
-            
             _client.Connection.On<string>("ReceivePlayerMove", (moveObj) =>
             {
-    //ReceivedMove = moveObj;
+                if (!_initialized)
+                {
+                    return;
+                }
+                var move = JsonConvert.DeserializeObject<IMove>(moveObj, _jsonSerializerSettings);
+                move.Do(_grid, _playerOrder);
+
+                var width = move.GetAreaWidth();
+                var height = move.GetAreaHeight();
+                if (width > 0 && height > 0)
+                {
+                    _map.FillArea(move.GetAreaCorner(), width, height);
+                }
+                    
                 StateHasChanged();
             });
+            
+            
+            
             _client.Connection.On<string>("AnnounceWinner", (winnerName) =>
             {
     //Winner = winnerName;
@@ -291,7 +287,6 @@
 
             _client.Connection.On("ActivatePlayer", () =>
             {
-                _isActive = true;
     //activate control buttons / allow making a move
             });
 
@@ -317,8 +312,12 @@
                 }
                 _grid = new Grid(_game.Settings.GridSize, _game.Settings.GridSize);
                 _rendererGame = new GameRenderer(_grid);
+                _map = new HeatMap(250, 200, _game.Settings.GridSize, _game.Settings.GridSize);
+                _rendererMap = new MapRenderer(_map, _rendererGame);
+                
                 _myIndex = playerIndex;
                 _initialized = true;
+                _playerOrder = new Permutation(_game.PlayerOrder);
                 StateHasChanged();
                 //_client.Connection.SendAsync("OnUserConnectedToLobby", _game.players.IndexOf(User));
             });
@@ -335,10 +334,7 @@
             IsConnected = _client.Connection.State == HubConnectionState.Connected;
         }
     #endregion
-    #region Canvas
-    //todo current problems:
-    //resizing the window also needs to trigger a resize of the canvas.
-    //moving the viewpoint of the game renderer stops new lines from rendering.
+    #region Canvas Rendering
         if (firstRender)
         {
             await JSRuntime.InvokeVoidAsync("stretch_first_canvas");
@@ -395,10 +391,10 @@
 
     private void SendPlacementMove(GlobalPos pos)
     {
-        var move = new PlacementMove(_myIndex, pos);
+        IMove move = new PlacementMove(_myIndex, pos);
         var jsonMove = JsonConvert.SerializeObject(move);
         _client.Connection.SendAsync("ReceivePlacementMove", IdString, jsonMove);
     }
-    
+
     #endregion
 }
