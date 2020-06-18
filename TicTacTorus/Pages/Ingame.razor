@@ -407,7 +407,7 @@
     private void SendPlacementMove(GlobalPos pos)
     {
         IMove move = new PlacementMove(_myIndex, pos);
-        var jsonMove = JsonConvert.SerializeObject(move);
+        var jsonMove = JsonConvert.SerializeObject(move, Formatting.Indented, _jsonSerializerSettings);
         _client.Connection.SendAsync("ReceivePlacementMove", IdString, jsonMove);
     }
 

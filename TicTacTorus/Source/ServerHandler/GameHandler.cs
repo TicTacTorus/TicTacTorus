@@ -11,11 +11,10 @@ namespace TicTacTorus.Source.ServerHandler
     {
         #region Ingame
 
-        public static bool PlaceMove(string gameId, IMove move)
+        public static Tuple<bool, string> PlaceMove(string gameId, IMove move)
         {
             var game = Server.Instance.GetClientGameById(gameId);
-            game.SendMoveToGame(move);
-            return false;
+            return game.SendMoveToGame(move);;
         }
 
         #endregion

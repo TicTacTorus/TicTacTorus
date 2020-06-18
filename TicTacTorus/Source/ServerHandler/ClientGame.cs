@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
@@ -63,11 +64,46 @@ namespace TicTacTorus.Source.ServerHandler
 
         #region Moves
 
-        public void SendMoveToGame(IMove move)
+        public Tuple<bool, string> SendMoveToGame(IMove move)
         {
-            Game.ReceivePlayerMove(move.Owner, move);
+            var (isValid, winners) = Game.ReceivePlayerMove(move.Owner, move);
+            if (!isValid)
+            {
+                return Tuple.Create<bool, string>(false, null);
+            }
+
+            if (winners == null)
+            {
+                return Tuple.Create<bool, string>(true, null);
+            }
+
+            var winnerMessage = GenerateWinnerMessage(winners);
+            
+            return Tuple.Create<bool, string>(true, winnerMessage);
         }
 
+        private string GenerateWinnerMessage(IDictionary<byte, GlobalPos> winners)
+        {
+            var title = "We have a winner!\n";
+            if (winners.Count > 1)
+            {
+                title = "We have multiple winners!\n";
+            }
+
+            var names = "";
+            foreach (var winner in winners)
+            {
+                if (names.Length > 0)
+                {
+                    names += '\n';
+                }
+                names += Game.GetPlayerList()[winner.Key].InGameName;
+            }
+
+            return title + names;
+        }
+        
+        /*
         public async void DenyMove(int plrIndex)
         {
             var group = Game.UniquePlayerGroup(Game.ID, plrIndex);
@@ -102,7 +138,7 @@ namespace TicTacTorus.Source.ServerHandler
             await _hubClients.Group(ID).SendAsync("ReceiveAlert", title, names);
             await _hubClients.Group(ID).SendAsync("DisplayWinningMoves", JsonConvert.SerializeObject(winners, Formatting.Indented, _jsonSerializerSettings));
         }
-
+        */
         #endregion
         
     }
