@@ -88,17 +88,6 @@
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
-      <Content Update="wwwroot\js\chat.js">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Update="wwwroot\js\signalr.js">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Update="Pages\Chat.razor">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      </Content>
     </ItemGroup>
 
     <ItemGroup>

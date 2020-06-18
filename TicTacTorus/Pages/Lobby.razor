@@ -88,9 +88,12 @@
                         <b>
                             <h3 class="text-center">Chat</h3></b>
                         <hr>
-                        <textarea id="messagesList" readonly>
+                        <textarea id="messagesList" readonly>@foreach (var message in _messages)
+                                                             {
+                                                                 @message<br>
+                                                             }
                         </textarea>
-                        <input id="messageInput" disabled="@(!IsConnected)" class="w-100 align-bottom"/>
+                        <input @bind="_messageInput" @onkeyup="SendChatMessage" disabled="@(!IsConnected)" class="w-100 align-bottom"/>
                     </div>
                 </div>
                 <div class="below-chat col">
@@ -115,19 +118,19 @@
                         <hr>
                         <table>
                             <tr>
-                                    <h3>Change Lobby Information</h3></tr>
-                                <tr>
-                                    <div class="mt-2"><b>Lobby Title</b></div>
-                                    <input type="text" @onkeyup="ChangeTitle" @bind="_newTitle" placeholder="@_lobby?.Name"/>
-                                </tr>
-                                <tr>
-                                    <div class="mt-2"><b>Lobby Description</b></div>
-                                    <input type="text" @onkeyup="ChangeDescription" @bind="_newDescription" placeholder="@_lobby?.Description"/>
-                                </tr>
-                                <tr>
-                                    <div class="mt-2"><b>Lobby Status</b></div>
-                                    <input type="text" @onkeyup="ChangeStatus" @bind="_newStatus" placeholder="@_lobby?.Status"/>
-                                </tr>
+                                <h3>Change Lobby Information</h3></tr>
+                            <tr>
+                                <div class="mt-2"><b>Lobby Title</b></div>
+                                <input type="text" @onkeyup="ChangeTitle" @bind="_newTitle" placeholder="@_lobby?.Name"/>
+                            </tr>
+                            <tr>
+                                <div class="mt-2"><b>Lobby Description</b></div>
+                                <input type="text" @onkeyup="ChangeDescription" @bind="_newDescription" placeholder="@_lobby?.Description"/>
+                            </tr>
+                            <tr>
+                                <div class="mt-2"><b>Lobby Status</b></div>
+                                <input type="text" @onkeyup="ChangeStatus" @bind="_newStatus" placeholder="@_lobby?.Status"/>
+                            </tr>
                         </table>
                     </div>
                 </div>
@@ -251,18 +254,12 @@
             
             InviteLink += IdString;
 
-            await _client.Connection.SendAsync("CheckLobbyExisting", IdString);
+            //await _client.Connection.SendAsync("CheckLobbyExisting", IdString);
+
+            await _client.Connection.SendAsync("OnConnectedPlayer", User);
             
-            #region Listener Methods
-            
-            _client.Connection.On<bool>("ReceiveLobbyExisting", (exists) =>
-            {
-                if (!exists)
-                {
-                    NavigationManager.NavigateTo("/?error=lobbyNotFound");
-                }
-            });
-        
+    #region Listener Methods
+
             _client.Connection.On<string, string>("ReceiveMessage", (user, message) =>
             {
                 var encodedMsg = $"{user}: {message}";

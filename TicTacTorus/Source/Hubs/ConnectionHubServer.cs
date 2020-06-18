@@ -17,10 +17,24 @@ namespace TicTacTorus.Source.Hubs
 {
     public class ConnectionHubServer : Hub
     {
+        /// <summary>
+        /// Adds a User to the connected User List in the Server
+        /// </summary>
+        /// <param name="user"></param>
+        public void OnConnectedPlayer(HumanPlayer user = null)
+        {
+            Server.Instance.AddConnectedUser(Context.ConnectionId, user);
+        }
+
+        /// <summary>
+        /// Removes a User from the connected User List in the Server
+        /// </summary>
+        /// <param name="exception"></param>
+        /// <returns></returns>
         public override Task OnDisconnectedAsync(Exception exception)
         {
-            Console.WriteLine("lol");
-            return null;
+            Server.Instance.RemoveConnectedUser(Context.ConnectionId);
+            return base.OnDisconnectedAsync(exception);
         }
 
         #region Lobby
@@ -40,11 +54,12 @@ namespace TicTacTorus.Source.Hubs
 
             // logic
             var lobby= LobbyHandler.AddPlayerToLobby(lobbyId, hPlayer);
+            /*
             if (lobby == null)
             {
                 await Clients.Caller.SendAsync("ReceiveLobbyExisting", false);
             }
-            
+            */
             // prepare json-strings
             var jsLobby = JsonConvert.SerializeObject(lobby, Formatting.Indented, settings);
             var jsPlayers = JsonConvert.SerializeObject(lobby.Players, Formatting.Indented, settings);
@@ -219,7 +234,8 @@ namespace TicTacTorus.Source.Hubs
         
         public async Task SendMessage(string lobbyId, string user, string message)
         {
-            await Clients.Group(lobbyId).SendAsync("ReceiveMessage", user, message);
+            await Clients.Group(lobbyId).SendAsync("ReceiveMessage", 
+                Server.Instance.GetConnectedUser(Context.ConnectionId).InGameName, message);
         }
         
         public async Task SendMessage2(string user, string message)

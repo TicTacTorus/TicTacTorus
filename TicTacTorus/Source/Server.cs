@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using TicTacTorus.Source.Hubs;
 using TicTacTorus.Source.Ingame;
@@ -16,7 +17,8 @@ namespace TicTacTorus.Source
     public sealed class Server
     {
         private readonly IDictionary<string, ILobby> _lobbies;
-        private readonly IDictionary<string, ClientGame> _games;   
+        private readonly IDictionary<string, ClientGame> _games;
+        private readonly IDictionary<string, HumanPlayer> _connectedUsers;
         
         //private readonly IDictionary<string, string> _sessionIDs;
 
@@ -31,6 +33,7 @@ namespace TicTacTorus.Source
         {
             _lobbies = new ConcurrentDictionary<string, ILobby>();
             _games = new ConcurrentDictionary<string, ClientGame>();
+            _connectedUsers = new ConcurrentDictionary<string, HumanPlayer>();
         }
         // Makes Singleton Thread-safe
         private class Nested
@@ -134,6 +137,19 @@ namespace TicTacTorus.Source
 
         #endregion
 
-        
+        public void AddConnectedUser(string connectionId, HumanPlayer user)
+        {
+            _connectedUsers.Add(connectionId, user);
+        }
+
+        public void RemoveConnectedUser(string connectionId)
+        {
+            _connectedUsers.Remove(connectionId);
+        }
+
+        public HumanPlayer GetConnectedUser(string connectionId)
+        {
+            return _connectedUsers[connectionId];
+        }
     }
 }
