@@ -192,15 +192,26 @@ namespace TicTacTorus.Source.Hubs
 
         public async Task ReceivePlacementMove(string gameId, string jsonMove)
         {
-            var move = JsonConvert.DeserializeObject<PlacementMove>(jsonMove);
-            var validMove = GameHandler.PlaceMove(gameId, move);
+            var settings = new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.All
+            };
+            var move = JsonConvert.DeserializeObject<PlacementMove>(jsonMove, settings);
+            var (validMove, winnerMessage) = GameHandler.PlaceMove(gameId, move);
             if (validMove)
             {
                 // send everyone
+                await Clients.Group(gameId).SendAsync("ReceivePlayerMove", jsonMove);
+                if (winnerMessage != null)
+                {
+                    var message = winnerMessage.Split('!');
+                    await Clients.Group(gameId).SendAsync("ReceiveAlert", message[0], message[1]);
+                }
             }
             else
             {
                 // send error
+                Clients.Group(Game.UniquePlayerGroup(gameId, move.Owner)).SendAsync("ReceiveAlert", "Error", "Invalid Move");
             }
         }
 

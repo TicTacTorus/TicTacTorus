@@ -110,6 +110,71 @@ namespace TicTacTorus.Source.Ingame
             }
         }
 
+        /// <summary>
+        /// <returns>isValidMove; List of winners, if there is no, null</returns>
+        /// </summary>
+        public Tuple<bool, IDictionary<byte, GlobalPos>> ReceivePlayerMove(int plrIndex, IMove move)
+        {
+            var isValidMove = false;    // not needed, but for better understanding
+            if (plrIndex != _activePlayerIndex)
+            {
+                return Tuple.Create<bool, IDictionary<byte, GlobalPos>>(false, null);
+            }
+
+            if (!move.CanDo(_grid, PlayerOrder))
+            {
+                //send error message to player
+                // @Dan, do enums if you need to
+                return Tuple.Create<bool, IDictionary<byte, GlobalPos>>(false, null);
+            }
+
+            isValidMove = true;
+
+            var winners = CheckForWinners(move);
+            
+            if (winners.Count > 0)
+            {
+                Tuple.Create(isValidMove, winners);
+            }
+            // have to add (to tuple)
+            NextPlayer();
+            
+            return Tuple.Create<bool, IDictionary<byte, GlobalPos>>(isValidMove, null);
+        }
+
+        private IDictionary<byte, GlobalPos> CheckForWinners(IMove move)
+        {
+            var winners =  new Dictionary<byte, GlobalPos>();
+            var width = move.GetAreaWidth();
+            var height = move.GetAreaHeight();
+            if (width > 0 && height > 0)
+            {
+                var start = move.GetAreaCorner();
+                var pos = new GlobalPos(start.X, start.Y);
+                for (var y = 0; y < height; ++y)
+                {
+                    pos.X = start.X;
+                    for (var x = 0; x < width; ++x)
+                    {
+                        if (_referee.HasWon(_grid, pos))
+                        {
+                            var owner = _grid.GetSymbol(pos);
+                            _grid.SetSymbol(pos, owner);
+                            if (!winners.ContainsKey(owner))
+                            {
+                                winners[owner] = new GlobalPos();
+                            }
+                        }
+                        ++pos.X;
+                    }
+                    ++pos.Y;
+                }
+            }
+
+            return winners;
+        }
+        
+        /*
         public void ReceivePlayerMove(int plrIndex, IMove move)
         {
             if (plrIndex != _activePlayerIndex)
@@ -153,14 +218,14 @@ namespace TicTacTorus.Source.Ingame
                     ++pos.Y;
                 }
             }
-/*
+
             if (winners.Count > 0)
             {
                 Parent.AnnounceWinners(winners);
-            }*/
+            }
             NextPlayer();
         }
-
+        */
         #endregion
         #region Helper Methods
         
