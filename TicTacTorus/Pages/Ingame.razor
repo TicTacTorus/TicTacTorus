@@ -12,6 +12,7 @@
 @using TicTacTorus.Source.PlayerSpecificContent
 @using System.Drawing
 @using System.Reflection
+@using TicTacTorus.Source
 @using TicTacTorus.Source.Ingame.Move
 @using TicTacTorus.Source.ServerHandler
 @using TicTacTorus.Source.Utility
@@ -112,6 +113,7 @@
     //game stuff
     //todo: set on game start
     private static byte _myIndex = 0;
+    private static byte _currentIndex = 0;
     
     //canvas stuff
     private static Canvas2DContext _contextGame, _contextMap;
@@ -234,8 +236,9 @@
             var height = await JSRuntime.InvokeAsync<int>("client_height");
             
             var pos = _rendererGame.GetCursorPosition(evnt.ClientX, evnt.ClientY, width, height);
-            SendPlacementMove(pos);
-            //Console.WriteLine($"Click Detected at {pos}!");
+            //SendPlacementMove(pos);
+            MockPlacementMove(pos);
+    //Console.WriteLine($"Click Detected at {pos}!");
         }
         
         _mouseDown = false;
@@ -402,13 +405,44 @@
     }
 
     #endregion
-    #region Communication
+    #region Moves
 
     private void SendPlacementMove(GlobalPos pos)
     {
         IMove move = new PlacementMove(_myIndex, pos);
         var jsonMove = JsonConvert.SerializeObject(move, Formatting.Indented, _jsonSerializerSettings);
         _client.Connection.SendAsync("ReceivePlacementMove", IdString, jsonMove);
+    }
+
+    private void MockPlacementMove(GlobalPos pos)
+    {
+        IMove move = new PlacementMove(_currentIndex, pos);
+        var (isValid, winners) = GameHandler.PlaceMove(IdString, move);
+        if (isValid)
+        {
+            SetSymbol(move);
+            if (winners == null) return;
+            var message = winners.Split('!');
+            JSRuntime.InvokeAsync<bool>("custom_alert", message[0], message[1]);
+        }
+        else
+        {
+            JSRuntime.InvokeAsync<bool>("custom_alert", "Error", "Move not Possible");
+        }
+    }
+
+    private void SetSymbol(IMove move)
+    {
+        move.Do(_grid, _playerOrder);
+
+        var width = move.GetAreaWidth();
+        var height = move.GetAreaHeight();
+        if (width > 0 && height > 0)
+        {
+            _map.FillArea(move.GetAreaCorner(), width, height);
+        }
+                    
+        StateHasChanged();
     }
 
     #endregion
