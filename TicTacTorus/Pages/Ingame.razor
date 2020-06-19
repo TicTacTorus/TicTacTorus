@@ -113,7 +113,7 @@
     //game stuff
     //todo: set on game start
     private static byte _myIndex = 0;
-    private static byte _currentIndex = 0;
+    private static byte _activePlayerIndex = 0;
     
     //canvas stuff
     private static Canvas2DContext _contextGame, _contextMap;
@@ -416,18 +416,19 @@
 
     private void MockPlacementMove(GlobalPos pos)
     {
-        IMove move = new PlacementMove(_currentIndex, pos);
-        var (isValid, winners) = GameHandler.PlaceMove(IdString, move);
+        IMove move = new PlacementMove(_activePlayerIndex, pos);
+        var (isValid, winners, nextPlayer) = GameHandler.PlaceMove(IdString, move);
         if (isValid)
         {
             SetSymbol(move);
+            _activePlayerIndex = nextPlayer;
             if (winners == null) return;
             var message = winners.Split('!');
             JSRuntime.InvokeAsync<bool>("custom_alert", message[0], message[1]);
         }
         else
         {
-            JSRuntime.InvokeAsync<bool>("custom_alert", "Error", "Move not Possible");
+            JSRuntime.InvokeAsync<bool>("custom_alert", "Error", "Move not Possible. Try again.");
         }
     }
 

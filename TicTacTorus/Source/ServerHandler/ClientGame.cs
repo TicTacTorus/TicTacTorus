@@ -64,22 +64,22 @@ namespace TicTacTorus.Source.ServerHandler
 
         #region Moves
 
-        public Tuple<bool, string> SendMoveToGame(IMove move)
+        public Tuple<bool, string, byte> SendMoveToGame(IMove move)
         {
-            var (isValid, winners) = Game.ReceivePlayerMove(move.Owner, move);
+            var (isValid, winners, nextPlayer) = Game.ReceivePlayerMove(move.Owner, move);
             if (!isValid)
             {
-                return Tuple.Create<bool, string>(false, null);
+                return Tuple.Create<bool, string, byte>(false, null, nextPlayer);
             }
 
             if (winners == null)
             {
-                return Tuple.Create<bool, string>(true, null);
+                return Tuple.Create<bool, string, byte>(true, null, nextPlayer);
             }
 
             var winnerMessage = GenerateWinnerMessage(winners);
             
-            return Tuple.Create<bool, string>(true, winnerMessage);
+            return Tuple.Create<bool, string, byte>(true, winnerMessage, nextPlayer);
         }
 
         private string GenerateWinnerMessage(IDictionary<byte, GlobalPos> winners)
