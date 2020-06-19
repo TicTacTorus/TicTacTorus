@@ -129,16 +129,14 @@ namespace TicTacTorus.Source.Ingame
             }
 
             isValidMove = true;
+            NextPlayer();
 
             var winners = CheckForWinners(move);
-            
             if (winners.Count > 0)
             {
-                Tuple.Create(isValidMove, winners);
+                return Tuple.Create(isValidMove, winners, _activePlayerIndex);
             }
-            
-            NextPlayer();
-            
+
             return Tuple.Create<bool, IDictionary<byte, GlobalPos>, byte>(isValidMove, null, _activePlayerIndex);
         }
 

@@ -97,7 +97,11 @@ namespace TicTacTorus.Source.ServerHandler
                 {
                     names += '\n';
                 }
-                names += Game.GetPlayerList()[winner.Key].InGameName;
+                // TODO: there should be no winner 255
+                if (winner.Key < Game.GetPlayerList().Count)
+                {
+                    names += Game.GetPlayerList()[winner.Key].InGameName;
+                }
             }
 
             return title + names;
