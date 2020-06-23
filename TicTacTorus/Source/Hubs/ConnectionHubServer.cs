@@ -212,11 +212,12 @@ namespace TicTacTorus.Source.Hubs
                 TypeNameHandling = TypeNameHandling.All
             };
             var move = JsonConvert.DeserializeObject<PlacementMove>(jsonMove, settings);
-            var (validMove, winnerMessage) = GameHandler.PlaceMove(gameId, move);
+            var (validMove, winnerMessage, nextPlayer) = GameHandler.PlaceMove(gameId, move);
             if (validMove)
             {
                 // send everyone
                 await Clients.Group(gameId).SendAsync("ReceivePlayerMove", jsonMove);
+                await Clients.Group(Game.UniquePlayerGroup(gameId, nextPlayer)).SendAsync("YourTurn");
                 if (winnerMessage != null)
                 {
                     var message = winnerMessage.Split('!');

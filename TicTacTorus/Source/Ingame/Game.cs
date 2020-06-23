@@ -111,35 +111,33 @@ namespace TicTacTorus.Source.Ingame
         }
 
         /// <summary>
-        /// <returns>isValidMove; List of winners, if there is no, null</returns>
+        /// <returns>isValidMove; List of winners, if there is no, null; index of next Player for the next turn</returns>
         /// </summary>
-        public Tuple<bool, IDictionary<byte, GlobalPos>> ReceivePlayerMove(int plrIndex, IMove move)
+        public Tuple<bool, IDictionary<byte, GlobalPos>, byte> ReceivePlayerMove(int plrIndex, IMove move)
         {
             var isValidMove = false;    // not needed, but for better understanding
             if (plrIndex != _activePlayerIndex)
             {
-                return Tuple.Create<bool, IDictionary<byte, GlobalPos>>(false, null);
+                return Tuple.Create<bool, IDictionary<byte, GlobalPos>, byte>(false, null, _activePlayerIndex);
             }
 
             if (!move.CanDo(_grid, PlayerOrder))
             {
                 //send error message to player
                 // @Dan, do enums if you need to
-                return Tuple.Create<bool, IDictionary<byte, GlobalPos>>(false, null);
+                return Tuple.Create<bool, IDictionary<byte, GlobalPos>, byte>(false, null, _activePlayerIndex);
             }
 
             isValidMove = true;
+            NextPlayer();
 
             var winners = CheckForWinners(move);
-            
             if (winners.Count > 0)
             {
-                Tuple.Create(isValidMove, winners);
+                return Tuple.Create(isValidMove, winners, _activePlayerIndex);
             }
-            // have to add (to tuple)
-            NextPlayer();
-            
-            return Tuple.Create<bool, IDictionary<byte, GlobalPos>>(isValidMove, null);
+
+            return Tuple.Create<bool, IDictionary<byte, GlobalPos>, byte>(isValidMove, null, _activePlayerIndex);
         }
 
         private IDictionary<byte, GlobalPos> CheckForWinners(IMove move)
