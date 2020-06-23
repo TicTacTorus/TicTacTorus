@@ -35,6 +35,12 @@ else
             </svg>
         </button>
         <h1 class="headers my-auto">TicTacTorus</h1>
+        <button class="btn-back" @onclick="Logout">
+            <svg class="bi bi-x" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" d="M11.854 4.146a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708-.708l7-7a.5.5 0 0 1 .708 0z"/>
+              <path fill-rule="evenodd" d="M4.146 4.146a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708l-7-7a.5.5 0 0 0-.708 0z"/>
+            </svg>
+        </button>
     </div>
 
     <div class="d-flex justify-content-center">
@@ -202,7 +208,7 @@ else
         
         _client.Connection.On("PasswordIsChanged", () =>
         {
-            // TODO show success/failure message
+    // TODO show success/failure message
             StateHasChanged();
         });
 
@@ -214,7 +220,7 @@ else
         
         _client.Connection.On<string>("SymbolIsChanged", color =>
         {
-            // TODO Symbol stuff
+    // TODO Symbol stuff
             StateHasChanged();
         });
 
@@ -254,7 +260,7 @@ else
         }
         catch (Exception ex)
         {
-            //doing nothing
+    //doing nothing
             Console.Write(ex);
         }
 
@@ -263,7 +269,7 @@ else
 
     private static async Task ChangeSymbol()
     {
-        // TODO Symbol stuff
+    // TODO Symbol stuff
         await _client.Connection.SendAsync("ChangePlayerSymbol", _loggedInUser.ID, 1);
     }
 
@@ -296,5 +302,11 @@ else
             await _client.Connection.SendAsync("ChangeIngameName", _loggedInUser.ID, _newName);
             _newName = "";
         }
+    }
+
+    private void Logout()
+    {
+        ProtectedSessionStorage.DeleteAsync("LoginData");
+        NavigationManager.NavigateTo("/");
     }
 }

@@ -19,7 +19,6 @@ namespace TicTacTorus.Source
         private readonly IDictionary<string, ILobby> _lobbies;
         private readonly IDictionary<string, ClientGame> _games;
         private readonly IDictionary<string, HumanPlayer> _connectedUsers;
-        
         //private readonly IDictionary<string, string> _sessionIDs;
 
         public ServerSettings Settings { get; }
