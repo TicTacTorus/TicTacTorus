@@ -154,9 +154,9 @@ namespace TicTacTorus.Source.Ingame
                     pos.X = start.X;
                     for (var x = 0; x < width; ++x)
                     {
-                        if (_referee.HasWon(_grid, pos))
+                        var owner = _grid.GetSymbol(pos);
+                        if (_referee.HasWon(_grid, pos) && owner != BasicChunk.NoOwner)
                         {
-                            var owner = _grid.GetSymbol(pos);
                             _grid.SetSymbol(pos, owner);
                             if (!winners.ContainsKey(owner))
                             {
